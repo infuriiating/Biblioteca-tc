@@ -58,7 +58,7 @@ const AdminLogin = () => {
       {/* Background Orbs */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]" />
-      
+
       <div className="w-full max-w-lg relative z-10 space-y-4">
         {/* Back Link */}
         <Link to="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors group text-sm font-bold uppercase tracking-widest">
@@ -91,7 +91,7 @@ const AdminLogin = () => {
               </label>
               <div className="relative group">
                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
-                <input 
+                <input
                   type="email"
                   required
                   autoComplete="email"
@@ -109,7 +109,7 @@ const AdminLogin = () => {
               </label>
               <div className="relative group">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
-                <input 
+                <input
                   type="password"
                   required
                   autoComplete="current-password"
@@ -121,8 +121,8 @@ const AdminLogin = () => {
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
               className="w-full bg-primary hover:bg-primary/90 text-white py-4 rounded-2xl font-black shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-sm relative mt-2"
             >

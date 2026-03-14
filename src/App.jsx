@@ -50,8 +50,11 @@ function App() {
           <Routes>
             {/* Standalone pages — no sidebar */}
             <Route path="/entrar" element={<Login />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/registar" element={<Signup />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/admin/entrar" element={<AdminLogin />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
 
             {/* Main app with sidebar layout */}
             <Route 

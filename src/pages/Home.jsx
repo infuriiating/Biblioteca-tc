@@ -62,8 +62,8 @@ const Home = () => {
   }
 
   const filteredBooks = books.filter(b => {
-    const matchesSearch = !query || b.title.toLowerCase().includes(query.toLowerCase()) || 
-                          b.author?.toLowerCase().includes(query.toLowerCase())
+    const matchesSearch = !query || b.title.toLowerCase().includes(query.toLowerCase()) ||
+      b.author?.toLowerCase().includes(query.toLowerCase())
     const matchesCategory = categoryFilter === '0' || b.category_id.toString() === categoryFilter
     return matchesSearch && matchesCategory
   })
@@ -82,10 +82,10 @@ const Home = () => {
             ))
           ) : (
             featuredBooks.map(book => (
-              <BookCard 
-                key={book.id} 
-                book={book} 
-                variant="recommended" 
+              <BookCard
+                key={book.id}
+                book={book}
+                variant="recommended"
                 onClick={(id) => navigate(`/livro/${id}`)}
               />
             ))
@@ -100,15 +100,15 @@ const Home = () => {
           <h2 className="text-4xl font-black text-text-main tracking-tight">Catálogo</h2>
           <p className="text-text-muted text-lg font-medium mt-1">Explore todos os livros disponíveis na nossa biblioteca</p>
         </div>
-        
+
         {/* Category Pills */}
         <div className="flex gap-2.5 overflow-x-auto pb-4 scrollbar-hide">
           <button
             onClick={() => setCategoryFilter('0')}
             className={cn(
               "px-4 py-2 rounded-xl text-xs font-medium transition-all shrink-0",
-              categoryFilter === '0' 
-                ? "bg-primary text-white shadow-sm" 
+              categoryFilter === '0'
+                ? "bg-primary text-white shadow-sm"
                 : "bg-bg-surface border border-border/60 text-text-muted hover:border-primary/30 hover:text-primary"
             )}
           >
@@ -120,10 +120,10 @@ const Home = () => {
               onClick={() => setCategoryFilter(c.id.toString())}
               className={cn(
                 "px-4 py-2 rounded-xl text-xs font-medium transition-all shrink-0",
-                categoryFilter === c.id.toString() 
-                  ? "bg-primary text-white shadow-sm" 
+                categoryFilter === c.id.toString()
+                  ? "bg-primary text-white shadow-sm"
                   : "bg-bg-surface border border-border/60 text-text-muted hover:border-primary/30 hover:text-primary"
-            )}
+              )}
             >
               {c.name}
             </button>
@@ -138,9 +138,9 @@ const Home = () => {
             ))
           ) : filteredBooks.length > 0 ? (
             filteredBooks.map(book => (
-              <BookCard 
-                key={book.id} 
-                book={book} 
+              <BookCard
+                key={book.id}
+                book={book}
                 variant="catalog"
                 onClick={(id) => navigate(`/livro/${id}`)}
               />

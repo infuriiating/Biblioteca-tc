@@ -22,7 +22,7 @@ const TopBar = ({ onOpenSidebar }) => {
   return (
     <header className="sticky top-0 z-40 h-16 bg-bg-main/90 backdrop-blur-lg flex items-center justify-between px-4 lg:px-8 gap-4">
       {/* Mobile Menu */}
-      <button 
+      <button
         onClick={onOpenSidebar}
         className="lg:hidden p-2 text-text-muted hover:text-primary transition-colors shrink-0"
       >
@@ -34,8 +34,8 @@ const TopBar = ({ onOpenSidebar }) => {
         {isDiscoverPage && (
           <>
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={17} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Pesquisar livros..."
               value={query}
               onChange={handleSearch}
@@ -75,14 +75,14 @@ const TopBar = ({ onOpenSidebar }) => {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <Link 
-              to="/login" 
+            <Link
+              to="/login"
               className="px-4 py-2 text-sm font-medium text-text-muted hover:text-primary transition-colors"
             >
               Entrar
             </Link>
-            <Link 
-              to="/signup" 
+            <Link
+              to="/signup"
               className="px-4 py-2 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-all active:scale-95"
             >
               Registe-se

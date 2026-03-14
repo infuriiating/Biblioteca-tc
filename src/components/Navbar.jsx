@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Search, UserCircle, LogOut, Book, List, RefreshCw, PlusCircle, XCircle } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
+import logo from '../assets/logo.png'
 
 const Navbar = () => {
   const { user, profile, isAdmin, signOut } = useAuth()
@@ -37,7 +38,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 bg-bg-surface border-b border-border z-50 h-16 shadow-sm">
       <div className="container mx-auto h-full flex items-center justify-between px-4">
         <Link to="/" className="flex-shrink-0">
-          <img src="src/assets/logo.png" alt="Logo" className="h-12 transition-opacity hover:opacity-90" />
+          <img src={logo} alt="Logo" className="h-12 transition-opacity hover:opacity-90" />
         </Link>
 
         {/* Search Container */}

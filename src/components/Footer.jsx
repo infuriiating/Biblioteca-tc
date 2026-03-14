@@ -1,3 +1,5 @@
+import logotipo from '../assets/logotipo.png'
+
 const Footer = () => {
   return (
     <footer className="bg-[#0d1111] text-text-muted py-12 mt-16 border-t-4 border-primary">
@@ -6,7 +8,7 @@ const Footer = () => {
           {/* Logo & About */}
           <div className="space-y-6">
             <div className="flex items-center gap-4">
-              <img src="src/assets/logotipo.png" alt="Logotipo" className="h-20" />
+              <img src={logotipo} alt="Logotipo" className="h-20" />
               <div>
                 <h4 className="text-xl font-bold text-text-main line-height-tight">Agrupamento de Escolas</h4>
                 <p className="text-text-muted">Tomás Cabreira</p>

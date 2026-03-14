@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Mail, Lock, User, UserPlus, AlertCircle, BookOpen } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import logo from '../assets/logo.png'
 
 const Signup = () => {
   const [email, setEmail] = useState('')
@@ -49,7 +50,7 @@ const Signup = () => {
         {/* Logo */}
         <div className="flex flex-col items-center justify-center gap-3 mb-8">
           <div className="w-20 h-20">
-            <img src="/src/assets/logo.png" alt="Logo" className="w-full h-full object-contain" />
+            <img src={logo} alt="Logo" className="w-full h-full object-contain" />
           </div>
         </div>
 

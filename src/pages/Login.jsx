@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Mail, Lock, LogIn, AlertCircle, BookOpen } from 'lucide-react'
+import logo from '../assets/logo.png'
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('')
@@ -30,7 +31,7 @@ const Login = () => {
         {/* Logo */}
         <div className="flex flex-col items-center justify-center gap-3 mb-8">
           <div className="w-20 h-20">
-            <img src="/src/assets/logo.png" alt="Logo" className="w-full h-full object-contain" />
+            <img src={logo} alt="Logo" className="w-full h-full object-contain" />
           </div>
         </div>
 

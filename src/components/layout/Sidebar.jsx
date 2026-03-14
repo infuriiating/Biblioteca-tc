@@ -11,6 +11,7 @@ import {
 import { useAuth } from '../../context/AuthContext'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import logo from '../../assets/logo.png'
 
 function cn(...inputs) {
   return twMerge(clsx(inputs))
@@ -66,7 +67,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* Logo */}
         <div className="px-5 mb-8 flex items-center justify-center">
           <div className="w-16 h-16 overflow-hidden">
-            <img src="/src/assets/logo.png" alt="BibliotecaTC Logo" className="w-full h-full object-contain" />
+            <img src={logo} alt="BibliotecaTC Logo" className="w-full h-full object-contain" />
           </div>
         </div>
 

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { useLanguage } from '../../context/LanguageContext'
 
 function cn(...inputs) {
   return twMerge(clsx(inputs))
@@ -38,6 +39,7 @@ const StatCard = ({ icon: Icon, label, value, color, sub }) => (
 
 const AdminDashboard = () => {
   const { signOut } = useAuth()
+  const { t } = useLanguage()
   const [stats, setStats] = useState({ totalBooks: 0, activeLoans: 0, pendingLoans: 0, overdueLoans: 0 })
   const [recentLoans, setRecentLoans] = useState([])
   const [loading, setLoading] = useState(true)
@@ -75,10 +77,10 @@ const AdminDashboard = () => {
     <div className="space-y-10 pb-20">
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard icon={BookOpen} label="Total Books" value={stats.totalBooks} color="bg-primary" />
-        <StatCard icon={Clock} label="Active Loans" value={stats.activeLoans} color="bg-orange-500" />
-        <StatCard icon={Users} label="Pending Requests" value={stats.pendingLoans} color="bg-purple-500" />
-        <StatCard icon={AlertCircle} label="Overdue" value={stats.overdueLoans} color="bg-red-500" />
+        <StatCard icon={BookOpen} label={t('admin.dashboard.totalBooks')} value={stats.totalBooks} color="bg-primary" />
+        <StatCard icon={Clock} label={t('admin.dashboard.activeLoans')} value={stats.activeLoans} color="bg-orange-500" />
+        <StatCard icon={Users} label={t('admin.dashboard.pendingRequests')} value={stats.pendingLoans} color="bg-purple-500" />
+        <StatCard icon={AlertCircle} label={t('admin.dashboard.overdue')} value={stats.overdueLoans} color="bg-red-500" />
       </div>
 
       {/* Quick Actions + Recent Loans */}
@@ -86,9 +88,9 @@ const AdminDashboard = () => {
         {/* Recent Loans */}
         <div className="lg:col-span-2 bg-bg-surface rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden">
           <div className="px-8 py-6 border-b border-border/50 flex items-center justify-between">
-            <h2 className="font-bold text-text-main">Recent Loan Activity</h2>
-            <Link to="/admin/loans" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-              View All <ArrowRight size={12} />
+            <h2 className="font-bold text-text-main">{t('admin.dashboard.recentActivity')}</h2>
+            <Link to="/admin/emprestimos" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+              {t('admin.dashboard.viewAll')} <ArrowRight size={12} />
             </Link>
           </div>
           <div className="divide-y divide-border/30">
@@ -107,15 +109,16 @@ const AdminDashboard = () => {
                     <p className="text-xs text-text-muted line-clamp-1">{loan.books?.title || 'Unknown Book'}</p>
                   </div>
                 </div>
-                <span className={cn(
-                  "text-[9px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-widest shrink-0",
-                  (loan.status === 'active' && loan.due_date && new Date(loan.due_date) < new Date()) ? "bg-red-500/10 text-red-600" :
-                  loan.status === 'pending' ? "bg-orange-500/10 text-orange-600" :
-                  loan.status === 'active' ? "bg-green-500/10 text-green-600" :
-                  "bg-bg-main text-text-muted"
-                )}>
-                  {(loan.status === 'active' && loan.due_date && new Date(loan.due_date) < new Date()) ? 'overdue' : loan.status}
-                </span>
+                  <span className={cn(
+                    "text-[9px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-widest shrink-0",
+                    (loan.status === 'active' && loan.due_date && new Date(loan.due_date) < new Date()) ? "bg-red-500/10 text-red-600" :
+                    loan.status === 'pending' ? "bg-orange-500/10 text-orange-600" :
+                    loan.status === 'active' ? "bg-green-500/10 text-green-600" :
+                    loan.status === 'returned' ? "bg-bg-main text-text-muted" :
+                    "bg-bg-main text-text-muted"
+                  )}>
+                    {(loan.status === 'active' && loan.due_date && new Date(loan.due_date) < new Date()) ? t('admin.dashboard.overdue') : t(`admin.loans.${loan.status}`)}
+                  </span>
               </div>
             )) : (
               <div className="px-8 py-16 text-center text-text-muted italic">No recent loan activity.</div>
@@ -129,44 +132,44 @@ const AdminDashboard = () => {
             <TrendingUp size={140} />
           </div>
           <div className="relative z-10">
-            <h2 className="text-lg font-bold mb-6">Quick Actions</h2>
+            <h2 className="text-lg font-bold mb-6">{t('admin.dashboard.quickActions')}</h2>
             <div className="space-y-3">
               <Link
-                to="/admin/books/new"
+                to="/admin/livros/novo"
                 className="w-full bg-white/10 hover:bg-white/20 p-4 rounded-2xl flex items-center gap-3 transition-all border border-white/5 group"
               >
                 <div className="p-2 rounded-xl bg-primary/20 text-primary">
                   <Plus size={18} />
                 </div>
                 <div>
-                  <p className="font-bold text-sm">Add New Book</p>
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest">Update catalog</p>
+                  <p className="font-bold text-sm">{t('admin.dashboard.addNewBook')}</p>
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest">{t('admin.dashboard.updateCatalog')}</p>
                 </div>
                 <ArrowRight size={14} className="ml-auto text-white/20 group-hover:text-white/60 transition-colors" />
               </Link>
               <Link
-                to="/admin/books"
+                to="/admin/livros"
                 className="w-full bg-white/10 hover:bg-white/20 p-4 rounded-2xl flex items-center gap-3 transition-all border border-white/5 group"
               >
                 <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
                   <BookOpen size={18} />
                 </div>
                 <div>
-                  <p className="font-bold text-sm">Manage Books</p>
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest">Edit or remove</p>
+                  <p className="font-bold text-sm">{t('admin.dashboard.manageBooks')}</p>
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest">{t('admin.dashboard.editOrRemove')}</p>
                 </div>
                 <ArrowRight size={14} className="ml-auto text-white/20 group-hover:text-white/60 transition-colors" />
               </Link>
               <Link
-                to="/admin/loans"
+                to="/admin/emprestimos"
                 className="w-full bg-white/10 hover:bg-white/20 p-4 rounded-2xl flex items-center gap-3 transition-all border border-white/5 group"
               >
                 <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400">
                   <Users size={18} />
                 </div>
                 <div>
-                  <p className="font-bold text-sm">Manage Loans</p>
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest">Approve / reject</p>
+                  <p className="font-bold text-sm">{t('admin.dashboard.manageLoans')}</p>
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest">{t('admin.dashboard.approveReject')}</p>
                 </div>
                 <ArrowRight size={14} className="ml-auto text-white/20 group-hover:text-white/60 transition-colors" />
               </Link>

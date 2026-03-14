@@ -9,10 +9,11 @@ import { twMerge } from 'tailwind-merge'
 function cn(...inputs) {
   return twMerge(clsx(inputs))
 }
-
+import { useLanguage } from '../../context/LanguageContext'
 import { useNotification } from '../../context/NotificationContext'
 
 const ManageBooks = () => {
+  const { t } = useLanguage()
   const { confirm, showToast } = useNotification()
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(true)
@@ -54,9 +55,9 @@ const ManageBooks = () => {
 
   const deleteBook = async (id) => {
     const isConfirmed = await confirm({
-      title: 'Apagar Livro',
-      message: 'Tem a certeza que deseja apagar este livro definitivamente do catálogo?',
-      confirmText: 'Apagar',
+      title: t('admin.books.deleteTitle'),
+      message: t('admin.books.deleteMsg'),
+      confirmText: t('admin.books.deleteBtn'),
       type: 'danger'
     })
 
@@ -64,9 +65,9 @@ const ManageBooks = () => {
       const { error } = await supabase.from('books').delete().eq('id', id)
       if (!error) {
         setBooks(books.filter(b => b.id !== id))
-        showToast('Livro apagado com sucesso.', 'success')
+        showToast(t('admin.books.toastDeleted') || 'Livro apagado com sucesso.', 'success')
       } else {
-        showToast('Erro ao apagar o livro.', 'error')
+        showToast(t('admin.books.toastDeleteError') || 'Erro ao apagar o livro.', 'error')
       }
     }
   }
@@ -83,14 +84,14 @@ const ManageBooks = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
-          <h1 className="text-4xl font-black text-text-main tracking-tight">Manage Catalog</h1>
-          <p className="text-text-muted text-lg">Inventory management and collection control</p>
+          <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.dashboard.manageBooks')}</h1>
+          <p className="text-text-muted text-lg font-medium mt-1">{t('admin.dashboard.updateCatalog')}</p>
         </div>
         <Link
-          to="/admin/books/new"
+          to="/admin/livros/novo"
           className="bg-primary text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:scale-[1.02] transition-all shadow-lg shadow-primary/20 active:scale-95 uppercase tracking-widest text-xs"
         >
-          <Plus size={18} /> Add New Book
+          <Plus size={18} /> {t('admin.dashboard.addNewBook')}
         </Link>
       </div>
 
@@ -100,7 +101,7 @@ const ManageBooks = () => {
           <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
-            placeholder="Search by title, author or ISBN..."
+            placeholder={t('admin.books.searchPlaceholder')}
             className="w-full bg-bg-main/50 border border-transparent rounded-2xl py-4 pl-14 pr-6 outline-none focus:bg-white focus:border-primary/30 transition-all text-sm font-medium"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -108,10 +109,10 @@ const ManageBooks = () => {
         </div>
         <div className="w-full md:w-64">
           <Select 
-            options={[{ id: '0', name: 'All Categories' }, ...categories]}
+            options={[{ id: '0', name: t('admin.books.allCategories') }, ...categories]}
             value={categoryFilter}
             onChange={setCategoryFilter}
-            placeholder="Filter by category"
+            placeholder={t('admin.books.filterPlaceholder')}
           />
         </div>
       </div>
@@ -122,11 +123,11 @@ const ManageBooks = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-bg-main/30">
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">ID</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">Book Info</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">Inventory</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted text-center">Featured</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted text-right">Actions</th>
+                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.books.id')}</th>
+                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.books.bookInfo')}</th>
+                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.books.inventory')}</th>
+                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted text-center">{t('admin.books.featured')}</th>
+                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted text-right">{t('admin.books.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/30">
@@ -135,7 +136,7 @@ const ManageBooks = () => {
                   <td colSpan="5" className="px-8 py-32 text-center">
                     <div className="flex flex-col items-center gap-4 text-text-muted">
                       <div className="w-10 h-10 border-4 border-primary/10 border-t-primary rounded-full animate-spin" />
-                      <p className="italic font-medium">Fetching your collection...</p>
+                      <p className="italic font-medium">{t('admin.common.fetchingCollection')}</p>
                     </div>
                   </td>
                 </tr>
@@ -165,7 +166,7 @@ const ManageBooks = () => {
                     <td className="px-8 py-6">
                       <div className="space-y-2">
                         <div className="flex justify-between text-[10px] font-bold text-text-muted uppercase">
-                          <span>Available</span>
+                          <span>{t('admin.books.available')}</span>
                           <span>{book.available_qty}/{book.quantity}</span>
                         </div>
                         <div className="w-32 h-1.5 bg-bg-main rounded-full overflow-hidden">
@@ -194,7 +195,7 @@ const ManageBooks = () => {
                     <td className="px-8 py-6 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Link
-                          to={`/admin/books/edit/${book.id}`}
+                          to={`/admin/livros/editar/${book.id}`}
                           className="p-3 bg-bg-main text-text-muted hover:bg-primary/10 hover:text-primary rounded-xl transition-all"
                         >
                           <Edit size={18} />
@@ -214,7 +215,7 @@ const ManageBooks = () => {
                   <td colSpan="5" className="px-8 py-32 text-center text-text-muted">
                     <div className="flex flex-col items-center gap-4 opacity-30">
                       <Search size={48} />
-                      <p className="font-bold uppercase tracking-widest text-sm">No books found in this search</p>
+                      <p className="font-bold uppercase tracking-widest text-sm">{t('admin.common.noBooks')}</p>
                     </div>
                   </td>
                 </tr>

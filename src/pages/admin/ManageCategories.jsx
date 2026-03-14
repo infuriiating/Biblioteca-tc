@@ -10,8 +10,10 @@ function cn(...inputs) {
 }
 
 import { useNotification } from '../../context/NotificationContext'
+import { useLanguage } from '../../context/LanguageContext'
 
 const ManageCategories = () => {
+  const { t } = useLanguage()
   const { confirm, showToast } = useNotification()
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
@@ -81,9 +83,9 @@ const ManageCategories = () => {
 
   const handleDeleteCategory = async (id) => {
     const isConfirmed = await confirm({
-      title: 'Eliminar Categoria',
-      message: 'Tem a certeza que deseja eliminar esta categoria? Isto pode afetar livros associados.',
-      confirmText: 'Sim, Eliminar',
+      title: t('admin.categories.deleteTitle'),
+      message: t('admin.categories.deleteMsg'),
+      confirmText: t('admin.categories.deleteBtn'),
       type: 'danger'
     })
     
@@ -105,9 +107,9 @@ const ManageCategories = () => {
   return (
     <div className="space-y-8 max-w-4xl">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-black text-text-main tracking-tight">Categorias</h1>
-          <p className="text-text-muted mt-1">Gerir as categorias do catálogo de livros.</p>
+        <div className="space-y-1">
+          <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.categories.title')}</h1>
+          <p className="text-text-muted text-lg font-medium mt-1">{t('admin.categories.subtitle')}</p>
         </div>
       </div>
 
@@ -125,7 +127,7 @@ const ManageCategories = () => {
       <form onSubmit={handleAddCategory} className="bg-bg-surface p-6 rounded-3xl border border-border/40 shadow-sm flex gap-4">
         <input 
           type="text"
-          placeholder="Nome da nova categoria..."
+          placeholder={t('admin.categories.addPlaceholder')}
           className="flex-grow bg-bg-main border border-border/60 rounded-xl px-4 py-2.5 text-sm focus:border-primary/50 outline-none transition-all"
           value={newCategoryName}
           onChange={(e) => setNewCategoryName(e.target.value)}
@@ -134,7 +136,7 @@ const ManageCategories = () => {
           type="submit"
           className="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary-hover transition-all flex items-center gap-2"
         >
-          <Plus size={18} /> Adicionar
+          <Plus size={18} /> {t('admin.categories.addBtn')}
         </button>
       </form>
 
@@ -155,7 +157,7 @@ const ManageCategories = () => {
               <Reorder.Item 
                 key={category.id} 
                 value={category}
-                className="p-4 flex items-center gap-4 hover:bg-bg-main/40 transition-colors bg-bg-surface"
+                className="p-4 flex items-center gap-4 hover:bg-bg-main/40 transition-colors bg-bg-surface group"
               >
                 <div className="text-text-muted cursor-grab active:cursor-grabbing p-2 hover:bg-bg-main rounded-lg transition-colors">
                   <GripVertical size={18} />
@@ -180,7 +182,7 @@ const ManageCategories = () => {
                 ) : (
                   <>
                     <span className="flex-grow text-sm font-medium text-text-main">{category.name}</span>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button 
                         onClick={() => { setEditingId(category.id); setEditValue(category.name) }}
                         className="p-2 text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
@@ -204,7 +206,7 @@ const ManageCategories = () => {
 
       <div className="flex justify-end gap-3 items-center">
         <p className="text-[10px] text-text-muted italic">
-          Arraste os ícones <GripVertical size={10} className="inline" /> para reordenar
+          {t('admin.categories.dragToReorder')} <GripVertical size={10} className="inline" />
         </p>
         <button 
           onClick={async () => {
@@ -224,10 +226,10 @@ const ManageCategories = () => {
                 if (error) throw error
               }
               
-              showToast('Ordem guardada com sucesso!', 'success')
+              showToast(t('admin.common.orderSaved'), 'success')
             } catch (err) {
               console.error(err)
-              showToast('Erro ao guardar ordem.', 'error')
+              showToast(t('admin.common.orderError'), 'error')
             } finally {
               setLoading(false)
             }

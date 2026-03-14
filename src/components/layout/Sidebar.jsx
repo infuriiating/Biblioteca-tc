@@ -12,6 +12,7 @@ import { useAuth } from '../../context/AuthContext'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import logo from '../../assets/logo.png'
+import { useLanguage } from '../../context/LanguageContext'
 
 function cn(...inputs) {
   return twMerge(clsx(inputs))
@@ -19,17 +20,18 @@ function cn(...inputs) {
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { user, isAdmin } = useAuth()
+  const { t } = useLanguage()
 
   const menuItems = [
-    { icon: Compass, label: 'Discover', path: '/' },
-    { icon: Library, label: 'My Library', path: '/my-loans' },
+    { icon: Compass, label: t('sidebar.discover'), path: '/' },
+    { icon: Library, label: t('sidebar.myLibrary'), path: '/emprestimos' },
   ]
 
   const adminItems = [
-    { icon: Grid, label: 'Overview', path: '/admin', exact: true },
-    { icon: BookOpen, label: 'Books', path: '/admin/books' },
-    { icon: Tags, label: 'Categories', path: '/admin/categories' },
-    { icon: Library, label: 'Loans', path: '/admin/loans' },
+    { icon: Grid, label: t('sidebar.overview'), path: '/admin', exact: true },
+    { icon: BookOpen, label: t('sidebar.books'), path: '/admin/livros' },
+    { icon: Tags, label: t('sidebar.categories'), path: '/admin/categorias' },
+    { icon: Library, label: t('sidebar.loans'), path: '/admin/emprestimos' },
   ]
 
   const NavItem = ({ item }) => (
@@ -73,16 +75,16 @@ const Sidebar = ({ isOpen, onClose }) => {
 
         {/* Main Nav */}
         <nav className="flex-grow space-y-0.5">
-          <NavItem item={{ icon: Compass, label: 'Discover', path: '/' }} />
+          <NavItem item={{ icon: Compass, label: t('sidebar.discover'), path: '/' }} />
           
-          {user && (
-            <NavItem item={{ icon: Library, label: 'My Library', path: '/my-loans' }} />
+          {!isAdmin && user && (
+            <NavItem item={{ icon: Library, label: t('sidebar.myLibrary'), path: '/emprestimos' }} />
           )}
 
           {/* Admin Section */}
           {isAdmin && (
             <div className="pt-6">
-              <p className="px-5 text-[10px] font-semibold text-text-muted uppercase tracking-[0.15em] mb-2">Administração</p>
+              <p className="px-5 text-[10px] font-semibold text-text-muted uppercase tracking-[0.15em] mb-2">{t('sidebar.administration')}</p>
               {adminItems.map((item, idx) => (
                 <NavItem key={idx} item={item} />
               ))}
@@ -96,13 +98,11 @@ const Sidebar = ({ isOpen, onClose }) => {
 
         {/* Bottom — Settings + Admin shortcut */}
         <nav className="space-y-0.5">
-          {user && (
-            <NavItem item={{ icon: Settings, label: 'Settings', path: '/settings' }} />
-          )}
+          <NavItem item={{ icon: Settings, label: t('sidebar.settings'), path: '/definicoes' }} />
 
           {!user && (
             <NavLink
-              to="/admin/login"
+              to="/admin/entrar"
               onClick={onClose}
               className={({ isActive }) => cn(
                 "flex items-center gap-3.5 px-5 py-2.5 mx-3 rounded-xl text-sm font-medium transition-all",
@@ -112,7 +112,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               )}
             >
               <ShieldCheck size={19} className="shrink-0" />
-              <span>Admin</span>
+              <span>{t('sidebar.admin')}</span>
             </NavLink>
           )}
         </nav>

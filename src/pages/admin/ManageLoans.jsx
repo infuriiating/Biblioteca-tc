@@ -3,12 +3,14 @@ import { supabase } from '../../lib/supabase'
 import { RefreshCw, CheckCircle, Clock, User, Book as BookIcon, Filter, Inbox, XCircle } from 'lucide-react'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { useLanguage } from '../../context/LanguageContext'
 
 function cn(...inputs) {
   return twMerge(clsx(inputs))
 }
 
 const ManageLoans = () => {
+  const { t } = useLanguage()
   const [loans, setLoans] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -85,8 +87,8 @@ const ManageLoans = () => {
     <div className="space-y-10 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
-          <h1 className="text-4xl font-black text-text-main tracking-tight">Loan Requests</h1>
-          <p className="text-text-muted text-lg">Monitor and fulfill reader requests</p>
+          <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.loans.title')}</h1>
+          <p className="text-text-muted text-lg font-medium mt-1">{t('admin.loans.subtitle')}</p>
         </div>
         <div className="bg-white p-1.5 rounded-2xl shadow-sm border border-border/50 flex gap-1">
           {['all', 'pending', 'active', 'returned', 'rejected', 'overdue'].map((status) => (
@@ -100,7 +102,7 @@ const ManageLoans = () => {
                   : "bg-transparent text-text-muted hover:text-text-main hover:bg-bg-main"
               )}
             >
-              {status === 'all' ? 'All' : status}
+              {status === 'all' ? t('admin.loans.all') : t(`admin.loans.${status}`)}
             </button>
           ))}
         </div>
@@ -111,11 +113,11 @@ const ManageLoans = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-bg-main/30">
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">ID</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">User</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">Book Details</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">Status</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted text-right">Actions</th>
+                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.loans.id')}</th>
+                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.loans.user')}</th>
+                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.loans.bookDetails')}</th>
+                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.loans.status')}</th>
+                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted text-right">{t('admin.loans.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/30">
@@ -131,7 +133,7 @@ const ManageLoans = () => {
                    <td colSpan="5" className="px-8 py-32 text-center">
                       <div className="flex flex-col items-center gap-4 animate-pulse text-text-muted">
                         <div className="w-12 h-12 rounded-full bg-secondary/50" />
-                        <p className="font-bold uppercase tracking-widest text-xs">Loading requests...</p>
+                        <p className="font-bold uppercase tracking-widest text-xs">{t('admin.common.loadingRequests')}</p>
                       </div>
                    </td>
                 </tr>
@@ -148,7 +150,7 @@ const ManageLoans = () => {
                         </div>
                         <div>
                           <p className="font-bold text-text-main">{loan.profiles?.username || 'User'}</p>
-                          <p className="text-[10px] text-text-muted font-bold opacity-60 uppercase">Lib Member</p>
+                          <p className="text-[10px] text-text-muted font-bold opacity-60 uppercase">{t('admin.loans.libMember')}</p>
                         </div>
                       </div>
                     </td>
@@ -182,7 +184,7 @@ const ManageLoans = () => {
                             "bg-bg-main text-text-muted"
                           )}>
                             {isOverdue || loan.status === 'active' || loan.status === 'pending' ? <Clock size={12} className={cn(loan.status === 'pending' && "opacity-50")} /> : <CheckCircle size={12} />}
-                            {isOverdue ? 'Overdue' : loan.status}
+                            {isOverdue ? t('admin.loans.overdue') : t(`admin.loans.${loan.status}`)}
                           </span>
                         )
                       })()}
@@ -203,13 +205,13 @@ const ManageLoans = () => {
                                 onClick={() => updateLoanStatus(loan.id, 'active', loan.book_id)}
                                 className="px-4 py-2 bg-primary/10 text-primary text-[10px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all shadow-sm"
                               >
-                                Approve
+                                {t('admin.common.approve')}
                               </button>
                               <button 
                                 onClick={() => updateLoanStatus(loan.id, 'rejected', loan.book_id)}
                                 className="px-4 py-2 bg-red-500/10 text-red-600 text-[10px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm"
                               >
-                                Reject
+                                {t('admin.common.reject')}
                               </button>
                             </>
                           )}
@@ -218,7 +220,7 @@ const ManageLoans = () => {
                               onClick={() => updateLoanStatus(loan.id, 'returned', loan.book_id)}
                               className="px-4 py-2 bg-secondary text-primary text-[10px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all shadow-sm"
                             >
-                              Return
+                              {t('admin.common.returnBtn')}
                             </button>
                           )}
                        </div>
@@ -230,7 +232,7 @@ const ManageLoans = () => {
                    <td colSpan="5" className="px-8 py-32 text-center text-text-muted">
                       <div className="flex flex-col items-center gap-4 opacity-30">
                         <Inbox size={48} />
-                        <p className="font-bold uppercase tracking-widest text-sm">No loan requests found</p>
+                        <p className="font-bold uppercase tracking-widest text-sm">{t('admin.common.noRequests')}</p>
                       </div>
                    </td>
                 </tr>

@@ -4,9 +4,11 @@ import { Search, UserCircle, LogOut, Book, List, RefreshCw, PlusCircle, XCircle 
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import logo from '../assets/logo.png'
+import { useLanguage } from '../context/LanguageContext'
 
 const Navbar = () => {
   const { user, profile, isAdmin, signOut } = useAuth()
+  const { t } = useLanguage()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('0')
   const [categories, setCategories] = useState([])
@@ -48,7 +50,7 @@ const Navbar = () => {
             onChange={(e) => setCategory(e.target.value)}
             className="bg-transparent border-0 text-secondary text-sm px-4 focus:ring-0 cursor-pointer min-w-[120px] group-focus-within:text-gray-800"
           >
-            <option value="0">Tudo</option>
+            <option value="0">{t('navbar.all')}</option>
             {categories.map(c => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
@@ -56,7 +58,7 @@ const Navbar = () => {
           <div className="w-px h-6 bg-border/50 self-center" />
           <input
             type="text"
-            placeholder="Pesquisar livros, autores..."
+            placeholder={t('navbar.searchPlaceholder')}
             className="flex-grow bg-transparent border-0 focus:ring-0 px-4 text-text-main group-focus-within:text-gray-900"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -81,24 +83,24 @@ const Navbar = () => {
               </button>
               {/* Dropdown Menu */}
               <div className="absolute right-0 mt-2 w-56 bg-bg-surface border border-border rounded-xl shadow-xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right scale-95 group-hover:scale-100">
-                <div className="px-3 py-2 text-xs font-bold text-text-muted uppercase tracking-wider">Minha Conta</div>
+                <div className="px-3 py-2 text-xs font-bold text-text-muted uppercase tracking-wider">{t('navbar.myAccount')}</div>
                 {!isAdmin && (
-                  <Link to="/my-loans" className="flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors">
-                    <Book size={18} /> <span className="text-sm">Meus Empréstimos</span>
+                  <Link to="/emprestimos" className="flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors">
+                    <Book size={18} /> <span className="text-sm">{t('navbar.myLoans')}</span>
                   </Link>
                 )}
                 {isAdmin && (
                   <>
                     <div className="h-px bg-border my-2" />
-                    <div className="px-3 py-2 text-xs font-bold text-text-muted uppercase tracking-wider">Administração</div>
-                    <Link to="/admin/books" className="flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors">
-                      <List size={18} /> <span className="text-sm">Gerir Livros</span>
+                    <div className="px-3 py-2 text-xs font-bold text-text-muted uppercase tracking-wider">{t('navbar.adminMenu')}</div>
+                    <Link to="/admin/livros" className="flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors">
+                      <List size={18} /> <span className="text-sm">{t('navbar.manageBooks')}</span>
                     </Link>
-                    <Link to="/admin/loans" className="flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors">
-                      <RefreshCw size={18} /> <span className="text-sm">Empréstimos</span>
+                    <Link to="/admin/emprestimos" className="flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors">
+                      <RefreshCw size={18} /> <span className="text-sm">{t('navbar.manageLoans')}</span>
                     </Link>
-                    <Link to="/admin/create" className="flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors">
-                      <PlusCircle size={18} /> <span className="text-sm">Novo Livro</span>
+                    <Link to="/admin/livros/novo" className="flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors">
+                      <PlusCircle size={18} /> <span className="text-sm">{t('navbar.newBook')}</span>
                     </Link>
                   </>
                 )}
@@ -107,14 +109,14 @@ const Navbar = () => {
                   onClick={handleSignOut}
                   className="w-full flex items-center gap-2 p-2 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors"
                 >
-                  <LogOut size={18} /> <span className="text-sm">Sair</span>
+                  <LogOut size={18} /> <span className="text-sm">{t('navbar.logout')}</span>
                 </button>
               </div>
             </div>
           ) : (
             <div className="flex gap-2">
-              <Link to="/login" className="px-4 py-2 rounded-full border border-border hover:bg-white/5 transition-colors text-sm font-semibold">Entrar</Link>
-              <Link to="/signup" className="px-4 py-2 rounded-full bg-primary hover:bg-primary-hover text-bg-main transition-colors text-sm font-semibold">Registar</Link>
+              <Link to="/entrar" className="px-4 py-2 rounded-full border border-border hover:bg-white/5 transition-colors text-sm font-semibold">{t('navbar.login')}</Link>
+              <Link to="/registar" className="px-4 py-2 rounded-full bg-primary hover:bg-primary-hover text-bg-main transition-colors text-sm font-semibold">{t('navbar.register')}</Link>
             </div>
           )}
         </div>

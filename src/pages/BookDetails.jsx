@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { Book, ChevronLeft, Sparkles, CheckCircle2 } from 'lucide-react'
+import { useLanguage } from '../context/LanguageContext'
 import { motion } from 'framer-motion'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -15,6 +16,7 @@ const BookDetails = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [book, setBook] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
@@ -49,7 +51,7 @@ const BookDetails = () => {
   }
 
   const handleLoan = async () => {
-    if (!user) { navigate('/login'); return }
+    if (!user) { navigate('/entrar'); return }
     if (book.available_qty <= 0) return
     setIsRequesting(true)
     try {
@@ -130,9 +132,9 @@ const BookDetails = () => {
       <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto text-primary opacity-30">
         <Book size={32} />
       </div>
-      <h2 className="text-xl font-semibold text-text-main">Livro não encontrado</h2>
+      <h2 className="text-xl font-semibold text-text-main">{t('bookDetails.bookNotFound')}</h2>
       <Link to="/" className="text-primary hover:underline inline-flex items-center gap-1.5 text-sm font-medium">
-        <ChevronLeft size={16} /> Voltar ao início
+        <ChevronLeft size={16} /> {t('bookDetails.backToStart')}
       </Link>
     </div>
   )
@@ -140,7 +142,7 @@ const BookDetails = () => {
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 space-y-6">
       <Link to="/" className="inline-flex items-center gap-1.5 text-text-muted hover:text-primary text-sm font-medium transition-colors">
-        <ChevronLeft size={18} /> Voltar ao catálogo
+        <ChevronLeft size={18} /> {t('bookDetails.backToCatalog')}
       </Link>
 
       {/* Main Detail Card */}
@@ -167,7 +169,7 @@ const BookDetails = () => {
         <div className="flex flex-col items-center gap-3 w-full max-w-xs mb-10">
           {requestStatus === 'success' ? (
             <div className="bg-green-500/20 border border-green-500/30 py-3.5 px-8 rounded-2xl w-full text-green-400 font-medium flex items-center justify-center gap-2 text-sm">
-              <CheckCircle2 size={18} /> Requisitado com sucesso
+              <CheckCircle2 size={18} /> {t('bookDetails.requestedSuccess')}
             </div>
           ) : (
             <button 
@@ -178,12 +180,12 @@ const BookDetails = () => {
               {isRequesting ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <><Book size={16} /> {book.available_qty <= 0 ? 'Sem exemplares' : 'Requisitar Livro'}</>
+                <><Book size={16} /> {book.available_qty <= 0 ? t('bookDetails.outOfStock') : t('bookDetails.requestBook')}</>
               )}
             </button>
           )}
           <p className="text-[11px] text-white/30 font-normal">
-            {book.available_qty} de {book.quantity} disponíveis
+            {t('bookDetails.availableOf').replace('{available}', book.available_qty).replace('{total}', book.quantity)}
           </p>
         </div>
 
@@ -192,7 +194,7 @@ const BookDetails = () => {
           <div className="h-px bg-white/10" />
           <div className="flex items-center justify-center">
             <div className="space-y-1">
-              <p className="text-[10px] text-white/40 uppercase font-medium tracking-widest">Ano de Edição</p>
+              <p className="text-[10px] text-white/40 uppercase font-medium tracking-widest">{t('bookDetails.yearEdition')}</p>
               <p className="text-lg font-semibold">{book.year_edition || '—'}</p>
             </div>
           </div>
@@ -203,13 +205,13 @@ const BookDetails = () => {
       <div className="bg-bg-surface rounded-[2rem] p-8 shadow-sm border border-border/30 space-y-4">
         <div className="flex items-center gap-2.5 text-text-main">
           <Sparkles size={18} className="text-primary" />
-          <h3 className="text-lg font-semibold">Sobre este livro</h3>
+          <h3 className="text-lg font-semibold">{t('bookDetails.aboutBook')}</h3>
           {book.ai_summary && (
-            <span className="ml-auto text-[10px] font-medium text-primary/60 bg-primary/8 px-2 py-1 rounded-full uppercase tracking-wider">IA</span>
+            <span className="ml-auto text-[10px] font-medium text-primary/60 bg-primary/8 px-2 py-1 rounded-full uppercase tracking-wider">{t('bookDetails.aiSummary')}</span>
           )}
         </div>
         <p className="text-text-muted leading-relaxed text-sm font-normal">
-          {book.ai_summary || book.description || 'Sem descrição disponível para este livro. Clique em "Gerar resumo" para criar um com inteligência artificial.'}
+          {book.ai_summary || book.description || t('bookDetails.noDescription')}
         </p>
         
         {summaryError && (
@@ -227,7 +229,7 @@ const BookDetails = () => {
             ) : (
               <Sparkles size={14} />
             )}
-            {isGeneratingSummary ? 'A gerar resumo...' : 'Gerar resumo com IA'}
+            {isGeneratingSummary ? t('bookDetails.generatingAiSummary') : t('bookDetails.generateAiSummary')}
           </button>
         )}
       </div>
@@ -235,12 +237,12 @@ const BookDetails = () => {
       {/* Details Grid */}
       <div className="w-full">
         <div className="bg-bg-surface p-7 rounded-[2rem] shadow-sm border border-border/30 space-y-4">
-          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Detalhes da Obra</p>
+          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">{t('bookDetails.bookMetadata')}</p>
           <div className="space-y-2">
             {[
-              { label: 'ISBN', value: book.isbn },
-              { label: 'Editora', value: book.publisher },
-              { label: 'Ano de Edição', value: book.year_edition }
+              { label: t('bookDetails.isbn'), value: book.isbn },
+              { label: t('bookDetails.publisher'), value: book.publisher },
+              { label: t('bookDetails.yearEdition'), value: book.year_edition }
             ].map(({ label, value }) => (
               <div key={label} className="flex justify-between items-center py-2.5 border-b border-border/20 last:border-0">
                 <span className="text-text-muted text-sm font-normal">{label}</span>

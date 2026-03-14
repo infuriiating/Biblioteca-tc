@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { supabase } from '../lib/supabase'
 import { Mail, Lock, LogIn, AlertCircle, BookOpen } from 'lucide-react'
 import logo from '../assets/logo.png'
 
@@ -16,12 +17,23 @@ const Login = () => {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    const { error } = await signIn({ email: identifier, password })
+    const { data, error } = await signIn({ email: identifier, password })
     if (error) {
       setError(error.message)
       setLoading(false)
     } else {
-      navigate('/')
+      // Check role for redirection
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single()
+
+      if (profileData?.role === 'admin') {
+        navigate('/admin')
+      } else {
+        navigate('/')
+      }
     }
   }
 
@@ -116,7 +128,7 @@ const Login = () => {
 
           <p className="text-center text-sm text-text-muted font-normal">
             Sem conta?{' '}
-            <Link to="/signup" className="text-primary hover:underline font-medium">Registe-se</Link>
+            <Link to="/registar" className="text-primary hover:underline font-medium">Registe-se</Link>
           </p>
         </div>
       </div>

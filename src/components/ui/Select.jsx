@@ -8,7 +8,11 @@ function cn(...inputs) {
   return twMerge(clsx(inputs))
 }
 
-const Select = ({ options, value, onChange, label, placeholder = 'Select an option...' }) => {
+import { useLanguage } from '../../context/LanguageContext'
+
+const Select = ({ options, value, onChange, label, placeholder }) => {
+  const { t } = useLanguage()
+  const defaultPlaceholder = placeholder || t('admin.common.select.placeholder')
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)
 
@@ -43,7 +47,7 @@ const Select = ({ options, value, onChange, label, placeholder = 'Select an opti
           "font-bold truncate",
           selectedOption ? "text-text-main" : "text-text-muted opacity-60"
         )}>
-          {selectedOption ? selectedOption.name : placeholder}
+          {selectedOption ? selectedOption.name : defaultPlaceholder}
         </span>
         <ChevronDown 
           size={18} 
@@ -85,7 +89,7 @@ const Select = ({ options, value, onChange, label, placeholder = 'Select an opti
                 </div>
               )) : (
                 <div className="px-6 py-4 text-text-muted text-xs uppercase tracking-widest font-bold text-center opacity-40">
-                  No options
+                  {t('admin.common.select.noOptions')}
                 </div>
               )}
             </div>

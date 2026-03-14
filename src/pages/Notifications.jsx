@@ -11,9 +11,9 @@ const Notifications = () => {
         >
           <ChevronLeft size={22} />
         </Link>
-        <div>
+        <div className="space-y-1">
           <h1 className="text-4xl font-black text-text-main tracking-tight">Notificações</h1>
-          <p className="text-text-muted text-sm">Fique a par das atualizações da sua biblioteca</p>
+          <p className="text-text-muted text-lg font-medium mt-1">Fique a par das atualizações da sua biblioteca</p>
         </div>
       </div>
 

@@ -49,9 +49,9 @@ function App() {
           <ScrollToTop />
           <Routes>
             {/* Standalone pages — no sidebar */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/entrar" element={<Login />} />
+            <Route path="/registar" element={<Signup />} />
+            <Route path="/admin/entrar" element={<AdminLogin />} />
 
             {/* Main app with sidebar layout */}
             <Route 
@@ -60,25 +60,25 @@ function App() {
                 <DashboardLayout>
                   <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route path="/book/:id" element={<BookDetails />} />
+                    <Route path="/livro/:id" element={<BookDetails />} />
                     <Route 
-                      path="/my-loans" 
+                      path="/emprestimos" 
                       element={
                         <ProtectedRoute>
                           <MyLoans />
                         </ProtectedRoute>
                       } 
                     />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/notifications" element={<Notifications />} />
+                    <Route path="/definicoes" element={<Settings />} />
+                    <Route path="/notificacoes" element={<Notifications />} />
 
                     {/* Admin routes — local auth guard */}
                     <Route path="/admin" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
-                    <Route path="/admin/books" element={<AdminProtectedRoute><ManageBooks /></AdminProtectedRoute>} />
-                    <Route path="/admin/categories" element={<AdminProtectedRoute><ManageCategories /></AdminProtectedRoute>} />
-                    <Route path="/admin/loans" element={<AdminProtectedRoute><ManageLoans /></AdminProtectedRoute>} />
-                    <Route path="/admin/books/new" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
-                    <Route path="/admin/books/edit/:id" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
+                    <Route path="/admin/livros" element={<AdminProtectedRoute><ManageBooks /></AdminProtectedRoute>} />
+                    <Route path="/admin/categorias" element={<AdminProtectedRoute><ManageCategories /></AdminProtectedRoute>} />
+                    <Route path="/admin/emprestimos" element={<AdminProtectedRoute><ManageLoans /></AdminProtectedRoute>} />
+                    <Route path="/admin/livros/novo" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
+                    <Route path="/admin/livros/editar/:id" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
                   </Routes>
                 </DashboardLayout>
               } 

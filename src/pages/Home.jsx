@@ -86,7 +86,7 @@ const Home = () => {
                 key={book.id} 
                 book={book} 
                 variant="recommended" 
-                onClick={(id) => navigate(`/book/${id}`)}
+                onClick={(id) => navigate(`/livro/${id}`)}
               />
             ))
           )}
@@ -96,8 +96,9 @@ const Home = () => {
       {/* Catalog */}
       {/* Catalog */}
       <section className="space-y-10 pt-10">
-        <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-black text-text-main tracking-tight">Catálogo</h2>
+        <div className="space-y-1">
+          <h2 className="text-4xl font-black text-text-main tracking-tight">Catálogo</h2>
+          <p className="text-text-muted text-lg font-medium mt-1">Explore todos os livros disponíveis na nossa biblioteca</p>
         </div>
         
         {/* Category Pills */}
@@ -141,7 +142,7 @@ const Home = () => {
                 key={book.id} 
                 book={book} 
                 variant="catalog"
-                onClick={(id) => navigate(`/book/${id}`)}
+                onClick={(id) => navigate(`/livro/${id}`)}
               />
             ))
           ) : (

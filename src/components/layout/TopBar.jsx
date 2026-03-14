@@ -48,7 +48,7 @@ const TopBar = ({ onOpenSidebar }) => {
       {/* Right — bell + avatar/auth */}
       <div className="flex items-center gap-3 shrink-0">
         {user && (
-          <Link to="/notifications" className="relative p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all">
+          <Link to="/notificacoes" className="relative p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all">
             <Bell size={18} />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full border border-bg-surface" />
           </Link>

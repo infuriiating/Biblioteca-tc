@@ -27,9 +27,9 @@ const MyLoans = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-12 pb-20">
-      <div>
+      <div className="space-y-1">
         <h1 className="text-4xl font-black text-text-main tracking-tight">Meus Empréstimos</h1>
-        <p className="text-text-muted mt-2">Histórico completo das suas requisições</p>
+        <p className="text-text-muted text-lg font-medium mt-1">Histórico completo das suas requisições</p>
       </div>
 
       {loading ? (
@@ -51,7 +51,7 @@ const MyLoans = () => {
               </div>
               
               <div className="flex-grow text-center md:text-left space-y-1">
-                <Link to={`/book/${loan.books?.id}`} className="text-lg font-bold hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2">
+                <Link to={`/livro/${loan.books?.id}`} className="text-lg font-bold hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2">
                   {loan.books?.title} <ArrowRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Link>
                 <p className="text-sm text-text-muted">{loan.books?.author}</p>

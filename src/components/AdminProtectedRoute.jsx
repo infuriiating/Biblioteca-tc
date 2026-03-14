@@ -5,7 +5,7 @@ const AdminProtectedRoute = ({ children }) => {
   const { isAdmin, user } = useAuth()
 
   if (!user || !isAdmin) {
-    return <Navigate to="/admin/login" replace />
+    return <Navigate to="/admin/entrar" replace />
   }
 
   return children

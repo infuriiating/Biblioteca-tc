@@ -1,0 +1,158 @@
+import { useState, useEffect } from 'react'
+import { useSearchParams, useNavigate } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import BookCard from '../components/BookCard'
+import { clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+function cn(...inputs) {
+  return twMerge(clsx(inputs))
+}
+
+const Home = () => {
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const query = searchParams.get('q') || ''
+  const cat = searchParams.get('c') || '0'
+
+  const [books, setBooks] = useState([])
+  const [featuredBooks, setFeaturedBooks] = useState([])
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [categoryFilter, setCategoryFilter] = useState(cat)
+
+  useEffect(() => {
+    setCategoryFilter(cat)
+  }, [cat])
+
+  const getCoverUrl = (filename) => {
+    if (!filename) return null
+    return supabase.storage.from('capalivro').getPublicUrl(filename).data.publicUrl
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    setLoading(true)
+    try {
+      const { data: catData } = await supabase.from('categories').select('*').order('display_order', { ascending: true })
+      setCategories(catData)
+
+      const { data: booksData } = await supabase
+        .from('books')
+        .select('*, categories(name)')
+        .order('title')
+
+      const processedBooks = booksData.map(b => ({
+        ...b,
+        category_name: b.categories?.name,
+        cover_url: getCoverUrl(b.cover_image)
+      }))
+
+      setBooks(processedBooks)
+      setFeaturedBooks(processedBooks.filter(b => b.is_featured).slice(0, 6))
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredBooks = books.filter(b => {
+    const matchesSearch = !query || b.title.toLowerCase().includes(query.toLowerCase()) || 
+                          b.author?.toLowerCase().includes(query.toLowerCase())
+    const matchesCategory = categoryFilter === '0' || b.category_id.toString() === categoryFilter
+    return matchesSearch && matchesCategory
+  })
+
+  return (
+    <div className="space-y-10 pb-12">
+      {/* Recommended */}
+      <section>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-semibold text-text-main">Recomendados</h2>
+        </div>
+        <div className="flex gap-5 overflow-x-auto pb-4 custom-scrollbar-h px-1">
+          {loading ? (
+            [...Array(4)].map((_, i) => (
+              <div key={i} className="min-w-[200px] aspect-[3/4] bg-bg-surface rounded-[1.75rem] animate-pulse shrink-0" />
+            ))
+          ) : (
+            featuredBooks.map(book => (
+              <BookCard 
+                key={book.id} 
+                book={book} 
+                variant="recommended" 
+                onClick={(id) => navigate(`/book/${id}`)}
+              />
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* Catalog */}
+      {/* Catalog */}
+      <section className="space-y-10 pt-10">
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-black text-text-main tracking-tight">Catálogo</h2>
+        </div>
+        
+        {/* Category Pills */}
+        <div className="flex gap-2.5 overflow-x-auto pb-4 scrollbar-hide">
+          <button
+            onClick={() => setCategoryFilter('0')}
+            className={cn(
+              "px-4 py-2 rounded-xl text-xs font-medium transition-all shrink-0",
+              categoryFilter === '0' 
+                ? "bg-primary text-white shadow-sm" 
+                : "bg-bg-surface border border-border/60 text-text-muted hover:border-primary/30 hover:text-primary"
+            )}
+          >
+            Todos
+          </button>
+          {categories.map(c => (
+            <button
+              key={c.id}
+              onClick={() => setCategoryFilter(c.id.toString())}
+              className={cn(
+                "px-4 py-2 rounded-xl text-xs font-medium transition-all shrink-0",
+                categoryFilter === c.id.toString() 
+                  ? "bg-primary text-white shadow-sm" 
+                  : "bg-bg-surface border border-border/60 text-text-muted hover:border-primary/30 hover:text-primary"
+            )}
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Book Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 mt-3">
+          {loading ? (
+            [...Array(12)].map((_, i) => (
+              <div key={i} className="aspect-[3/4] bg-bg-surface rounded-2xl animate-pulse" />
+            ))
+          ) : filteredBooks.length > 0 ? (
+            filteredBooks.map(book => (
+              <BookCard 
+                key={book.id} 
+                book={book} 
+                variant="catalog"
+                onClick={(id) => navigate(`/book/${id}`)}
+              />
+            ))
+          ) : (
+            <div className="col-span-full py-16 text-center text-text-muted text-sm bg-bg-surface/50 rounded-2xl border border-dashed border-border/50">
+              Nenhum livro encontrado.
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+export default Home

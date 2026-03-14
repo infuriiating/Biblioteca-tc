@@ -1,0 +1,257 @@
+import { useState, useEffect } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
+import { Book, ChevronLeft, Sparkles, CheckCircle2 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+function cn(...inputs) {
+  return twMerge(clsx(inputs))
+}
+
+const BookDetails = () => {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const [book, setBook] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
+  const [summaryError, setSummaryError] = useState(null)
+  const [isRequesting, setIsRequesting] = useState(false)
+  const [requestStatus, setRequestStatus] = useState(null)
+
+  const getCoverUrl = (filename) => {
+    if (!filename) return null
+    return supabase.storage.from('capalivro').getPublicUrl(filename).data.publicUrl
+  }
+
+  useEffect(() => {
+    fetchBook()
+  }, [id])
+
+  const fetchBook = async () => {
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('books')
+        .select('*, categories(name)')
+        .eq('id', id)
+        .single()
+      if (error) throw error
+      setBook({ ...data, category_name: data.categories?.name, cover_url: getCoverUrl(data.cover_image) })
+    } catch (error) {
+      console.error('Error fetching book:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleLoan = async () => {
+    if (!user) { navigate('/login'); return }
+    if (book.available_qty <= 0) return
+    setIsRequesting(true)
+    try {
+      const { error: loanError } = await supabase.from('loans').insert([
+        { book_id: id, user_id: user.id, status: 'pending' }
+      ])
+      if (loanError) throw loanError
+      
+      setRequestStatus('success')
+    } catch (error) {
+      console.error('Error requesting loan:', error)
+      setRequestStatus('error')
+    } finally {
+      setIsRequesting(false)
+    }
+  }
+
+  const handleGenerateSummary = async () => {
+    setIsGeneratingSummary(true)
+    setSummaryError(null)
+
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+    if (!apiKey) {
+      setSummaryError('A chave de API OpenAI não está configurada. Adicione VITE_OPENAI_API_KEY ao ficheiro .env')
+      setIsGeneratingSummary(false)
+      return
+    }
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'user',
+              content: `Escreve um resumo curto e cativante em português (3-4 frases) do livro "${book.title}" de ${book.author}. Foca-te no tema central e no que o livro tem de especial para os leitores. Não uses aspas nem formatação especial.`
+            }
+          ],
+          max_tokens: 200,
+          temperature: 0.7
+        })
+      })
+
+      if (!response.ok) {
+        const err = await response.json()
+        throw new Error(err.error?.message || 'Erro na API OpenAI')
+      }
+
+      const data = await response.json()
+      const summary = data.choices[0]?.message?.content?.trim()
+
+      if (summary) {
+        await supabase.from('books').update({ ai_summary: summary }).eq('id', id)
+        setBook(prev => ({ ...prev, ai_summary: summary }))
+      }
+    } catch (error) {
+      console.error('OpenAI error:', error)
+      setSummaryError(error.message || 'Erro ao gerar resumo. Verifique a sua chave de API.')
+    } finally {
+      setIsGeneratingSummary(false)
+    }
+  }
+
+  if (loading) return (
+    <div className="animate-pulse space-y-8 max-w-4xl mx-auto py-12">
+      <div className="h-5 w-20 bg-bg-surface rounded-lg" />
+      <div className="bg-bg-surface rounded-[2.5rem] h-[500px] shadow-sm" />
+    </div>
+  )
+
+  if (!book) return (
+    <div className="py-20 text-center space-y-5">
+      <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto text-primary opacity-30">
+        <Book size={32} />
+      </div>
+      <h2 className="text-xl font-semibold text-text-main">Livro não encontrado</h2>
+      <Link to="/" className="text-primary hover:underline inline-flex items-center gap-1.5 text-sm font-medium">
+        <ChevronLeft size={16} /> Voltar ao início
+      </Link>
+    </div>
+  )
+
+  return (
+    <div className="max-w-4xl mx-auto py-8 px-4 space-y-6">
+      <Link to="/" className="inline-flex items-center gap-1.5 text-text-muted hover:text-primary text-sm font-medium transition-colors">
+        <ChevronLeft size={18} /> Voltar ao catálogo
+      </Link>
+
+      {/* Main Detail Card */}
+      <div className="bg-[#0a1629] rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col items-center py-12 px-8 text-center text-white relative">
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        
+        {/* Book Cover */}
+        <div className="w-44 aspect-[3/4] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-8 transform hover:scale-105 transition-transform duration-500">
+          <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
+        </div>
+
+        {/* Title & Author */}
+        <div className="space-y-2 mb-10 max-w-2xl">
+          <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight leading-tight">{book.title}</h1>
+          <p className="text-white/50 font-normal">{book.author}</p>
+          {book.category_name && (
+            <span className="inline-block mt-2 px-3 py-1 bg-white/10 rounded-full text-xs text-white/60 font-medium">
+              {book.category_name}
+            </span>
+          )}
+        </div>
+
+        {/* Action Button */}
+        <div className="flex flex-col items-center gap-3 w-full max-w-xs mb-10">
+          {requestStatus === 'success' ? (
+            <div className="bg-green-500/20 border border-green-500/30 py-3.5 px-8 rounded-2xl w-full text-green-400 font-medium flex items-center justify-center gap-2 text-sm">
+              <CheckCircle2 size={18} /> Requisitado com sucesso
+            </div>
+          ) : (
+            <button 
+              onClick={handleLoan}
+              disabled={isRequesting || book.available_qty <= 0}
+              className="w-full bg-primary text-white py-3.5 rounded-2xl font-medium shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95 flex items-center justify-center gap-2.5 disabled:opacity-30 disabled:grayscale text-sm"
+            >
+              {isRequesting ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <><Book size={16} /> {book.available_qty <= 0 ? 'Sem exemplares' : 'Requisitar Livro'}</>
+              )}
+            </button>
+          )}
+          <p className="text-[11px] text-white/30 font-normal">
+            {book.available_qty} de {book.quantity} disponíveis
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div className="w-full max-w-md space-y-6">
+          <div className="h-px bg-white/10" />
+          <div className="flex items-center justify-center">
+            <div className="space-y-1">
+              <p className="text-[10px] text-white/40 uppercase font-medium tracking-widest">Ano de Edição</p>
+              <p className="text-lg font-semibold">{book.year_edition || '—'}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Section */}
+      <div className="bg-bg-surface rounded-[2rem] p-8 shadow-sm border border-border/30 space-y-4">
+        <div className="flex items-center gap-2.5 text-text-main">
+          <Sparkles size={18} className="text-primary" />
+          <h3 className="text-lg font-semibold">Sobre este livro</h3>
+          {book.ai_summary && (
+            <span className="ml-auto text-[10px] font-medium text-primary/60 bg-primary/8 px-2 py-1 rounded-full uppercase tracking-wider">IA</span>
+          )}
+        </div>
+        <p className="text-text-muted leading-relaxed text-sm font-normal">
+          {book.ai_summary || book.description || 'Sem descrição disponível para este livro. Clique em "Gerar resumo" para criar um com inteligência artificial.'}
+        </p>
+        
+        {summaryError && (
+          <p className="text-red-400 text-xs font-normal bg-red-500/8 border border-red-400/20 rounded-xl px-4 py-3">{summaryError}</p>
+        )}
+
+        {!book.ai_summary && (
+          <button 
+            onClick={handleGenerateSummary}
+            disabled={isGeneratingSummary}
+            className="flex items-center gap-1.5 text-primary font-medium text-sm hover:underline disabled:opacity-50"
+          >
+            {isGeneratingSummary ? (
+              <div className="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            ) : (
+              <Sparkles size={14} />
+            )}
+            {isGeneratingSummary ? 'A gerar resumo...' : 'Gerar resumo com IA'}
+          </button>
+        )}
+      </div>
+
+      {/* Details Grid */}
+      <div className="w-full">
+        <div className="bg-bg-surface p-7 rounded-[2rem] shadow-sm border border-border/30 space-y-4">
+          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Detalhes da Obra</p>
+          <div className="space-y-2">
+            {[
+              { label: 'ISBN', value: book.isbn },
+              { label: 'Editora', value: book.publisher },
+              { label: 'Ano de Edição', value: book.year_edition }
+            ].map(({ label, value }) => (
+              <div key={label} className="flex justify-between items-center py-2.5 border-b border-border/20 last:border-0">
+                <span className="text-text-muted text-sm font-normal">{label}</span>
+                <span className="text-sm font-medium text-text-main">{value || '—'}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default BookDetails

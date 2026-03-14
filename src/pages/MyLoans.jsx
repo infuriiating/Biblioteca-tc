@@ -1,0 +1,97 @@
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
+import { Book as BookIcon, Clock, CheckCircle, ArrowRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
+
+const MyLoans = () => {
+  const { user } = useAuth()
+  const [loans, setLoans] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchMyLoans = async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('loans')
+      .select('*, books(*)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    if (!error) setLoans(data)
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    if (user) fetchMyLoans()
+  }, [user])
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-12 pb-20">
+      <div>
+        <h1 className="text-4xl font-black text-text-main tracking-tight">Meus Empréstimos</h1>
+        <p className="text-text-muted mt-2">Histórico completo das suas requisições</p>
+      </div>
+
+      {loading ? (
+        <div className="space-y-4">
+           {[1,2,3].map(i => <div key={i} className="h-24 bg-bg-surface rounded-2xl animate-pulse" />)}
+        </div>
+      ) : loans.length > 0 ? (
+        <div className="space-y-4">
+          {loans.map((loan) => (
+            <div key={loan.id} className="bg-bg-surface border border-border p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6 group hover:border-primary/30 transition-colors shadow-sm">
+              <div className="w-16 h-24 bg-bg-main rounded overflow-hidden flex-shrink-0 border border-border/50">
+                {loan.books?.cover_image && (
+                  <img 
+                    src={supabase.storage.from('capalivro').getPublicUrl(loan.books.cover_image).data.publicUrl} 
+                    className="w-full h-full object-cover" 
+                    alt=""
+                  />
+                )}
+              </div>
+              
+              <div className="flex-grow text-center md:text-left space-y-1">
+                <Link to={`/book/${loan.books?.id}`} className="text-lg font-bold hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2">
+                  {loan.books?.title} <ArrowRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+                <p className="text-sm text-text-muted">{loan.books?.author}</p>
+              </div>
+
+              <div className="flex flex-col items-center md:items-end gap-2">
+                <span className={cn(
+                  "inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest",
+                  loan.status === 'active' ? 'bg-orange-500/10 text-orange-500' : 
+                  loan.status === 'pending' ? 'bg-blue-500/10 text-blue-500' :
+                  loan.status === 'rejected' ? 'bg-red-500/10 text-red-500' :
+                  'bg-green-500/10 text-green-500'
+                )}>
+                  {loan.status === 'active' ? <Clock size={14} /> : loan.status === 'pending' ? <Clock size={14} className="opacity-50" /> : <CheckCircle size={14} />}
+                  {loan.status === 'active' ? 'Ativo' : 
+                   loan.status === 'pending' ? 'Pendente' : 
+                   loan.status === 'rejected' ? 'Recusado' : 'Devolvido'}
+                </span>
+                <p className="text-[10px] text-text-muted uppercase font-bold tracking-tighter">Requisição #{loan.id}</p>
+                {loan.status === 'active' && loan.due_date && (
+                   <p className="text-[9px] text-orange-500/60 font-medium">Vence: {new Date(loan.due_date).toLocaleDateString()}</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="py-20 text-center space-y-6 bg-bg-surface/50 rounded-3xl border border-dashed border-border">
+          <BookIcon size={64} className="mx-auto text-text-muted opacity-20" />
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold">Sem empréstimos</h3>
+            <p className="text-text-muted">Ainda não requisitou nenhum livro do nosso catálogo.</p>
+          </div>
+          <Link to="/" className="inline-block bg-primary text-bg-main px-8 py-3 rounded-full font-bold hover:bg-primary-hover transition-all">
+            Explorar Catálogo
+          </Link>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default MyLoans

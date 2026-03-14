@@ -1,0 +1,151 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
+@theme {
+  --color-primary: #1e68f0;
+  --color-primary-hover: #1652c9;
+  --color-secondary: #ebf2ff;
+  --color-bg-main: #f4f7fb;
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-hover: #f8fafc;
+  --color-text-main: #1a202c;
+  --color-text-muted: #718096;
+  --color-border: #e2e8f0;
+  --color-accent: #f56565;
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+}
+
+:root {
+  color-scheme: light;
+}
+
+/* ─── Dark Mode ─────────────────────────────────────────────── */
+html.dark {
+  color-scheme: dark;
+  --color-bg-main: #0f172a;
+  --color-bg-surface: #1e293b;
+  --color-bg-surface-hover: #263347;
+  --color-text-main: #e2e8f0;
+  --color-text-muted: #94a3b8;
+  --color-border: #334155;
+  --color-secondary: #1e3a6a;
+}
+
+html.dark body {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+/* Ensure white backgrounds become surface in dark */
+html.dark .dark\:bg-surface {
+  background-color: var(--color-bg-surface);
+}
+
+/* Fix hardcoded bg-white elements in dark mode */
+html.dark [class*="bg-white"] {
+  background-color: var(--color-bg-surface) !important;
+}
+
+/* Fix hardcoded border-white rings */
+html.dark [class*="border-white"]:not([class*="border-white/"]) {
+  border-color: var(--color-border);
+}
+
+/* Fix hardcoded text colors in dark mode */
+html.dark [class*="text-gray-"] {
+  color: var(--color-text-muted);
+}
+
+/* Scrollbar dark */
+html.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* TopBar search bar in dark */
+html.dark .topbar-search {
+  background-color: var(--color-bg-surface);
+  border-color: var(--color-border);
+  color: var(--color-text-main);
+}
+
+/* ─────────────────────────────────────────────────────────── */
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-bg-main);
+  color: var(--color-text-main);
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Apply transitions to all interactive/surface elements */
+body * {
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
+
+/* Horizontal scrollbar hide utility */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom Scrollbar for Recommended Section */
+.custom-scrollbar-h {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.custom-scrollbar-h::-webkit-scrollbar {
+  height: 6px;
+}
+
+.custom-scrollbar-h::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar-h::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 10px;
+}
+
+.custom-scrollbar-h::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Custom Select Dropdown UI */
+.custom-select-shadow {
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .custom-select-shadow {
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import { ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import BookCard from '../components/BookCard'
@@ -12,6 +13,7 @@ function cn(...inputs) {
 
 const Home = () => {
   const navigate = useNavigate()
+  const { user, loading: authLoading } = useAuth()
   const [searchParams] = useSearchParams()
   const query = searchParams.get('q') || ''
   const cat = searchParams.get('c') || '0'
@@ -32,8 +34,10 @@ const Home = () => {
   }
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    if (!authLoading) {
+      fetchData()
+    }
+  }, [authLoading, user])
 
   const fetchData = async () => {
     setLoading(true)

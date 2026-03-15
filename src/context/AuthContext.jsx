@@ -22,19 +22,73 @@ export const AuthProvider = ({ children }) => {
       }
     }, 5000)
 
+    const fetchProfile = async (userId) => {
+      setProfileLoading(true)
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single()
+
+        if (error && error.code === 'PGRST116') {
+          // Profile missing - auto create default
+          console.log('[AuthContext] Profile missing, creating default...')
+          const { data: userData } = await supabase.auth.getUser()
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert([
+              {
+                id: userId,
+                name: userData?.user?.user_metadata?.full_name || userData?.user?.email?.split('@')[0] || 'User',
+                email: userData?.user?.email,
+                role: 'student'
+              }
+            ])
+            .select()
+            .single()
+          
+          if (createError) throw createError
+          setProfile(newProfile)
+          return newProfile
+        }
+
+        if (error) throw error
+        setProfile(data)
+        return data
+      } catch (error) {
+        console.error('[AuthContext] Error in fetchProfile:', error)
+        setProfile(null)
+        return null
+      } finally {
+        setProfileLoading(false)
+      }
+    }
+
     const initAuth = async () => {
       try {
+        // Initial session check
         const { data: { session }, error } = await supabase.auth.getSession()
-        if (error) throw error
+        if (error) {
+          if (error.message.includes('refresh_token_not_found') || error.message.includes('Invalid Refresh Token')) {
+             console.warn('[AuthContext] Session invalid, clearing...')
+             await supabase.auth.signOut()
+          }
+          throw error
+        }
 
         const currentUser = session?.user ?? null
         setUser(currentUser)
         
         if (currentUser) {
           await fetchProfile(currentUser.id)
+        } else {
+          setProfile(null)
         }
       } catch (error) {
         console.error('[AuthContext] Error initializing auth:', error)
+        setUser(null)
+        setProfile(null)
       } finally {
         setLoading(false)
         clearTimeout(timeout)
@@ -43,7 +97,9 @@ export const AuthProvider = ({ children }) => {
 
     initAuth()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log(`[AuthContext] State change: ${event}`, session?.user?.email)
+      
       const currentUser = session?.user ?? null
       setUser(currentUser)
       
@@ -53,6 +109,8 @@ export const AuthProvider = ({ children }) => {
         setProfile(null)
         setProfileLoading(false)
       }
+      
+      // If we got a session change AFTER initial load, make sure loading is false
       setLoading(false)
     })
 

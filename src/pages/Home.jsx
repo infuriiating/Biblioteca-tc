@@ -35,6 +35,9 @@ const Home = () => {
 
   useEffect(() => {
     if (!authLoading) {
+      // If we have a user but no profile yet, wait a bit longer or trigger fetch
+      // But fetchProfile in context handles most of this. 
+      // We'll just trigger our data fetch now.
       fetchData()
     }
   }, [authLoading, user])
@@ -44,13 +47,14 @@ const Home = () => {
     
     // Safety timeout
     const timeout = setTimeout(() => {
-      if (loading) {
-        console.warn('Home data fetching timed out');
-        setLoading(false)
-      }
+      setLoading(false)
     }, 6000)
 
     try {
+      // If we are logged in, we might want to wait a split second for headers to settle
+      if (user) {
+        await new Promise(r => setTimeout(r, 100))
+      }
       const { data: catData, error: catError } = await supabase.from('categories').select('*').order('display_order', { ascending: true })
       if (catError) throw catError
       setCategories(catData || [])
@@ -166,8 +170,14 @@ const Home = () => {
               />
             ))
           ) : (
-            <div className="col-span-full py-16 text-center text-text-muted text-sm bg-bg-surface/50 rounded-2xl border border-dashed border-border/50">
-              Nenhum livro encontrado.
+            <div className="col-span-full py-16 text-center space-y-4 bg-bg-surface/50 rounded-2xl border border-dashed border-border/50">
+              <p className="text-text-muted text-sm italic">Nenhum livro encontrado.</p>
+              <button 
+                onClick={() => fetchData()}
+                className="text-xs font-bold text-primary hover:underline uppercase tracking-widest"
+              >
+                Tentar Novamente
+              </button>
             </div>
           )}
         </div>

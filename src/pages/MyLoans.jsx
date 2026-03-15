@@ -10,12 +10,17 @@ function cn(...inputs) {
   return twMerge(clsx(inputs))
 }
 const MyLoans = () => {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [loans, setLoans] = useState([])
   const [loading, setLoading] = useState(true)
 
   const fetchMyLoans = async () => {
+    if (!user) return
     setLoading(true)
+    
+    // Tiny delay for Supabase headers to stabilize on refresh
+    await new Promise(r => setTimeout(r, 100))
+    
     const { data, error } = await supabase
       .from('loans')
       .select('*, books!fk_loans_book(*)')
@@ -27,8 +32,12 @@ const MyLoans = () => {
   }
 
   useEffect(() => {
-    if (user) fetchMyLoans()
-  }, [user])
+    if (!authLoading && user) {
+      fetchMyLoans()
+    } else if (!authLoading && !user) {
+      setLoading(false)
+    }
+  }, [authLoading, user])
 
   return (
     <div className="max-w-4xl mx-auto space-y-12 pb-20">

@@ -3,7 +3,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useSearchParams, Link, useLocation } from 'react-router-dom'
 
 const TopBar = ({ onOpenSidebar }) => {
-  const { user, profile } = useAuth()
+  const { user, profile, profileLoading } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
   const query = searchParams.get('q') || ''
@@ -70,7 +70,9 @@ const TopBar = ({ onOpenSidebar }) => {
               <p className="text-xs font-semibold text-text-main leading-tight">
                 {user.user_metadata?.full_name || user.user_metadata?.display_name || user.user_metadata?.username || profile?.name || user.email?.split('@')[0] || 'Utilizador'}
               </p>
-              <p className="text-[10px] text-text-muted capitalize font-medium">{profile?.role || 'Estudante'}</p>
+              <p className="text-[10px] text-text-muted capitalize font-medium">
+                {profileLoading ? 'Carregando...' : (profile?.role || 'Estudante')}
+              </p>
             </div>
           </div>
         ) : (

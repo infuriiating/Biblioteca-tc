@@ -9,7 +9,61 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
 
+  const lastFetchedUserId = useRef(null)
   const initialized = useRef(false)
+
+  const fetchProfile = async (userId, userObject = null) => {
+    // Prevent double-fetching for the same user if already in progress or completed
+    if (lastFetchedUserId.current === userId && profile && !profileLoading) return
+    
+    setProfileLoading(true)
+    lastFetchedUserId.current = userId
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (error && error.code === 'PGRST116') {
+        // Profile missing - auto create default
+        console.log('[AuthContext] Profile missing, creating default for:', userId)
+        
+        // Use userObject if provided, else fallback to current user
+        const activeUser = userObject || (await supabase.auth.getUser()).data?.user
+        
+        if (!activeUser) throw new Error('No active user to create profile for')
+
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: userId,
+              name: activeUser.user_metadata?.full_name || activeUser.email?.split('@')[0] || 'User',
+              email: activeUser.email,
+              role: 'student'
+            }
+          ])
+          .select()
+          .single()
+        
+        if (createError) throw createError
+        setProfile(newProfile)
+        return newProfile
+      }
+
+      if (error) throw error
+      setProfile(data)
+      return data
+    } catch (error) {
+      console.error('[AuthContext] Error in fetchProfile:', error)
+      setProfile(null)
+      return null
+    } finally {
+      setProfileLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (initialized.current) return
@@ -17,57 +71,11 @@ export const AuthProvider = ({ children }) => {
 
     // Safety timeout: ensure loading state is cleared even if Supabase hangs
     const timeout = setTimeout(() => {
-      if (loading) {
-        setLoading(false)
-      }
-    }, 5000)
-
-    const fetchProfile = async (userId) => {
-      setProfileLoading(true)
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single()
-
-        if (error && error.code === 'PGRST116') {
-          // Profile missing - auto create default
-          console.log('[AuthContext] Profile missing, creating default...')
-          const { data: userData } = await supabase.auth.getUser()
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert([
-              {
-                id: userId,
-                name: userData?.user?.user_metadata?.full_name || userData?.user?.email?.split('@')[0] || 'User',
-                email: userData?.user?.email,
-                role: 'student'
-              }
-            ])
-            .select()
-            .single()
-          
-          if (createError) throw createError
-          setProfile(newProfile)
-          return newProfile
-        }
-
-        if (error) throw error
-        setProfile(data)
-        return data
-      } catch (error) {
-        console.error('[AuthContext] Error in fetchProfile:', error)
-        setProfile(null)
-        return null
-      } finally {
-        setProfileLoading(false)
-      }
-    }
+      setLoading(false)
+    }, 8000)
 
     const initAuth = async () => {
       try {
-        // Initial session check
         const { data: { session }, error } = await supabase.auth.getSession()
         if (error) {
           if (error.message.includes('refresh_token_not_found') || error.message.includes('Invalid Refresh Token')) {
@@ -81,9 +89,10 @@ export const AuthProvider = ({ children }) => {
         setUser(currentUser)
         
         if (currentUser) {
-          await fetchProfile(currentUser.id)
+          await fetchProfile(currentUser.id, currentUser)
         } else {
           setProfile(null)
+          lastFetchedUserId.current = null
         }
       } catch (error) {
         console.error('[AuthContext] Error initializing auth:', error)
@@ -98,19 +107,19 @@ export const AuthProvider = ({ children }) => {
     initAuth()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log(`[AuthContext] State change: ${event}`, session?.user?.email)
+      console.log(`[AuthContext] State change: ${event}`)
       
       const currentUser = session?.user ?? null
       setUser(currentUser)
       
       if (currentUser) {
-        await fetchProfile(currentUser.id)
+        await fetchProfile(currentUser.id, currentUser)
       } else {
         setProfile(null)
         setProfileLoading(false)
+        lastFetchedUserId.current = null
       }
       
-      // If we got a session change AFTER initial load, make sure loading is false
       setLoading(false)
     })
 
@@ -118,28 +127,11 @@ export const AuthProvider = ({ children }) => {
       subscription.unsubscribe()
       clearTimeout(timeout)
     }
-  }, [])
-
-  const fetchProfile = async (userId) => {
-    setProfileLoading(true)
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      if (error && error.code !== 'PGRST116') throw error
-      setProfile(data)
-    } catch (error) {
-      console.error('Error fetching profile:', error)
-    } finally {
-      setProfileLoading(false)
-    }
-  }
+  }, [profile]) // Add profile to dependency if needed for internal logic, but usually it's static
 
   const signOut = async () => {
     try {
+      lastFetchedUserId.current = null
       await supabase.auth.signOut()
       setUser(null)
       setProfile(null)

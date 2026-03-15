@@ -16,19 +16,36 @@ const MyLoans = () => {
 
   const fetchMyLoans = async () => {
     if (!user) return
+    console.log('[MyLoans] Fetching loans for user:', user.email)
     setLoading(true)
     
-    // Tiny delay for Supabase headers to stabilize on refresh
-    await new Promise(r => setTimeout(r, 100))
-    
-    const { data, error } = await supabase
-      .from('loans')
-      .select('*, books!fk_loans_book(*)')
-      .eq('user_id', user.id)
-      .order('id', { ascending: false })
+    // Safety timeout
+    const timeoutId = setTimeout(() => {
+      console.warn('[MyLoans] Data fetching timed out after 10s')
+      setLoading(false)
+    }, 10000)
 
-    if (!error) setLoans(data)
-    setLoading(false)
+    try {
+      // Small delay for Supabase headers to stabilize on refresh
+      await new Promise(r => setTimeout(r, 200))
+      
+      const { data, error } = await supabase
+        .from('loans')
+        .select('*, books!fk_loans_book(*)')
+        .eq('user_id', user.id)
+        .order('id', { ascending: false })
+
+      if (error) throw error
+      
+      setLoans(data || [])
+      console.log('[MyLoans] Successfully fetched', (data || []).length, 'loans')
+    } catch (err) {
+      console.error('[MyLoans] Fetch error:', err)
+      setLoans([])
+    } finally {
+      setLoading(false)
+      clearTimeout(timeoutId)
+    }
   }
 
   useEffect(() => {

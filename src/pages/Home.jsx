@@ -42,31 +42,33 @@ const Home = () => {
     }
   }, [authLoading, user])
 
-  const fetchData = async () => {
+  const fetchData = async (catId) => {
+    if (authLoading) return
+    
+    console.log('[Home] Fetching data for category:', catId || categoryFilter)
     setLoading(true)
     
     // Safety timeout
-    const timeout = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
+      console.warn('[Home] Data fetching timed out after 10s')
       setLoading(false)
-    }, 6000)
+    }, 10000)
 
     try {
-      // If we are logged in, we might want to wait a split second for headers to settle
-      if (user) {
-        await new Promise(r => setTimeout(r, 100))
-      }
-      const { data: catData, error: catError } = await supabase.from('categories').select('*').order('display_order', { ascending: true })
-      if (catError) throw catError
-      setCategories(catData || [])
+      // Small delay for auth headers to stabilize
+      if (user) await new Promise(r => setTimeout(r, 200))
 
-      const { data: booksData, error: booksError } = await supabase
-        .from('books')
-        .select('*, categories(name)')
-        .order('title')
+      const [catRes, bookRes] = await Promise.all([
+        supabase.from('categories').select('*').order('display_order', { ascending: true }),
+        supabase.from('books').select('*, categories(name)').order('created_at', { ascending: false })
+      ])
+
+      if (catRes.error) throw catRes.error
+      if (bookRes.error) throw bookRes.error
+
+      setCategories(catRes.data || [])
       
-      if (booksError) throw booksError
-
-      const processedBooks = (booksData || []).map(b => ({
+      const processedBooks = (bookRes.data || []).map(b => ({
         ...b,
         category_name: b.categories?.name,
         cover_url: getCoverUrl(b.cover_image)
@@ -74,8 +76,9 @@ const Home = () => {
 
       setBooks(processedBooks)
       setFeaturedBooks(processedBooks.filter(b => b.is_featured).slice(0, 6))
-    } catch (error) {
-      console.error('Error fetching data:', error)
+      console.log('[Home] Successfully fetched', processedBooks.length, 'books')
+    } catch (err) {
+      console.error('[Home] Fetch error:', err)
       // If we fail, at least show empty lists instead of skeletons forever
       setBooks([])
       setCategories([])

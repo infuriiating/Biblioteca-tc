@@ -125,7 +125,7 @@ export const AuthProvider = ({ children }) => {
 
     return () => {
       subscription.unsubscribe()
-      clearTimeout(timeout)
+      clearTimeout(timeoutId)
     }
   }, [profile]) // Add profile to dependency if needed for internal logic, but usually it's static
 

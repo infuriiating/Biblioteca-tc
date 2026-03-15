@@ -29,7 +29,7 @@ const Select = ({ options, value, onChange, label, placeholder }) => {
   }, [])
 
   return (
-    <div className="space-y-3 relative" ref={containerRef}>
+    <div className={cn("relative", label && "space-y-3")} ref={containerRef}>
       {label && (
         <label className="text-xs font-extrabold uppercase tracking-[0.2em] text-text-muted ml-1">
           {label}
@@ -39,8 +39,8 @@ const Select = ({ options, value, onChange, label, placeholder }) => {
       <div 
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-full bg-bg-main/50 border border-transparent rounded-[1.25rem] py-4 px-6 flex items-center justify-between cursor-pointer transition-all shadow-inner hover:bg-bg-main/70",
-          isOpen ? "bg-white border-primary/30 shadow-none ring-4 ring-primary/5" : ""
+          "w-full h-14 bg-bg-main/50 border border-transparent rounded-[1.25rem] px-6 text-sm flex items-center justify-between cursor-pointer transition-all shadow-inner hover:bg-bg-main/70",
+          isOpen ? "bg-bg-surface border-primary/30 shadow-none ring-4 ring-primary/5" : ""
         )}
       >
         <span className={cn(

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../hooks/useAuth'
 import { Mail, Lock, User, UserPlus, AlertCircle, BookOpen } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import logo from '../assets/logo.png'
@@ -19,10 +19,17 @@ const Signup = () => {
     setLoading(true)
     setError(null)
 
+    const emailRegex = /^al\d{5}@agr-tc\.pt$/i;
+    if (!emailRegex.test(email)) {
+      setError("Por favor, utilize o email da escola (ex: al12345@agr-tc.pt)");
+      setLoading(false);
+      return;
+    }
+
     const { data: authData, error: authError } = await signUp({
       email,
       password,
-      options: { data: { username } }
+      options: { data: { full_name: username } }
     })
 
     if (authError) {
@@ -33,7 +40,13 @@ const Signup = () => {
 
     if (authData.user) {
       const { error: profileError } = await supabase.from('profiles').insert([
-        { id: authData.user.id, username, role: 'student' }
+        { 
+          id: authData.user.id, 
+          name: username, 
+          email: email, 
+          role: 'student',
+          created_at: authData.user.created_at
+        }
       ])
       if (profileError) {
         setError('Conta criada, mas erro ao criar perfil. Tente entrar.')
@@ -92,7 +105,7 @@ const Signup = () => {
                   required
                   autoComplete="email"
                   className="w-full bg-bg-main border border-border rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/40 transition-all text-text-main placeholder:text-text-muted/60"
-                  placeholder="exemplo@escola.pt"
+                  placeholder="al12345@agr-tc.pt"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />

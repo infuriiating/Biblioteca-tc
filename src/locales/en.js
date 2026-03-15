@@ -6,6 +6,7 @@ export default {
     books: 'Books',
     categories: 'Categories',
     loans: 'Loans',
+    users: 'Users',
     administration: 'Administration',
     settings: 'Settings',
     admin: 'Admin'
@@ -122,6 +123,7 @@ export default {
       title: 'Categories',
       subtitle: 'Manage the book catalog categories.',
       addPlaceholder: 'New category name...',
+      searchPlaceholder: 'Search categories...',
       addBtn: 'Add',
       dragToReorder: 'Drag icons to reorder',
       deleteTitle: 'Delete Category',
@@ -129,8 +131,9 @@ export default {
       deleteBtn: 'Yes, Delete'
     },
     loans: {
-      title: 'Loan Requests',
-      subtitle: 'Monitor and fulfill reader requests',
+      title: 'Loan Management',
+      subtitle: 'Manage and track reader borrows',
+      searchPlaceholder: 'Search by book, author or user email...',
       all: 'ALL',
       pending: 'PENDING',
       active: 'ACTIVE',
@@ -142,7 +145,29 @@ export default {
       bookDetails: 'BOOK DETAILS',
       status: 'STATUS',
       actions: 'ACTIONS',
-      libMember: 'LIB MEMBER'
+      libMember: 'LIB MEMBER',
+      borrowedDate: 'BORROWED',
+      returnedDate: 'RETURNED ON',
+      dueDate: 'DUE DATE',
+      approvedDate: 'APPROVED ON'
+    },
+    users: {
+      title: 'Users',
+      subtitle: 'Manage system access and roles',
+      searchPlaceholder: 'Search name or email...',
+      nameDetails: 'USER DETAILS',
+      role: 'ROLE',
+      joined: 'JOINED',
+      updateSuccess: 'Role updated successfully',
+      updateError: 'Error updating role',
+      noUsers: 'No users found'
+    },
+    roles: {
+      admin: 'Administrator',
+      professor: 'Professor',
+      aluno: 'Student',
+      student: 'Student',
+      membro: 'Member'
     },
     editBook: {
       newBookTitle: 'Add New Book',

@@ -1,5 +1,5 @@
 import { Search, Bell, ChevronDown, Menu } from 'lucide-react'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../hooks/useAuth'
 import { useSearchParams, Link, useLocation } from 'react-router-dom'
 
 const TopBar = ({ onOpenSidebar }) => {
@@ -20,7 +20,7 @@ const TopBar = ({ onOpenSidebar }) => {
   }
 
   return (
-    <header className="sticky top-0 z-40 h-16 bg-bg-main/90 backdrop-blur-lg flex items-center justify-between px-4 lg:px-8 gap-4">
+    <header className="sticky top-0 z-40 h-20 bg-bg-main/90 backdrop-blur-lg flex items-center justify-between px-4 lg:px-8 gap-4 py-4">
       {/* Mobile Menu */}
       <button
         onClick={onOpenSidebar}
@@ -59,7 +59,7 @@ const TopBar = ({ onOpenSidebar }) => {
             <div className="w-8 h-8 rounded-lg overflow-hidden bg-primary/10 flex items-center justify-center shrink-0">
               <span className="text-[10px] font-bold text-primary uppercase">
                 {(() => {
-                  const name = user.user_metadata?.full_name || user.user_metadata?.display_name || user.user_metadata?.username || profile?.username || user.email?.split('@')[0] || 'U'
+                  const name = user.user_metadata?.full_name || user.user_metadata?.display_name || user.user_metadata?.username || profile?.name || user.email?.split('@')[0] || 'U'
                   const parts = name.trim().split(/\s+/)
                   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
                   return name.substring(0, 2).toUpperCase()
@@ -68,7 +68,7 @@ const TopBar = ({ onOpenSidebar }) => {
             </div>
             <div className="text-left hidden sm:block">
               <p className="text-xs font-semibold text-text-main leading-tight">
-                {user.user_metadata?.full_name || user.user_metadata?.display_name || user.user_metadata?.username || profile?.username || user.email?.split('@')[0] || 'Utilizador'}
+                {user.user_metadata?.full_name || user.user_metadata?.display_name || user.user_metadata?.username || profile?.name || user.email?.split('@')[0] || 'Utilizador'}
               </p>
               <p className="text-[10px] text-text-muted capitalize font-medium">{profile?.role || 'Estudante'}</p>
             </div>

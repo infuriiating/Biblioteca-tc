@@ -6,9 +6,10 @@ import {
   Settings,
   BookOpen,
   ShieldCheck,
-  Tags
+  Tags,
+  Users
 } from 'lucide-react'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../hooks/useAuth'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import logo from '../../assets/logo.png'
@@ -22,16 +23,12 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { user, isAdmin } = useAuth()
   const { t } = useLanguage()
 
-  const menuItems = [
-    { icon: Compass, label: t('sidebar.discover'), path: '/' },
-    { icon: Library, label: t('sidebar.myLibrary'), path: '/emprestimos' },
-  ]
-
   const adminItems = [
     { icon: Grid, label: t('sidebar.overview'), path: '/admin', exact: true },
     { icon: BookOpen, label: t('sidebar.books'), path: '/admin/livros' },
     { icon: Tags, label: t('sidebar.categories'), path: '/admin/categorias' },
     { icon: Library, label: t('sidebar.loans'), path: '/admin/emprestimos' },
+    { icon: Users, label: t('sidebar.users'), path: '/admin/utilizadores' },
   ]
 
   const NavItem = ({ item }) => (
@@ -63,7 +60,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       />
 
       <aside className={cn(
-        "fixed lg:sticky top-0 left-0 z-50 shrink-0 w-60 h-screen bg-bg-surface border-r border-border/40 flex flex-col py-6 transition-transform duration-300",
+        "fixed lg:static top-0 left-0 z-50 shrink-0 w-60 h-screen bg-bg-surface border-r border-border/40 flex flex-col py-6 transition-transform duration-300",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         {/* Logo */}

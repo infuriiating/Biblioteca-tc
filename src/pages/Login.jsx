@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { Mail, Lock, LogIn, AlertCircle, BookOpen } from 'lucide-react'
 import logo from '../assets/logo.png'

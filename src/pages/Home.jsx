@@ -37,16 +37,28 @@ const Home = () => {
 
   const fetchData = async () => {
     setLoading(true)
-    try {
-      const { data: catData } = await supabase.from('categories').select('*').order('display_order', { ascending: true })
-      setCategories(catData)
+    
+    // Safety timeout
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Home data fetching timed out');
+        setLoading(false)
+      }
+    }, 6000)
 
-      const { data: booksData } = await supabase
+    try {
+      const { data: catData, error: catError } = await supabase.from('categories').select('*').order('display_order', { ascending: true })
+      if (catError) throw catError
+      setCategories(catData || [])
+
+      const { data: booksData, error: booksError } = await supabase
         .from('books')
         .select('*, categories(name)')
         .order('title')
+      
+      if (booksError) throw booksError
 
-      const processedBooks = booksData.map(b => ({
+      const processedBooks = (booksData || []).map(b => ({
         ...b,
         category_name: b.categories?.name,
         cover_url: getCoverUrl(b.cover_image)
@@ -56,7 +68,11 @@ const Home = () => {
       setFeaturedBooks(processedBooks.filter(b => b.is_featured).slice(0, 6))
     } catch (error) {
       console.error('Error fetching data:', error)
+      // If we fail, at least show empty lists instead of skeletons forever
+      setBooks([])
+      setCategories([])
     } finally {
+      clearTimeout(timeout)
       setLoading(false)
     }
   }
@@ -73,7 +89,7 @@ const Home = () => {
       {/* Recommended */}
       <section>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-semibold text-text-main">Recomendados</h2>
+          <h2 className="text-3xl font-semibold text-text-main">Recomendados</h2>
         </div>
         <div className="flex gap-5 overflow-x-auto pb-4 custom-scrollbar-h px-1">
           {loading ? (
@@ -97,7 +113,7 @@ const Home = () => {
       {/* Catalog */}
       <section className="space-y-10 pt-10">
         <div className="space-y-1">
-          <h2 className="text-4xl font-black text-text-main tracking-tight">Catálogo</h2>
+          <h2 className="text-3xl font-black text-text-main tracking-tight">Catálogo</h2>
           <p className="text-text-muted text-lg font-medium mt-1">Explore todos os livros disponíveis na nossa biblioteca</p>
         </div>
 

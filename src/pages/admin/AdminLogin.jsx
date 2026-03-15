@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabase'
 import { Lock, Mail, LogIn, AlertCircle, ShieldCheck, ChevronLeft } from 'lucide-react'
 import { clsx } from 'clsx'
@@ -46,7 +46,7 @@ const AdminLogin = () => {
         throw new Error(t('admin.login.accessDenied'))
       }
 
-      navigate('/admin')
+      window.location.href = '/admin'
     } catch (err) {
       setError(err.message)
       setLoading(false)

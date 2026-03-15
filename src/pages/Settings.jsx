@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { User, Sun, Moon, LogOut, Save, Check, Settings as SettingsIcon, Shield, Globe } from 'lucide-react'
 import { clsx } from 'clsx'
@@ -55,7 +55,6 @@ const Settings = () => {
 
   const handleLogout = async () => {
     await signOut()
-    navigate('/')
   }
 
   return (
@@ -81,7 +80,7 @@ const Settings = () => {
                 {t('settings.name')}
               </label>
               <div className="bg-bg-main/40 border border-border/40 rounded-2xl px-5 py-4 text-text-muted font-medium text-sm cursor-not-allowed select-none">
-                {user?.user_metadata?.full_name || user?.user_metadata?.display_name || user?.user_metadata?.username || profile?.username || 'Utilizador'}
+                {user?.user_metadata?.full_name || user?.user_metadata?.display_name || user?.user_metadata?.username || profile?.name || 'Utilizador'}
               </div>
             </div>
 

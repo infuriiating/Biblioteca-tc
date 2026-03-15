@@ -87,38 +87,40 @@ const ManageBooks = () => {
           <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.dashboard.manageBooks')}</h1>
           <p className="text-text-muted text-lg font-medium mt-1">{t('admin.dashboard.updateCatalog')}</p>
         </div>
-        <Link
-          to="/admin/livros/novo"
-          className="bg-primary text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:scale-[1.02] transition-all shadow-lg shadow-primary/20 active:scale-95 uppercase tracking-widest text-xs"
-        >
-          <Plus size={18} /> {t('admin.dashboard.addNewBook')}
-        </Link>
       </div>
 
       {/* Filters & Search */}
-      <div className="bg-white p-4 rounded-[2rem] shadow-sm border border-border/50 flex flex-col md:flex-row gap-4 items-center">
+      <div className="bg-bg-surface p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-border/50 flex flex-col md:flex-row gap-3 md:gap-4 items-center">
         <div className="relative flex-grow w-full">
           <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder={t('admin.books.searchPlaceholder')}
-            className="w-full bg-bg-main/50 border border-transparent rounded-2xl py-4 pl-14 pr-6 outline-none focus:bg-white focus:border-primary/30 transition-all text-sm font-medium"
+            className="w-full h-12 md:h-14 bg-bg-main/50 border border-transparent rounded-xl md:rounded-[1.25rem] pl-14 pr-6 outline-none focus:bg-bg-surface focus:border-primary/30 transition-all text-sm font-bold"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="w-full md:w-64">
-          <Select 
-            options={[{ id: '0', name: t('admin.books.allCategories') }, ...categories]}
-            value={categoryFilter}
-            onChange={setCategoryFilter}
-            placeholder={t('admin.books.filterPlaceholder')}
-          />
+        <div className="flex w-full md:w-auto items-center gap-3 md:gap-4 flex-grow md:flex-grow-0">
+          <Link
+            to="/admin/livros/novo"
+            className="flex-shrink-0 bg-primary text-white h-12 md:h-14 px-5 md:px-8 rounded-xl md:rounded-[1.25rem] font-bold flex items-center gap-2 hover:scale-[1.02] transition-all shadow-lg shadow-primary/20 active:scale-95 uppercase tracking-widest text-[10px] md:text-xs whitespace-nowrap"
+          >
+            <Plus size={18} /> {t('admin.dashboard.addNewBook')}
+          </Link>
+          <div className="w-full md:w-64 min-w-0 md:min-w-[250px] flex-shrink-0">
+            <Select 
+              options={[{ id: '0', name: t('admin.books.allCategories') }, ...categories]}
+              value={categoryFilter}
+              onChange={setCategoryFilter}
+              placeholder={t('admin.books.filterPlaceholder')}
+            />
+          </div>
         </div>
       </div>
 
       {/* Table Section */}
-      <div className="bg-white rounded-[2.5rem] shadow-sm border border-border/50 overflow-hidden">
+      <div className="bg-bg-surface rounded-[2rem] shadow-sm border border-border/50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -132,14 +134,33 @@ const ManageBooks = () => {
             </thead>
             <tbody className="divide-y divide-border/30">
               {loading ? (
-                <tr>
-                  <td colSpan="5" className="px-8 py-32 text-center">
-                    <div className="flex flex-col items-center gap-4 text-text-muted">
-                      <div className="w-10 h-10 border-4 border-primary/10 border-t-primary rounded-full animate-spin" />
-                      <p className="italic font-medium">{t('admin.common.fetchingCollection')}</p>
-                    </div>
-                  </td>
-                </tr>
+                [...Array(6)].map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="px-8 py-6"><div className="h-4 w-8 bg-bg-main rounded" /></td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-6">
+                        <div className="w-14 h-20 bg-bg-main rounded-xl shrink-0" />
+                        <div className="space-y-2">
+                          <div className="h-4 w-40 bg-bg-main rounded" />
+                          <div className="h-3 w-24 bg-bg-main rounded opacity-50" />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="space-y-2">
+                        <div className="h-2 w-20 bg-bg-main rounded" />
+                        <div className="h-1.5 w-32 bg-bg-main rounded" />
+                      </div>
+                    </td>
+                    <td className="px-8 py-6"><div className="h-10 w-10 bg-bg-main rounded-full mx-auto" /></td>
+                    <td className="px-8 py-6">
+                      <div className="flex gap-2 justify-end">
+                        <div className="h-10 w-10 bg-bg-main rounded-xl" />
+                        <div className="h-10 w-10 bg-bg-main rounded-xl" />
+                      </div>
+                    </td>
+                  </tr>
+                ))
               ) : filteredBooks.length > 0 ? (
                 filteredBooks.map((book) => (
                   <tr key={book.id} className="hover:bg-bg-main/30 transition-colors group">

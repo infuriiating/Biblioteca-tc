@@ -17,6 +17,7 @@ import ManageCategories from './pages/admin/ManageCategories'
 import BookForm from './pages/admin/BookForm'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminLogin from './pages/admin/AdminLogin'
+import AdminUsers from './pages/admin/AdminUsers'
 
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminProtectedRoute from './components/AdminProtectedRoute'
@@ -26,7 +27,14 @@ import DashboardLayout from './components/layout/DashboardLayout'
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => {
+    // Scroll window (for standalone pages like Login/Signup)
     window.scrollTo({ top: 0, behavior: 'instant' })
+    
+    // Scroll the main content area (for DashboardLayout pages)
+    const mainContent = document.querySelector('main')
+    if (mainContent) {
+      mainContent.scrollTo({ top: 0, behavior: 'instant' })
+    }
   }, [pathname])
   return null
 }
@@ -80,6 +88,7 @@ function App() {
                     <Route path="/admin/livros" element={<AdminProtectedRoute><ManageBooks /></AdminProtectedRoute>} />
                     <Route path="/admin/categorias" element={<AdminProtectedRoute><ManageCategories /></AdminProtectedRoute>} />
                     <Route path="/admin/emprestimos" element={<AdminProtectedRoute><ManageLoans /></AdminProtectedRoute>} />
+                    <Route path="/admin/utilizadores" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
                     <Route path="/admin/livros/novo" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
                     <Route path="/admin/livros/editar/:id" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
                   </Routes>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../hooks/useAuth'
 import {
   BookOpen,
   Users,
@@ -44,6 +44,11 @@ const AdminDashboard = () => {
   const [recentLoans, setRecentLoans] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const getDisplayName = (profile) => {
+    if (profile?.role === 'admin') return 'Admin'
+    return profile?.name || profile?.email?.split('@')[0] || 'User'
+  }
+
   useEffect(() => {
     fetchData()
   }, [])
@@ -56,7 +61,7 @@ const AdminDashboard = () => {
         supabase.from('loans').select('*', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('loans').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('loans').select('*', { count: 'exact', head: true }).eq('status', 'active').lt('due_date', new Date().toISOString()),
-        supabase.from('loans').select('*, books!fk_loans_book(title), profiles!fk_loans_user(username)').order('id', { ascending: false }).limit(6)
+        supabase.from('loans').select('*, books!fk_loans_book(title), profiles!fk_loans_user(name, email, role)').order('id', { ascending: false }).limit(5)
       ])
 
       setStats({
@@ -74,38 +79,65 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="flex flex-col h-[calc(100vh-theme(spacing.20)-theme(spacing.6)-theme(spacing.12))] overflow-hidden space-y-8">
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard icon={BookOpen} label={t('admin.dashboard.totalBooks')} value={stats.totalBooks} color="bg-primary" />
-        <StatCard icon={Clock} label={t('admin.dashboard.activeLoans')} value={stats.activeLoans} color="bg-orange-500" />
-        <StatCard icon={Users} label={t('admin.dashboard.pendingRequests')} value={stats.pendingLoans} color="bg-purple-500" />
-        <StatCard icon={AlertCircle} label={t('admin.dashboard.overdue')} value={stats.overdueLoans} color="bg-red-500" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 shrink-0">
+        {loading ? (
+          [...Array(4)].map((_, i) => (
+            <div key={i} className="bg-bg-surface p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-border/50 space-y-4 animate-pulse">
+              <div className="w-12 h-12 rounded-2xl bg-bg-main" />
+              <div className="space-y-2">
+                <div className="h-3 w-16 bg-bg-main rounded" />
+                <div className="h-8 w-12 bg-bg-main rounded" />
+              </div>
+            </div>
+          ))
+        ) : (
+          <>
+            <StatCard icon={BookOpen} label={t('admin.dashboard.totalBooks')} value={stats.totalBooks} color="bg-primary" />
+            <StatCard icon={Clock} label={t('admin.dashboard.activeLoans')} value={stats.activeLoans} color="bg-orange-500" />
+            <StatCard icon={Users} label={t('admin.dashboard.pendingRequests')} value={stats.pendingLoans} color="bg-purple-500" />
+            <StatCard icon={AlertCircle} label={t('admin.dashboard.overdue')} value={stats.overdueLoans} color="bg-red-500" />
+          </>
+        )}
       </div>
 
       {/* Quick Actions + Recent Loans */}
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-3 gap-8 flex-grow min-h-0">
         {/* Recent Loans */}
-        <div className="lg:col-span-2 bg-bg-surface rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden">
-          <div className="px-8 py-6 border-b border-border/50 flex items-center justify-between">
+        <div className="lg:col-span-2 bg-bg-surface rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden flex flex-col h-full">
+          <div className="px-8 py-6 border-b border-border/50 flex items-center justify-between shrink-0">
             <h2 className="font-bold text-text-main">{t('admin.dashboard.recentActivity')}</h2>
             <Link to="/admin/emprestimos" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
               {t('admin.dashboard.viewAll')} <ArrowRight size={12} />
             </Link>
           </div>
-          <div className="divide-y divide-border/30">
+          <div className="divide-y divide-border/30 overflow-y-auto flex-grow custom-scrollbar">
             {loading ? (
-              <div className="px-8 py-16 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-primary/10 border-t-primary rounded-full animate-spin" />
-              </div>
-            ) : recentLoans.length > 0 ? recentLoans.map((loan) => (
+              [...Array(6)].map((_, i) => (
+                <div key={i} className="px-8 py-4 flex items-center justify-between animate-pulse">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-2xl bg-bg-main" />
+                    <div className="space-y-2">
+                      <div className="h-4 w-32 bg-bg-main rounded" />
+                      <div className="h-3 w-48 bg-bg-main rounded opacity-50" />
+                    </div>
+                  </div>
+                  <div className="h-6 w-16 bg-bg-main rounded-full" />
+                </div>
+              ))
+            ) : recentLoans.length > 0 ? recentLoans.map((loan) => {
+              const displayName = getDisplayName(loan.profiles)
+              const initial = displayName.charAt(0).toUpperCase()
+              
+              return (
               <div key={loan.id} className="px-8 py-4 flex items-center justify-between hover:bg-bg-main/30 transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-2xl bg-secondary flex items-center justify-center text-primary font-extrabold text-sm shrink-0">
-                    {loan.profiles?.username?.charAt(0) || 'U'}
+                    {initial}
                   </div>
                   <div>
-                    <p className="font-bold text-text-main text-sm">{loan.profiles?.username || 'Unknown User'}</p>
+                    <p className="font-bold text-text-main text-sm">{displayName}</p>
                     <p className="text-xs text-text-muted line-clamp-1">{loan.books?.title || 'Unknown Book'}</p>
                   </div>
                 </div>
@@ -120,14 +152,15 @@ const AdminDashboard = () => {
                     {(loan.status === 'active' && loan.due_date && new Date(loan.due_date) < new Date()) ? t('admin.dashboard.overdue') : t(`admin.loans.${loan.status}`)}
                   </span>
               </div>
-            )) : (
+              )
+            }) : (
               <div className="px-8 py-16 text-center text-text-muted italic">No recent loan activity.</div>
             )}
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-[#0a1629] rounded-[2.5rem] p-8 text-white space-y-6 shadow-xl relative overflow-hidden">
+        <div className="bg-[#0a1629] rounded-[2.5rem] p-8 text-white space-y-6 shadow-xl relative overflow-hidden h-full flex flex-col">
           <div className="absolute top-0 right-0 p-8 opacity-5">
             <TrendingUp size={140} />
           </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Search, UserCircle, LogOut, Book, List, RefreshCw, PlusCircle, XCircle } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import logo from '../assets/logo.png'
 import { useLanguage } from '../context/LanguageContext'
@@ -24,7 +24,6 @@ const Navbar = () => {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/')
   }
 
   const handleSearch = (e) => {
@@ -79,7 +78,7 @@ const Navbar = () => {
             <div className="relative group">
               <button className="bg-white/5 border border-border px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white/10 transition-colors">
                 <UserCircle size={24} />
-                <span className="text-sm font-semibold hidden sm:inline">{profile?.username || user.email}</span>
+                <span className="text-sm font-semibold hidden sm:inline">{profile?.name || user.email}</span>
               </button>
               {/* Dropdown Menu */}
               <div className="absolute right-0 mt-2 w-56 bg-bg-surface border border-border rounded-xl shadow-xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right scale-95 group-hover:scale-100">

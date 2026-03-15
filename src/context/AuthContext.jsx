@@ -1,36 +1,69 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
-const AuthContext = createContext()
+export const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(false)
+
+  const initialized = useRef(false)
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      if (session?.user) fetchProfile(session.user.id)
-      setLoading(false)
-    })
+    if (initialized.current) return
+    initialized.current = true
 
-    // Listen for changes on auth state (sign in, sign out, etc.)
+    // Safety timeout: ensure loading state is cleared even if Supabase hangs
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false)
+      }
+    }, 5000)
+
+    const initAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) throw error
+
+        const currentUser = session?.user ?? null
+        setUser(currentUser)
+        
+        if (currentUser) {
+          await fetchProfile(currentUser.id)
+        }
+      } catch (error) {
+        console.error('[AuthContext] Error initializing auth:', error)
+      } finally {
+        setLoading(false)
+        clearTimeout(timeout)
+      }
+    }
+
+    initAuth()
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchProfile(session.user.id)
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
+      
+      if (currentUser) {
+        await fetchProfile(currentUser.id)
       } else {
         setProfile(null)
+        setProfileLoading(false)
       }
       setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [])
 
   const fetchProfile = async (userId) => {
+    setProfileLoading(true)
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -42,6 +75,20 @@ export const AuthProvider = ({ children }) => {
       setProfile(data)
     } catch (error) {
       console.error('Error fetching profile:', error)
+    } finally {
+      setProfileLoading(false)
+    }
+  }
+
+  const signOut = async () => {
+    try {
+      await supabase.auth.signOut()
+      setUser(null)
+      setProfile(null)
+      setProfileLoading(false)
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Error signing out:', error)
     }
   }
 
@@ -51,22 +98,25 @@ export const AuthProvider = ({ children }) => {
     signInWithGoogle: () => supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin
+        redirectTo: window.location.origin,
+        queryParams: {
+          prompt: 'select_account',
+          hd: 'agr-tc.pt'
+        }
       }
     }),
-    signOut: () => supabase.auth.signOut(),
+    signOut,
     user,
     profile,
+    loading,
+    profileLoading,
     isAdmin: profile?.role === 'admin'
   }
 
+
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   )
-}
-
-export const useAuth = () => {
-  return useContext(AuthContext)
 }

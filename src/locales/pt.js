@@ -6,6 +6,7 @@ export default {
     books: 'Livros',
     categories: 'Categorias',
     loans: 'Empréstimos',
+    users: 'Utilizadores',
     administration: 'Administração',
     settings: 'Definições',
     admin: 'Admin'
@@ -122,6 +123,7 @@ export default {
       title: 'Categorias',
       subtitle: 'Gerir as categorias do catálogo de livros.',
       addPlaceholder: 'Nome da nova categoria...',
+      searchPlaceholder: 'Pesquisar categorias...',
       addBtn: 'Adicionar',
       dragToReorder: 'Arraste os ícones para reordenar',
       deleteTitle: 'Eliminar Categoria',
@@ -129,20 +131,43 @@ export default {
       deleteBtn: 'Sim, Eliminar'
     },
     loans: {
-      title: 'Pedidos de Empréstimo',
-      subtitle: 'Monitorizar e gerir pedidos de leitores',
+      title: 'Gestão de Empréstimos',
+      subtitle: 'Gerir e acompanhar os empréstimos dos leitores',
+      searchPlaceholder: 'Pesquisar por livro, autor ou email...',
       all: 'TUDO',
-      pending: 'PENDENTES',
-      active: 'ATIVOS',
-      returned: 'DEVOLVIDOS',
-      rejected: 'REJEITADOS',
-      overdue: 'ATRASADOS',
+      pending: 'PENDENTE',
+      active: 'ATIVO',
+      returned: 'DEVOLVIDO',
+      rejected: 'REJEITADO',
+      overdue: 'ATRASADO',
       id: 'ID',
       user: 'UTILIZADOR',
       bookDetails: 'DETALHES DO LIVRO',
       status: 'ESTADO',
       actions: 'AÇÕES',
-      libMember: 'MEMBRO'
+      libMember: 'MEMBRO',
+      borrowedDate: 'REQUISITADO A',
+      returnedDate: 'DEVOLVIDO A',
+      dueDate: 'PRAZO',
+      approvedDate: 'APROVADO A'
+    },
+    users: {
+      title: 'Utilizadores',
+      subtitle: 'Gerir acesso e cargos do sistema',
+      searchPlaceholder: 'Pesquisar nome ou email...',
+      nameDetails: 'DETALHES',
+      role: 'CARGO',
+      joined: 'REGISTADO A',
+      updateSuccess: 'Cargo atualizado com sucesso',
+      updateError: 'Erro ao atualizar o cargo',
+      noUsers: 'Nenhum utilizador encontrado'
+    },
+    roles: {
+      admin: 'Administrador',
+      professor: 'Professor',
+      aluno: 'Aluno',
+      student: 'Aluno',
+      membro: 'Membro'
     },
     editBook: {
       newBookTitle: 'Adicionar Livro',

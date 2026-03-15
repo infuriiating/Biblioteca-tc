@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../hooks/useAuth'
 import { Book as BookIcon, Clock, CheckCircle, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
+function cn(...inputs) {
+  return twMerge(clsx(inputs))
+}
 const MyLoans = () => {
   const { user } = useAuth()
   const [loans, setLoans] = useState([])
@@ -13,9 +18,9 @@ const MyLoans = () => {
     setLoading(true)
     const { data, error } = await supabase
       .from('loans')
-      .select('*, books(*)')
+      .select('*, books!fk_loans_book(*)')
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
 
     if (!error) setLoans(data)
     setLoading(false)
@@ -34,7 +39,16 @@ const MyLoans = () => {
 
       {loading ? (
         <div className="space-y-4">
-           {[1,2,3].map(i => <div key={i} className="h-24 bg-bg-surface rounded-2xl animate-pulse" />)}
+           {[1,2,3,4].map(i => (
+             <div key={i} className="bg-bg-surface border border-border p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6 animate-pulse">
+               <div className="w-16 h-24 bg-bg-main rounded shrink-0" />
+               <div className="flex-grow space-y-2 w-full">
+                 <div className="h-5 bg-bg-main rounded w-1/2" />
+                 <div className="h-4 bg-bg-main rounded w-1/4 opacity-50" />
+               </div>
+               <div className="w-24 h-8 bg-bg-main rounded-full" />
+             </div>
+           ))}
         </div>
       ) : loans.length > 0 ? (
         <div className="space-y-4">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
-import { Plus, Edit2, Trash2, GripVertical, Check, X, AlertCircle, Save } from 'lucide-react'
+import { Plus, Edit2, Trash2, GripVertical, Check, X, AlertCircle, Save, Search } from 'lucide-react'
 import { motion, Reorder } from 'framer-motion'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -103,10 +103,11 @@ const ManageCategories = () => {
       setError(err.message)
     }
   }
+  
 
   return (
-    <div className="space-y-8 max-w-4xl">
-      <div className="flex items-center justify-between">
+    <div className="space-y-10 pb-20">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
           <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.categories.title')}</h1>
           <p className="text-text-muted text-lg font-medium mt-1">{t('admin.categories.subtitle')}</p>
@@ -124,29 +125,41 @@ const ManageCategories = () => {
       )}
 
       {/* Add Category Form */}
-      <form onSubmit={handleAddCategory} className="bg-bg-surface p-6 rounded-3xl border border-border/40 shadow-sm flex gap-4">
-        <input 
-          type="text"
-          placeholder={t('admin.categories.addPlaceholder')}
-          className="flex-grow bg-bg-main border border-border/60 rounded-xl px-4 py-2.5 text-sm focus:border-primary/50 outline-none transition-all"
-          value={newCategoryName}
-          onChange={(e) => setNewCategoryName(e.target.value)}
-        />
-        <button 
-          type="submit"
-          className="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary-hover transition-all flex items-center gap-2"
-        >
-          <Plus size={18} /> {t('admin.categories.addBtn')}
-        </button>
+      <form onSubmit={handleAddCategory} className="bg-bg-surface p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-border/50 flex flex-col md:flex-row gap-3 md:gap-4 items-center">
+        <div className="relative flex-grow w-full">
+          <input 
+            type="text"
+            placeholder={t('admin.categories.addPlaceholder')}
+            className="w-full h-12 md:h-14 bg-bg-main/50 border border-transparent rounded-xl md:rounded-[1.25rem] pl-6 pr-6 text-sm font-bold focus:bg-bg-surface focus:border-primary/30 outline-none transition-all"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+          />
+        </div>
+        <div className="w-full md:w-auto flex-shrink-0">
+          <button 
+            type="submit"
+            className="w-full md:w-auto h-12 md:h-14 bg-primary text-white px-8 rounded-xl md:rounded-[1.25rem] text-xs font-bold uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center gap-2 flex-shrink-0 shadow-lg shadow-primary/20"
+          >
+            <Plus size={18} /> {t('admin.categories.addBtn')}
+          </button>
+        </div>
       </form>
 
+
       {/* Categories List */}
-      <div className="bg-bg-surface rounded-3xl border border-border/40 overflow-hidden shadow-sm">
+      <div className="bg-bg-surface rounded-[1.5rem] md:rounded-[2rem] border border-border/50 overflow-hidden shadow-sm">
         {loading ? (
-          <div className="p-12 flex justify-center">
-            <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <div className="divide-y divide-border/20">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="p-4 flex items-center gap-4 animate-pulse">
+                <div className="w-6 h-6 bg-bg-main rounded-lg" /> {/* Grip icon placeholder */}
+                <div className="flex-grow h-5 bg-bg-main rounded-lg" /> {/* Category name placeholder */}
+                <div className="w-8 h-8 bg-bg-main rounded-lg" /> {/* Edit button placeholder */}
+                <div className="w-8 h-8 bg-bg-main rounded-lg" /> {/* Delete button placeholder */}
+              </div>
+            ))}
           </div>
-        ) : (
+        ) : categories.length > 0 ? (
           <Reorder.Group 
             axis="y" 
             values={categories} 
@@ -201,6 +214,10 @@ const ManageCategories = () => {
               </Reorder.Item>
             ))}
           </Reorder.Group>
+        ) : (
+          <div className="p-8 text-center text-text-muted italic">
+            {t('admin.common.noData') || 'Nenhuma categoria encontrada.'}
+          </div>
         )}
       </div>
 

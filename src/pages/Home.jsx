@@ -56,7 +56,7 @@ const Home = () => {
 
     try {
       // Small delay for auth headers to stabilize
-      if (user) await new Promise(r => setTimeout(r, 200))
+      if (user) await new Promise(r => setTimeout(r, 50))
 
       const [catRes, bookRes] = await Promise.all([
         supabase.from('categories').select('*').order('display_order', { ascending: true }),
@@ -83,8 +83,8 @@ const Home = () => {
       setBooks([])
       setCategories([])
     } finally {
-      clearTimeout(timeout)
       setLoading(false)
+      clearTimeout(timeoutId)
     }
   }
 

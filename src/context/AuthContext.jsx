@@ -70,9 +70,9 @@ export const AuthProvider = ({ children }) => {
     initialized.current = true
 
     // Safety timeout: ensure loading state is cleared even if Supabase hangs
-    const timeout = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setLoading(false)
-    }, 8000)
+    }, 4000)
 
     const initAuth = async () => {
       try {
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
         setProfile(null)
       } finally {
         setLoading(false)
-        clearTimeout(timeout)
+        clearTimeout(timeoutId)
       }
     }
 

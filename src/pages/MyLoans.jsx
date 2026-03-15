@@ -27,7 +27,7 @@ const MyLoans = () => {
 
     try {
       // Small delay for Supabase headers to stabilize on refresh
-      await new Promise(r => setTimeout(r, 200))
+      await new Promise(r => setTimeout(r, 50))
       
       const { data, error } = await supabase
         .from('loans')

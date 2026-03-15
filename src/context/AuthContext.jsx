@@ -23,11 +23,13 @@ export const AuthProvider = ({ children }) => {
     }, 5000)
 
     const initAuth = async () => {
+      console.log('[AuthContext] Initializing auth...')
       try {
         const { data: { session }, error } = await supabase.auth.getSession()
         if (error) throw error
 
         const currentUser = session?.user ?? null
+        console.log('[AuthContext] Session user:', currentUser?.email)
         setUser(currentUser)
         
         if (currentUser) {
@@ -37,13 +39,15 @@ export const AuthProvider = ({ children }) => {
         console.error('[AuthContext] Error initializing auth:', error)
       } finally {
         setLoading(false)
+        console.log('[AuthContext] Initialization complete.')
         clearTimeout(timeout)
       }
     }
 
     initAuth()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[AuthContext] Auth state changed:', event, session?.user?.email)
       const currentUser = session?.user ?? null
       setUser(currentUser)
       

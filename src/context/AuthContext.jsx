@@ -127,7 +127,7 @@ export const AuthProvider = ({ children }) => {
       subscription.unsubscribe()
       clearTimeout(timeoutId)
     }
-  }, [profile]) // Add profile to dependency if needed for internal logic, but usually it's static
+  }, []) // Empty dependency array to ensure listener only sets up once
 
   const signOut = async () => {
     try {

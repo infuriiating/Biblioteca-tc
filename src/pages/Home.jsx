@@ -33,6 +33,8 @@ const Home = () => {
     return supabase.storage.from('capalivro').getPublicUrl(filename).data.publicUrl
   }
 
+  const fetchInProgress = useRef(false)
+
   useEffect(() => {
     if (!authLoading) {
       fetchData()
@@ -42,17 +44,19 @@ const Home = () => {
   // Re-fetch books when the user returns to this tab after switching apps/tabs
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && !authLoading) {
+      // Only trigger if we aren't already loading and the page is visible
+      if (document.visibilityState === 'visible' && !authLoading && !loading) {
         fetchData()
       }
     }
     document.addEventListener('visibilitychange', handleVisibilityChange)
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [authLoading])
+  }, [authLoading, loading])
 
   const fetchData = async (catId) => {
-    if (authLoading) return
+    if (authLoading || fetchInProgress.current) return
     
+    fetchInProgress.current = true
     console.log('[Home] Fetching data for category:', catId || categoryFilter)
     setLoading(true)
     
@@ -60,11 +64,12 @@ const Home = () => {
     const timeoutId = setTimeout(() => {
       console.warn('[Home] Data fetching timed out after 10s')
       setLoading(false)
+      fetchInProgress.current = false
     }, 10000)
 
     try {
-      // Small delay for auth headers to stabilize
-      if (user) await new Promise(r => setTimeout(r, 50))
+      // Small delay to allow AuthContext visibility listener to settle first
+      await new Promise(r => setTimeout(r, 100))
 
       const [catRes, bookRes] = await Promise.all([
         supabase.from('categories').select('*').order('display_order', { ascending: true }),
@@ -87,11 +92,13 @@ const Home = () => {
       console.log('[Home] Successfully fetched', processedBooks.length, 'books')
     } catch (err) {
       console.error('[Home] Fetch error:', err)
-      // If we fail, at least show empty lists instead of skeletons forever
+      // Clear all to maintain consistency
       setBooks([])
+      setFeaturedBooks([])
       setCategories([])
     } finally {
       setLoading(false)
+      fetchInProgress.current = false
       clearTimeout(timeoutId)
     }
   }

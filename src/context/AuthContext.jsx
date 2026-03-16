@@ -143,19 +143,29 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const handleVisibilityChange = async () => {
       if (document.visibilityState !== 'visible') return
-      const { data: { session } } = await supabase.auth.getSession()
-      const currentUser = session?.user ?? null
-      setUser(currentUser)
-      if (currentUser) {
-        await fetchProfile(currentUser.id, currentUser)
-      } else {
-        setProfile(null)
-        lastFetchedUserId.current = null
+      
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const currentUser = session?.user ?? null
+        
+        // Only trigger updates if the user identity has actually changed
+        if (currentUser?.id !== user?.id) {
+          console.log('[AuthContext] Session changed on visibility check, updating state')
+          setUser(currentUser)
+          if (currentUser) {
+            await fetchProfile(currentUser.id, currentUser)
+          } else {
+            setProfile(null)
+            lastFetchedUserId.current = null
+          }
+        }
+      } catch (error) {
+        console.error('[AuthContext] Visibility session check failed:', error)
       }
     }
     document.addEventListener('visibilitychange', handleVisibilityChange)
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [])
+  }, [user, fetchProfile]) // Depend on user to compare, and fetchProfile
 
   const signOut = async () => {
     try {

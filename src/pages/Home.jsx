@@ -35,12 +35,20 @@ const Home = () => {
 
   useEffect(() => {
     if (!authLoading) {
-      // If we have a user but no profile yet, wait a bit longer or trigger fetch
-      // But fetchProfile in context handles most of this. 
-      // We'll just trigger our data fetch now.
       fetchData()
     }
   }, [authLoading, user])
+
+  // Re-fetch books when the user returns to this tab after switching apps/tabs
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && !authLoading) {
+        fetchData()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [authLoading])
 
   const fetchData = async (catId) => {
     if (authLoading) return

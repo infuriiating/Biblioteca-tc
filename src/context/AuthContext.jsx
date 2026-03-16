@@ -138,6 +138,25 @@ export const AuthProvider = ({ children }) => {
     }
   }, []) // Empty dependency array to ensure listener only sets up once
 
+  // When the user returns to the tab/app, silently re-check the session
+  // so the auth state stays fresh without requiring a full page reload.
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState !== 'visible') return
+      const { data: { session } } = await supabase.auth.getSession()
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
+      if (currentUser) {
+        await fetchProfile(currentUser.id, currentUser)
+      } else {
+        setProfile(null)
+        lastFetchedUserId.current = null
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
+
   const signOut = async () => {
     try {
       lastFetchedUserId.current = null

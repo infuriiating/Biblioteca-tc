@@ -32,6 +32,8 @@ const Signup = () => {
       options: { data: { full_name: username } }
     })
 
+    console.log('[Signup] authData:', authData, 'authError:', authError)
+
     if (authError) {
       setError(authError.message)
       setLoading(false)
@@ -48,13 +50,21 @@ const Signup = () => {
           created_at: authData.user.created_at
         }
       ])
+      console.log('[Signup] profileError:', profileError)
       if (profileError) {
         setError('Conta criada, mas erro ao criar perfil. Tente entrar.')
         setLoading(false)
       } else {
         navigate('/')
       }
+    } else {
+      // authData.user is null — this means Supabase requires email confirmation
+      // but confirmation is somehow still active, OR signups are disabled
+      console.warn('[Signup] authData.user is null. Supabase may have signups disabled or confirmation still required.')
+      setError('Não foi possível criar a conta. Contacte o administrador.')
+      setLoading(false)
     }
+
   }
 
   return (

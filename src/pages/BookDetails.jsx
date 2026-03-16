@@ -14,7 +14,7 @@ function cn(...inputs) {
 const BookDetails = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const { t } = useLanguage()
   const [book, setBook] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -29,8 +29,9 @@ const BookDetails = () => {
   }
 
   useEffect(() => {
+    if (authLoading) return
     fetchBook()
-  }, [id])
+  }, [id, authLoading])
 
   const fetchBook = async () => {
     setLoading(true)

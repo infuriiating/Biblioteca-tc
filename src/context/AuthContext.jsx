@@ -11,6 +11,9 @@ export const AuthProvider = ({ children }) => {
 
   const lastFetchedUserId = useRef(null)
   const initialized = useRef(false)
+  // True while initAuth() is still running — prevents the auth listener
+  // from prematurely clearing the loading gate during page-reload session restore.
+  const isInitializing = useRef(true)
 
   const fetchProfile = async (userId, userObject = null) => {
     // Prevent double-fetching for the same user if already in progress or completed
@@ -99,6 +102,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null)
         setProfile(null)
       } finally {
+        isInitializing.current = false
         setLoading(false)
         clearTimeout(timeoutId)
       }
@@ -108,6 +112,11 @@ export const AuthProvider = ({ children }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(`[AuthContext] State change: ${event}`)
+
+      // During initial boot, initAuth() owns the loading gate.
+      // If we're still initializing, skip updating state here to avoid
+      // a race condition where the listener fires before getSession() resolves.
+      if (isInitializing.current) return
       
       const currentUser = session?.user ?? null
       setUser(currentUser)

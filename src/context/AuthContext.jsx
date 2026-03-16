@@ -149,48 +149,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, []) // Empty dependency array to ensure listener only sets up once
 
-  const refreshSession = async () => {
-    try {
-      console.log('[AuthContext] Refreshing session...')
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error) throw error
-      
-      const currentUser = session?.user ?? null
-      
-      if (currentUser?.id !== user?.id) {
-        console.log('[AuthContext] Session refreshed, user changed:', currentUser?.id)
-        setUser(currentUser)
-        if (currentUser) {
-          await fetchProfile(currentUser.id, currentUser)
-        } else {
-          setProfile(null)
-          lastFetchedUserId.current = null
-        }
-      } else if (currentUser) {
-        // Same user, but let's ensure profile is there if missing
-        if (!profile && !profileLoading) {
-          await fetchProfile(currentUser.id, currentUser)
-        }
-      }
-      return { user: currentUser, session }
-    } catch (error) {
-      console.error('[AuthContext] Session refresh failed:', error)
-      return { user: null, session: null }
-    }
-  }
-
-  // When the user returns to the tab/app, silently re-check the session
-  // so the auth state stays fresh without requiring a full page reload.
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        refreshSession()
-      }
-    }
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [])
-
   const signOut = async () => {
     try {
       lastFetchedUserId.current = null
@@ -218,7 +176,6 @@ export const AuthProvider = ({ children }) => {
       }
     }),
     signOut,
-    refreshSession,
     user,
     profile,
     loading,

@@ -24,6 +24,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true)
   const [categoryFilter, setCategoryFilter] = useState(cat)
   const fetchInProgress = useRef(false)
+  const lastFetchTime = useRef(0)
 
   useEffect(() => {
     setCategoryFilter(cat)
@@ -41,42 +42,26 @@ const Home = () => {
     }
   }, [authLoading, user])
 
-  // Re-fetch books when the user returns to this tab after switching apps/tabs
-  useEffect(() => {
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible' && !authLoading && !fetchInProgress.current) {
-        console.log('[Home] Tab focused, ensuring fresh session...')
-        await refreshSession()
-        // Small buffer to allow auth state to settle
-        await new Promise(r => setTimeout(r, 100))
-        fetchData()
-      }
-    }
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [authLoading, refreshSession])
-
   const fetchData = async (catId, retryCount = 0) => {
-    if (authLoading || fetchInProgress.current) return
+    const now = Date.now()
+    // Throttling: prevent fetches closer than 2 seconds unless it's a manual retry or category change
+    if (authLoading || fetchInProgress.current || (retryCount === 0 && !catId && now - lastFetchTime.current < 2000)) return
     
     fetchInProgress.current = true
+    lastFetchTime.current = now
     const currentCat = catId || categoryFilter
-    console.log('[Home] Fetching data for category:', currentCat, retryCount > 0 ? `(retry ${retryCount})` : '')
-    setLoading(true)
+    console.log('[Home] Fetching books for:', currentCat)
     
-    // Safety timeout
-    const timeoutId = setTimeout(() => {
-      if (fetchInProgress.current) {
-        console.warn('[Home] Data fetching timed out after 12s')
-        setLoading(false)
-        fetchInProgress.current = false
-      }
-    }, 12000)
-
+    // Only show global loading spinner if we have absolutely no data
+    if (books.length === 0) {
+      setLoading(true)
+    }
+    
     try {
-      // Ensure we have a fresh session context before querying
-      const { session } = await supabase.auth.getSession()
+      // 1. Check session quickly
+      await supabase.auth.getSession()
       
+      // 2. Fetch data
       const [catRes, bookRes] = await Promise.all([
         supabase.from('categories').select('*').order('display_order', { ascending: true }),
         supabase.from('books').select('*, categories(name)').order('created_at', { ascending: false })
@@ -97,25 +82,23 @@ const Home = () => {
       setFeaturedBooks(processedBooks.filter(b => b.is_featured).slice(0, 6))
       console.log('[Home] Successfully fetched', processedBooks.length, 'books')
     } catch (err) {
-      console.error('[Home] Fetch error:', err)
+      console.warn('[Home] Fetch failed:', err.message || err)
       
-      // Auto-retry once for transient network/auth issues
+      // Auto-retry once after 1.5s for transient issues (common on app switch)
       if (retryCount < 1) {
-        console.log('[Home] Attempting auto-retry for category:', currentCat)
+        console.log('[Home] Will auto-retry in 1.5s...')
         fetchInProgress.current = false
-        clearTimeout(timeoutId)
-        // Wait a bit before retrying
-        await new Promise(r => setTimeout(r, 500))
+        await new Promise(r => setTimeout(r, 1500))
         return fetchData(currentCat, retryCount + 1)
       }
 
-      setBooks([])
-      setFeaturedBooks([])
-      setCategories([])
+      // Final failure logic
+      if (books.length === 0) {
+        setBooks([]) // This will trigger the "None found" screen
+      }
     } finally {
       setLoading(false)
       fetchInProgress.current = false
-      clearTimeout(timeoutId)
     }
   }
 
@@ -204,10 +187,11 @@ const Home = () => {
             ))
           ) : (
             <div className="col-span-full py-16 text-center space-y-4 bg-bg-surface/50 rounded-2xl border border-dashed border-border/50">
-              <p className="text-text-muted text-sm italic">Nenhum livro encontrado.</p>
+              <p className="text-text-muted text-sm font-medium">Não foi possível carregar os livros.</p>
+              <p className="text-text-muted/60 text-xs">Verifique a sua ligação à internet.</p>
               <button 
                 onClick={() => fetchData()}
-                className="text-xs font-bold text-primary hover:underline uppercase tracking-widest"
+                className="mt-2 px-6 py-2.5 bg-bg-surface border border-border/50 rounded-xl text-xs font-bold text-primary hover:bg-bg-main transition-colors uppercase tracking-wider shadow-sm"
               >
                 Tentar Novamente
               </button>

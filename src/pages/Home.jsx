@@ -13,7 +13,7 @@ function cn(...inputs) {
 
 const Home = () => {
   const navigate = useNavigate()
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, refreshSession } = useAuth()
   const [searchParams] = useSearchParams()
   const query = searchParams.get('q') || ''
   const cat = searchParams.get('c') || '0'
@@ -23,6 +23,7 @@ const Home = () => {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [categoryFilter, setCategoryFilter] = useState(cat)
+  const fetchInProgress = useRef(false)
 
   useEffect(() => {
     setCategoryFilter(cat)
@@ -33,8 +34,7 @@ const Home = () => {
     return supabase.storage.from('capalivro').getPublicUrl(filename).data.publicUrl
   }
 
-  const fetchInProgress = useRef(false)
-
+  // Initial load
   useEffect(() => {
     if (!authLoading) {
       fetchData()
@@ -43,34 +43,40 @@ const Home = () => {
 
   // Re-fetch books when the user returns to this tab after switching apps/tabs
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      // Only trigger if we aren't already loading and the page is visible
-      if (document.visibilityState === 'visible' && !authLoading && !loading) {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible' && !authLoading && !fetchInProgress.current) {
+        console.log('[Home] Tab focused, ensuring fresh session...')
+        await refreshSession()
+        // Small buffer to allow auth state to settle
+        await new Promise(r => setTimeout(r, 100))
         fetchData()
       }
     }
     document.addEventListener('visibilitychange', handleVisibilityChange)
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [authLoading, loading])
+  }, [authLoading, refreshSession])
 
-  const fetchData = async (catId) => {
+  const fetchData = async (catId, retryCount = 0) => {
     if (authLoading || fetchInProgress.current) return
     
     fetchInProgress.current = true
-    console.log('[Home] Fetching data for category:', catId || categoryFilter)
+    const currentCat = catId || categoryFilter
+    console.log('[Home] Fetching data for category:', currentCat, retryCount > 0 ? `(retry ${retryCount})` : '')
     setLoading(true)
     
     // Safety timeout
     const timeoutId = setTimeout(() => {
-      console.warn('[Home] Data fetching timed out after 10s')
-      setLoading(false)
-      fetchInProgress.current = false
-    }, 10000)
+      if (fetchInProgress.current) {
+        console.warn('[Home] Data fetching timed out after 12s')
+        setLoading(false)
+        fetchInProgress.current = false
+      }
+    }, 12000)
 
     try {
-      // Small delay to allow AuthContext visibility listener to settle first
-      await new Promise(r => setTimeout(r, 100))
-
+      // Ensure we have a fresh session context before querying
+      const { session } = await supabase.auth.getSession()
+      
       const [catRes, bookRes] = await Promise.all([
         supabase.from('categories').select('*').order('display_order', { ascending: true }),
         supabase.from('books').select('*, categories(name)').order('created_at', { ascending: false })
@@ -92,7 +98,17 @@ const Home = () => {
       console.log('[Home] Successfully fetched', processedBooks.length, 'books')
     } catch (err) {
       console.error('[Home] Fetch error:', err)
-      // Clear all to maintain consistency
+      
+      // Auto-retry once for transient network/auth issues
+      if (retryCount < 1) {
+        console.log('[Home] Attempting auto-retry for category:', currentCat)
+        fetchInProgress.current = false
+        clearTimeout(timeoutId)
+        // Wait a bit before retrying
+        await new Promise(r => setTimeout(r, 500))
+        return fetchData(currentCat, retryCount + 1)
+      }
+
       setBooks([])
       setFeaturedBooks([])
       setCategories([])
@@ -135,7 +151,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Catalog */}
       {/* Catalog */}
       <section className="space-y-10 pt-10">
         <div className="space-y-1">

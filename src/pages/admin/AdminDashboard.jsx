@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
@@ -43,6 +43,8 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({ totalBooks: 0, activeLoans: 0, pendingLoans: 0, overdueLoans: 0 })
   const [recentLoans, setRecentLoans] = useState([])
   const [loading, setLoading] = useState(true)
+  const fetchInProgress = useRef(false)
+  const lastFetchTime = useRef(0)
 
   const getDisplayName = (profile) => {
     if (profile?.role === 'admin') return 'Admin'
@@ -53,9 +55,20 @@ const AdminDashboard = () => {
     fetchData()
   }, [])
 
-  const fetchData = async () => {
-    setLoading(true)
+  const fetchData = async (retryCount = 0) => {
+    const now = Date.now()
+    if (fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) return
+    
+    fetchInProgress.current = true
+    lastFetchTime.current = now
+    
+    if (recentLoans.length === 0) {
+      setLoading(true)
+    }
+
     try {
+      await supabase.auth.getSession()
+      
       const [booksRes, activeRes, pendingRes, overdueRes, recentRes] = await Promise.all([
         supabase.from('books').select('*', { count: 'exact', head: true }),
         supabase.from('loans').select('*', { count: 'exact', head: true }).eq('status', 'active'),
@@ -63,6 +76,12 @@ const AdminDashboard = () => {
         supabase.from('loans').select('*', { count: 'exact', head: true }).eq('status', 'active').lt('due_date', new Date().toISOString()),
         supabase.from('loans').select('*, books!fk_loans_book(title), profiles!fk_loans_user(name, email, role)').order('id', { ascending: false }).limit(5)
       ])
+
+      if (booksRes.error) throw booksRes.error
+      if (activeRes.error) throw activeRes.error
+      if (pendingRes.error) throw pendingRes.error
+      if (overdueRes.error) throw overdueRes.error
+      if (recentRes.error) throw recentRes.error
 
       setStats({
         totalBooks: booksRes.count || 0,
@@ -72,9 +91,15 @@ const AdminDashboard = () => {
       })
       setRecentLoans(recentRes.data || [])
     } catch (e) {
-      console.error(e)
+      console.warn('[AdminDashboard] Fetch failed:', e.message || e)
+      if (retryCount < 1) {
+        fetchInProgress.current = false
+        await new Promise(r => setTimeout(r, 1500))
+        return fetchData(retryCount + 1)
+      }
     } finally {
       setLoading(false)
+      fetchInProgress.current = false
     }
   }
 

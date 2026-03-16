@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { RefreshCw, CheckCircle, Clock, User, Book as BookIcon, Filter, Inbox, XCircle, Search } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -18,10 +18,21 @@ const ManageLoans = () => {
   const [error, setError] = useState(null)
   const [statusFilter, setStatusFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const fetchInProgress = useRef(false)
+  const lastFetchTime = useRef(0)
 
-  const fetchLoans = async () => {
-    setLoading(true)
+  const fetchLoans = async (retryCount = 0) => {
+    const now = Date.now()
+    if (fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) return
+    
+    fetchInProgress.current = true
+    lastFetchTime.current = now
     setError(null)
+
+    if (loans.length === 0) {
+      setLoading(true)
+    }
+
     try {
       const { data, error: fetchError } = await supabase
         .from('loans')
@@ -35,16 +46,16 @@ const ManageLoans = () => {
       if (fetchError) throw fetchError
       
       // Auto-reject pending loans older than 24h
-      const now = new Date()
+      const nowTime = new Date()
       const expiryLimit = 24 * 60 * 60 * 1000
       const expiredIds = (data || [])
-        .filter(l => l.status === 'pending' && (now - new Date(l.created_at)) > expiryLimit)
+        .filter(l => l.status === 'pending' && (nowTime - new Date(l.created_at)) > expiryLimit)
         .map(l => l.id)
 
       if (expiredIds.length > 0) {
         await supabase.from('loans').update({ status: 'rejected' }).in('id', expiredIds)
         // Refresh data after auto-rejection
-        const { data: refreshedData } = await supabase
+        const { data: refreshedData, error: refreshError } = await supabase
           .from('loans')
           .select(`
             *,
@@ -52,15 +63,23 @@ const ManageLoans = () => {
             books!fk_loans_book(id, title, author, cover_image)
           `)
           .order('id', { ascending: false })
+        
+        if (refreshError) throw refreshError
         setLoans(refreshedData || [])
       } else {
         setLoans(data || [])
       }
     } catch (err) {
-      console.error('Error fetching loans:', err)
+      console.warn('[ManageLoans] Fetch failed:', err.message || err)
+      if (retryCount < 1) {
+        fetchInProgress.current = false
+        await new Promise(r => setTimeout(r, 1500))
+        return fetchLoans(retryCount + 1)
+      }
       setError(err.message)
     } finally {
       setLoading(false)
+      fetchInProgress.current = false
     }
   }
 

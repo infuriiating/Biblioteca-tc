@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { Book as BookIcon, Clock, CheckCircle, ArrowRight } from 'lucide-react'
@@ -13,21 +13,24 @@ const MyLoans = () => {
   const { user, loading: authLoading } = useAuth()
   const [loans, setLoans] = useState([])
   const [loading, setLoading] = useState(true)
+  const fetchInProgress = useRef(false)
+  const lastFetchTime = useRef(0)
 
-  const fetchMyLoans = async () => {
+  const fetchMyLoans = async (retryCount = 0) => {
     if (!user) return
+    const now = Date.now()
+    if (authLoading || fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) return
+
+    fetchInProgress.current = true
+    lastFetchTime.current = now
     console.log('[MyLoans] Fetching loans for user:', user.email)
-    setLoading(true)
     
-    // Safety timeout
-    const timeoutId = setTimeout(() => {
-      console.warn('[MyLoans] Data fetching timed out after 10s')
-      setLoading(false)
-    }, 10000)
+    if (loans.length === 0) {
+      setLoading(true)
+    }
 
     try {
-      // Small delay for Supabase headers to stabilize on refresh
-      await new Promise(r => setTimeout(r, 50))
+      await supabase.auth.getSession()
       
       const { data, error } = await supabase
         .from('loans')
@@ -40,11 +43,17 @@ const MyLoans = () => {
       setLoans(data || [])
       console.log('[MyLoans] Successfully fetched', (data || []).length, 'loans')
     } catch (err) {
-      console.error('[MyLoans] Fetch error:', err)
-      setLoans([])
+      console.warn('[MyLoans] Fetch failed:', err.message || err)
+      
+      if (retryCount < 1) {
+        console.log('[MyLoans] Retrying in 1.5s...')
+        fetchInProgress.current = false
+        await new Promise(r => setTimeout(r, 1500))
+        return fetchMyLoans(retryCount + 1)
+      }
     } finally {
       setLoading(false)
-      clearTimeout(timeoutId)
+      fetchInProgress.current = false
     }
   }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Plus, Edit2, Trash2, GripVertical, Check, X, AlertCircle, Save, Search } from 'lucide-react'
 import { motion, Reorder } from 'framer-motion'
@@ -21,13 +21,24 @@ const ManageCategories = () => {
   const [editingId, setEditingId] = useState(null)
   const [editValue, setEditValue] = useState('')
   const [error, setError] = useState(null)
+  const fetchInProgress = useRef(false)
+  const lastFetchTime = useRef(0)
 
   useEffect(() => {
     fetchCategories()
   }, [])
 
-  const fetchCategories = async () => {
-    setLoading(true)
+  const fetchCategories = async (retryCount = 0) => {
+    const now = Date.now()
+    if (fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) return
+    
+    fetchInProgress.current = true
+    lastFetchTime.current = now
+    
+    if (categories.length === 0) {
+      setLoading(true)
+    }
+
     try {
       // We try to order by display_order if it exists, otherwise by name
       const { data, error } = await supabase
@@ -37,12 +48,18 @@ const ManageCategories = () => {
         .order('name')
       
       if (error) throw error
-      setCategories(data)
+      setCategories(data || [])
     } catch (err) {
-      console.error('Error:', err)
+      console.warn('[ManageCategories] Fetch failed:', err.message || err)
+      if (retryCount < 1) {
+        fetchInProgress.current = false
+        await new Promise(r => setTimeout(r, 1500))
+        return fetchCategories(retryCount + 1)
+      }
       setError(err.message)
     } finally {
       setLoading(false)
+      fetchInProgress.current = false
     }
   }
 

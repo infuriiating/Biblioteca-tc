@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Search, User, Inbox, RefreshCw } from 'lucide-react'
 import { clsx } from 'clsx'
@@ -19,10 +19,21 @@ const AdminUsers = () => {
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [updating, setUpdating] = useState(null)
+  const fetchInProgress = useRef(false)
+  const lastFetchTime = useRef(0)
 
-  const fetchUsers = async () => {
-    setLoading(true)
+  const fetchUsers = async (retryCount = 0) => {
+    const now = Date.now()
+    if (fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) return
+    
+    fetchInProgress.current = true
+    lastFetchTime.current = now
     setError(null)
+    
+    if (users.length === 0) {
+      setLoading(true)
+    }
+
     try {
       const { data, error: fetchError } = await supabase
         .from('profiles')
@@ -32,10 +43,16 @@ const AdminUsers = () => {
       if (fetchError) throw fetchError
       setUsers(data || [])
     } catch (err) {
-      console.error('Error fetching users:', err)
+      console.warn('[AdminUsers] Fetch failed:', err.message || err)
+      if (retryCount < 1) {
+        fetchInProgress.current = false
+        await new Promise(r => setTimeout(r, 1500))
+        return fetchUsers(retryCount + 1)
+      }
       setError(err.message)
     } finally {
       setLoading(false)
+      fetchInProgress.current = false
     }
   }
 

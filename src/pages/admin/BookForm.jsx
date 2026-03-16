@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { ChevronLeft, Upload, Save, Loader2, Image as ImageIcon } from 'lucide-react'
@@ -36,26 +36,48 @@ const BookForm = () => {
   })
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
+  const fetchInProgress = useRef(false)
+  const lastFetchTime = useRef(0)
 
-  useEffect(() => {
-    fetchCategories()
-    if (isEdit) fetchBook()
-  }, [id])
+  const fetchData = async (retryCount = 0) => {
+    const now = Date.now()
+    if (fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) return
+    
+    fetchInProgress.current = true
+    lastFetchTime.current = now
 
-  const fetchCategories = async () => {
-    const { data } = await supabase.from('categories').select('*').order('display_order', { ascending: true })
-    setCategories(data || [])
-  }
+    try {
+      // Fetch categories
+      const { data: catData, error: catError } = await supabase.from('categories').select('*').order('display_order', { ascending: true })
+      if (catError) throw catError
+      setCategories(catData || [])
 
-  const fetchBook = async () => {
-    const { data, error } = await supabase.from('books').select('*').eq('id', id).single()
-    if (data && !error) {
-      setFormData(data)
-      if (data.cover_image) {
-        setImagePreview(supabase.storage.from('capalivro').getPublicUrl(data.cover_image).data.publicUrl)
+      // Fetch book if editing
+      if (isEdit) {
+        const { data: bookData, error: bookError } = await supabase.from('books').select('*').eq('id', id).single()
+        if (bookError) throw bookError
+        if (bookData) {
+          setFormData(bookData)
+          if (bookData.cover_image) {
+            setImagePreview(supabase.storage.from('capalivro').getPublicUrl(bookData.cover_image).data.publicUrl)
+          }
+        }
       }
+    } catch (err) {
+      console.warn('[BookForm] Fetch failed:', err.message || err)
+      if (retryCount < 1) {
+        fetchInProgress.current = false
+        await new Promise(r => setTimeout(r, 1500))
+        return fetchData(retryCount + 1)
+      }
+    } finally {
+      fetchInProgress.current = false
     }
   }
+
+  useEffect(() => {
+    fetchData()
+  }, [id])
 
   const handleImageChange = (e) => {
     const file = e.target.files[0]

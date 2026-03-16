@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Plus, Search, Star, Trash2, Edit, ExternalLink, Filter } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -20,21 +20,44 @@ const ManageBooks = () => {
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('0')
   const [categories, setCategories] = useState([])
+  const fetchInProgress = useRef(false)
+  const lastFetchTime = useRef(0)
 
   const fetchCategories = async () => {
     const { data } = await supabase.from('categories').select('*').order('display_order', { ascending: true })
     setCategories(data || [])
   }
 
-  const fetchBooks = async () => {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('books')
-      .select('*, categories(name)')
-      .order('created_at', { ascending: false })
+  const fetchBooks = async (retryCount = 0) => {
+    const now = Date.now()
+    if (fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) return
+    
+    fetchInProgress.current = true
+    lastFetchTime.current = now
+    
+    if (books.length === 0) {
+      setLoading(true)
+    }
 
-    if (!error) setBooks(data)
-    setLoading(false)
+    try {
+      const { data, error } = await supabase
+        .from('books')
+        .select('*, categories(name)')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setBooks(data || [])
+    } catch (err) {
+      console.warn('[ManageBooks] Fetch failed:', err.message || err)
+      if (retryCount < 1) {
+        fetchInProgress.current = false
+        await new Promise(r => setTimeout(r, 1500))
+        return fetchBooks(retryCount + 1)
+      }
+    } finally {
+      setLoading(false)
+      fetchInProgress.current = false
+    }
   }
 
   useEffect(() => {

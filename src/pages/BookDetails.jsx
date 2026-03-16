@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -22,6 +22,8 @@ const BookDetails = () => {
   const [summaryError, setSummaryError] = useState(null)
   const [isRequesting, setIsRequesting] = useState(false)
   const [requestStatus, setRequestStatus] = useState(null)
+  const fetchInProgress = useRef(false)
+  const lastFetchTime = useRef(0)
 
   const getCoverUrl = (filename) => {
     if (!filename) return null
@@ -33,20 +35,41 @@ const BookDetails = () => {
     fetchBook()
   }, [id, authLoading])
 
-  const fetchBook = async () => {
-    setLoading(true)
+  const fetchBook = async (retryCount = 0) => {
+    const now = Date.now()
+    if (authLoading || fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) return
+    
+    fetchInProgress.current = true
+    lastFetchTime.current = now
+
+    if (!book) {
+      setLoading(true)
+    }
+
     try {
+      await supabase.auth.getSession()
+      
       const { data, error } = await supabase
         .from('books')
         .select('*, categories(name)')
         .eq('id', id)
         .single()
+      
       if (error) throw error
+      
       setBook({ ...data, category_name: data.categories?.name, cover_url: getCoverUrl(data.cover_image) })
     } catch (error) {
-      console.error('Error fetching book:', error)
+      console.warn('[BookDetails] Fetch failed:', error.message || error)
+      
+      if (retryCount < 1) {
+        console.log('[BookDetails] Retrying in 1.5s...')
+        fetchInProgress.current = false
+        await new Promise(r => setTimeout(r, 1500))
+        return fetchBook(retryCount + 1)
+      }
     } finally {
       setLoading(false)
+      fetchInProgress.current = false
     }
   }
 

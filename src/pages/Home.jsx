@@ -82,7 +82,6 @@ const Home = () => {
 
       setBooks(processedBooks)
       setFeaturedBooks(processedBooks.filter(b => b.is_featured).slice(0, 6))
-      console.log('[Home] Successfully fetched', processedBooks.length, 'books')
     } catch (err) {
       console.warn('[Home] Fetch failed:', err.message || err)
       

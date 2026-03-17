@@ -39,6 +39,11 @@ export const AuthProvider = ({ children }) => {
         .eq('id', userId)
         .single()
 
+      if (error && (error.name === 'AbortError' || error.message?.includes('AbortError'))) {
+        console.log('[AuthContext] fetchProfile aborted, assuming redundant.')
+        return null
+      }
+
       if (error && error.code === 'PGRST116') {
         const activeUser = userObject || (await supabase.auth.getUser()).data?.user
         if (!activeUser) throw new Error('No active user to create profile for')
@@ -75,34 +80,19 @@ export const AuthProvider = ({ children }) => {
   }
 
   const refreshSession = async () => {
-    if (isRefreshing.current) {
-      console.log('[AuthContext] Refresh already in progress, skipping...')
-      return
-    }
-    
+    if (isRefreshing.current) return
     isRefreshing.current = true
-    console.log('[AuthContext] Refreshing session...')
     
     try {
-      // Use getSession() - this is the call that might trigger refreshes
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error) throw error
-      
-      const currentUser = session?.user ?? null
-      setUser(currentUser)
-      
-      if (currentUser) {
-        await fetchProfile(currentUser.id, currentUser)
-      } else {
-        setProfile(null)
-      }
-      
-      // Signal change to listeners
-      setSessionVersion(v => v + 1)
+      console.log('[AuthContext] Triggering session check...')
+      await supabase.auth.getSession()
     } catch (error) {
-      console.warn('[AuthContext] Session refresh failed:', error.message)
+      console.warn('[AuthContext] Session check failed:', error.message)
     } finally {
-      isRefreshing.current = false
+      // Debounce the boolean so we don't spam if multiple events fire
+      setTimeout(() => {
+        isRefreshing.current = false
+      }, 1000)
     }
   }
 
@@ -112,30 +102,19 @@ export const AuthProvider = ({ children }) => {
 
     const timeoutId = setTimeout(() => {
       setLoading(false)
-    }, 4000)
+    }, 5000)
 
     const initAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession()
-        if (error) {
-          if (error.message.includes('refresh_token_not_found') || error.message.includes('Invalid Refresh Token')) {
-             await supabase.auth.signOut()
-          }
-          throw error
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) {
+          setLoading(false)
         }
-
-        const currentUser = session?.user ?? null
-        setUser(currentUser)
-        
-        if (currentUser) {
-          await fetchProfile(currentUser.id, currentUser)
-        }
-        setSessionVersion(v => v + 1)
       } catch (error) {
-        console.error('[AuthContext] Error initializing auth:', error)
+        console.error('[AuthContext] Error in initAuth:', error)
+        setLoading(false)
       } finally {
         isInitializing.current = false
-        setLoading(false)
         clearTimeout(timeoutId)
       }
     }
@@ -143,9 +122,7 @@ export const AuthProvider = ({ children }) => {
     initAuth()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log(`[AuthContext] State change: ${event}`)
-      if (isInitializing.current) return
-      
+      console.log(`[AuthContext] Auth event: ${event}`)
       const currentUser = session?.user ?? null
       setUser(currentUser)
       
@@ -160,20 +137,24 @@ export const AuthProvider = ({ children }) => {
       setLoading(false)
     })
 
-    const handleFocus = () => {
+    let lastVisibilityRefresh = 0
+    const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        refreshSession()
+        const now = Date.now()
+        // Throttle to once every 30s
+        if (now - lastVisibilityRefresh > 30000) {
+          lastVisibilityRefresh = now
+          refreshSession()
+        }
       }
     }
 
-    window.addEventListener('visibilitychange', handleFocus)
-    window.addEventListener('focus', handleFocus)
+    window.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       subscription.unsubscribe()
       clearTimeout(timeoutId)
-      window.removeEventListener('visibilitychange', handleFocus)
-      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 

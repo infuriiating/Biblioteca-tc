@@ -24,8 +24,6 @@ const MyLoans = () => {
 
     fetchInProgress.current = true
     lastFetchTime.current = now
-    console.log('[MyLoans] Fetching loans for user:', user.email)
-    
     if (loans.length === 0) {
       setLoading(true)
     }
@@ -40,7 +38,6 @@ const MyLoans = () => {
       if (error) throw error
       
       setLoans(data || [])
-      console.log('[MyLoans] Successfully fetched', (data || []).length, 'loans')
     } catch (err) {
       console.warn('[MyLoans] Fetch failed:', err.message || err)
       

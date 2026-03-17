@@ -48,16 +48,16 @@ export default {
   routes: {
     login: '/entrar',
     signup: '/registar',
-    adminLogin: '/admin/entrar',
+    adminLogin: '/console/entrar',
     book: '/livro/:id',
     myLoans: '/emprestimos',
     settings: '/definicoes',
     notifications: '/notificacoes',
-    adminBooks: '/admin/livros',
-    adminCategories: '/admin/categorias',
-    adminLoans: '/admin/emprestimos',
-    adminBooksNew: '/admin/livros/novo',
-    adminBooksEdit: '/admin/livros/editar/:id'
+    adminBooks: '/console/livros',
+    adminCategories: '/console/categorias',
+    adminLoans: '/console/emprestimos',
+    adminBooksNew: '/console/livros/novo',
+    adminBooksEdit: '/console/livros/editar/:id'
   },
   admin: {
     dashboard: {

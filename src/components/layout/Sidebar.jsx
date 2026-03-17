@@ -24,12 +24,13 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { t } = useLanguage()
 
   const adminItems = [
-    { icon: Grid, label: t('sidebar.overview'), path: '/admin', exact: true },
-    { icon: BookOpen, label: t('sidebar.books'), path: '/admin/livros' },
-    { icon: Tags, label: t('sidebar.categories'), path: '/admin/categorias' },
-    { icon: Library, label: t('sidebar.loans'), path: '/admin/emprestimos' },
-    { icon: Users, label: t('sidebar.users'), path: '/admin/utilizadores' },
+    { icon: Grid, label: t('sidebar.overview'), path: '/console', exact: true },
+    { icon: BookOpen, label: t('sidebar.books'), path: '/console/livros' },
+    { icon: Tags, label: t('sidebar.categories'), path: '/console/categorias' },
+    { icon: Library, label: t('sidebar.loans'), path: '/console/emprestimos' },
+    { icon: Users, label: t('sidebar.users'), path: '/console/utilizadores' },
   ]
+  const inConsole = window.location.pathname.startsWith('/console')
 
   const NavItem = ({ item }) => (
     <NavLink
@@ -79,7 +80,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           )}
 
           {/* Admin Section */}
-          {isAdmin && (
+          {(isAdmin && inConsole) && (
             <div className="pt-6">
               <p className="px-5 text-[10px] font-semibold text-text-muted uppercase tracking-[0.15em] mb-2">{t('sidebar.administration')}</p>
               {adminItems.map((item, idx) => (
@@ -96,22 +97,6 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* Bottom — Settings + Admin shortcut */}
         <nav className="space-y-0.5">
           <NavItem item={{ icon: Settings, label: t('sidebar.settings'), path: '/definicoes' }} />
-
-          {!user && (
-            <NavLink
-              to="/admin/entrar"
-              onClick={onClose}
-              className={({ isActive }) => cn(
-                "flex items-center gap-3.5 px-5 py-2.5 mx-3 rounded-xl text-sm font-medium transition-all",
-                isActive
-                  ? "text-primary bg-primary/8 font-semibold"
-                  : "text-text-muted hover:text-text-main hover:bg-bg-main"
-              )}
-            >
-              <ShieldCheck size={19} className="shrink-0" />
-              <span>{t('sidebar.admin')}</span>
-            </NavLink>
-          )}
         </nav>
       </aside>
     </>

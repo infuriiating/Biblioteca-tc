@@ -61,8 +61,8 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route path="/registar" element={<Signup />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/admin/entrar" element={<AdminLogin />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/console/entrar" element={<AdminLogin />} />
+        <Route path="/console/login" element={<AdminLogin />} />
 
         {/* Main app with sidebar layout */}
         <Route 
@@ -84,13 +84,13 @@ function AppContent() {
                 <Route path="/notificacoes" element={<Notifications />} />
 
                 {/* Admin routes — local auth guard */}
-                <Route path="/admin" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
-                <Route path="/admin/livros" element={<AdminProtectedRoute><ManageBooks /></AdminProtectedRoute>} />
-                <Route path="/admin/categorias" element={<AdminProtectedRoute><ManageCategories /></AdminProtectedRoute>} />
-                <Route path="/admin/emprestimos" element={<AdminProtectedRoute><ManageLoans /></AdminProtectedRoute>} />
-                <Route path="/admin/utilizadores" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
-                <Route path="/admin/livros/novo" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
-                <Route path="/admin/livros/editar/:id" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
+                <Route path="/console" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+                <Route path="/console/livros" element={<AdminProtectedRoute><ManageBooks /></AdminProtectedRoute>} />
+                <Route path="/console/categorias" element={<AdminProtectedRoute><ManageCategories /></AdminProtectedRoute>} />
+                <Route path="/console/emprestimos" element={<AdminProtectedRoute><ManageLoans /></AdminProtectedRoute>} />
+                <Route path="/console/utilizadores" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
+                <Route path="/console/livros/novo" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
+                <Route path="/console/livros/editar/:id" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
               </Routes>
             </DashboardLayout>
           } 

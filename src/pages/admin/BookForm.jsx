@@ -115,7 +115,7 @@ const BookForm = () => {
         if (error) throw error
       }
 
-      navigate('/admin/livros')
+      navigate('/console/livros')
       showToast(isEdit ? t('admin.books.toastSaved') : t('admin.books.toastAdded'), 'success')
     } catch (error) {
       showToast('Error saving book: ' + error.message, 'error')

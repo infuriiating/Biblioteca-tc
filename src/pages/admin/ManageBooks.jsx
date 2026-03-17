@@ -139,7 +139,7 @@ const ManageBooks = () => {
         </div>
         <div className="flex w-full md:w-auto items-center gap-3 md:gap-4 flex-grow md:flex-grow-0">
           <Link
-            to="/admin/livros/novo"
+            to="/console/livros/novo"
             className="flex-shrink-0 bg-primary text-white h-12 md:h-14 px-5 md:px-8 rounded-xl md:rounded-[1.25rem] font-bold flex items-center gap-2 hover:scale-[1.02] transition-all shadow-lg shadow-primary/20 active:scale-95 uppercase tracking-widest text-[10px] md:text-xs whitespace-nowrap"
           >
             <Plus size={18} /> {t('admin.dashboard.addNewBook')}
@@ -252,7 +252,7 @@ const ManageBooks = () => {
                     <td className="px-8 py-6 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Link
-                          to={`/admin/livros/editar/${book.id}`}
+                          to={`/console/livros/editar/${book.id}`}
                           className="p-3 bg-bg-main text-text-muted hover:bg-primary/10 hover:text-primary rounded-xl transition-all"
                         >
                           <Edit size={18} />

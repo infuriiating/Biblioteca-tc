@@ -371,7 +371,15 @@ const ManageLoans = () => {
                         )}
                         {loan.status === 'active' && (
                           <button
-                            onClick={() => updateLoanStatus(loan.id, 'returned', loan.book_id)}
+                            onClick={() => {
+                              const expectedPin = new Date(loan.created_at).getTime().toString().slice(-4)
+                              const inputPin = window.prompt("Insira o PIN de 4 dígitos fornecido pelo aluno no ecrã 'Meus Empréstimos':")
+                              if (inputPin === expectedPin) {
+                                updateLoanStatus(loan.id, 'returned', loan.book_id)
+                              } else if (inputPin !== null) {
+                                alert("PIN incorreto! A devolução não foi registada.")
+                              }
+                            }}
                             className="px-4 py-2 bg-secondary text-primary text-[10px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all shadow-sm"
                           >
                             {t('admin.common.returnBtn')}

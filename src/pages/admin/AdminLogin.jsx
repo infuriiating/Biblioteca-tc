@@ -46,7 +46,7 @@ const AdminLogin = () => {
         throw new Error(t('admin.login.accessDenied'))
       }
 
-      window.location.href = '/admin'
+      window.location.href = '/console'
     } catch (err) {
       setError(err.message)
       setLoading(false)

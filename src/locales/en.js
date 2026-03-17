@@ -48,16 +48,16 @@ export default {
   routes: {
     login: '/login',
     signup: '/signup',
-    adminLogin: '/admin/login',
+    adminLogin: '/console/login',
     book: '/book/:id',
     myLoans: '/my-loans',
     settings: '/settings',
     notifications: '/notifications',
-    adminBooks: '/admin/books',
-    adminCategories: '/admin/categories',
-    adminLoans: '/admin/loans',
-    adminBooksNew: '/admin/books/new',
-    adminBooksEdit: '/admin/books/edit/:id'
+    adminBooks: '/console/books',
+    adminCategories: '/console/categories',
+    adminLoans: '/console/loans',
+    adminBooksNew: '/console/books/new',
+    adminBooksEdit: '/console/books/edit/:id'
   },
   admin: {
     dashboard: {

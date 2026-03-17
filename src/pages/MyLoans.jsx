@@ -128,8 +128,13 @@ const MyLoans = () => {
                    loan.status === 'rejected' ? 'Recusado' : 'Devolvido'}
                 </span>
                 <p className="text-[10px] text-text-muted uppercase font-bold tracking-tighter">Requisição #{loan.id}</p>
-                {loan.status === 'active' && loan.due_date && (
-                   <p className="text-[9px] text-orange-500/60 font-medium">Vence: {new Date(loan.due_date).toLocaleDateString()}</p>
+                {loan.status === 'active' && (
+                   <div className="flex flex-col items-center md:items-end gap-1 mt-1">
+                     {loan.due_date && <p className="text-[9px] text-orange-500/60 font-medium">Vence: {new Date(loan.due_date).toLocaleDateString()}</p>}
+                     <p className="text-[10px] text-primary font-black bg-primary/10 px-2 py-1 rounded-md border border-primary/20 mt-1 uppercase tracking-widest shadow-sm">
+                       PIN DEV: {new Date(loan.created_at).getTime().toString().slice(-4)}
+                     </p>
+                   </div>
                 )}
               </div>
             </div>

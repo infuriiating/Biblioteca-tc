@@ -11,11 +11,11 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   )
 
   if (!user) {
-    return <Navigate to={adminOnly ? "/admin/entrar" : "/entrar"} replace />
+    return <Navigate to={adminOnly ? "/console/entrar" : "/entrar"} replace />
   }
 
   if (adminOnly && !isAdmin) {
-    return <Navigate to="/admin/entrar" replace />
+    return <Navigate to="/console/entrar" replace />
   }
 
   return children

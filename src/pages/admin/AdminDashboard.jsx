@@ -10,7 +10,9 @@ import {
   AlertCircle,
   TrendingUp,
   ChevronRight,
-  Star
+  Star,
+  ArrowRight,
+  Plus
 } from 'lucide-react'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -144,7 +146,7 @@ const AdminDashboard = () => {
         <div className="lg:col-span-2 bg-bg-surface rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden flex flex-col h-full">
           <div className="px-8 py-6 border-b border-border/50 flex items-center justify-between shrink-0">
             <h2 className="font-bold text-text-main">{t('admin.dashboard.recentActivity')}</h2>
-            <Link to="/admin/emprestimos" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+            <Link to="/console/emprestimos" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
               {t('admin.dashboard.viewAll')} <ArrowRight size={12} />
             </Link>
           </div>
@@ -204,7 +206,7 @@ const AdminDashboard = () => {
             <h2 className="text-lg font-bold mb-6">{t('admin.dashboard.quickActions')}</h2>
             <div className="space-y-3">
               <Link
-                to="/admin/livros/novo"
+                to="/console/livros/novo"
                 className="w-full bg-white/10 hover:bg-white/20 p-4 rounded-2xl flex items-center gap-3 transition-all border border-white/5 group"
               >
                 <div className="p-2 rounded-xl bg-primary/20 text-primary">
@@ -217,7 +219,7 @@ const AdminDashboard = () => {
                 <ArrowRight size={14} className="ml-auto text-white/20 group-hover:text-white/60 transition-colors" />
               </Link>
               <Link
-                to="/admin/livros"
+                to="/console/livros"
                 className="w-full bg-white/10 hover:bg-white/20 p-4 rounded-2xl flex items-center gap-3 transition-all border border-white/5 group"
               >
                 <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
@@ -230,7 +232,7 @@ const AdminDashboard = () => {
                 <ArrowRight size={14} className="ml-auto text-white/20 group-hover:text-white/60 transition-colors" />
               </Link>
               <Link
-                to="/admin/emprestimos"
+                to="/console/emprestimos"
                 className="w-full bg-white/10 hover:bg-white/20 p-4 rounded-2xl flex items-center gap-3 transition-all border border-white/5 group"
               >
                 <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400">

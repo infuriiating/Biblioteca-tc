@@ -30,7 +30,7 @@ const Login = () => {
         .single()
 
       if (profileData?.role === 'admin') {
-        navigate('/admin')
+        navigate('/console')
       } else {
         navigate('/')
       }

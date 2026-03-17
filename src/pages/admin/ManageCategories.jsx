@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
+import { useRefreshOnFocus } from '../../hooks/useRefreshOnFocus'
 import { Plus, Edit2, Trash2, GripVertical, Check, X, AlertCircle, Save, Search } from 'lucide-react'
 import { motion, Reorder } from 'framer-motion'
 import { clsx } from 'clsx'
@@ -27,6 +28,8 @@ const ManageCategories = () => {
   useEffect(() => {
     fetchCategories()
   }, [])
+
+  useRefreshOnFocus(() => fetchCategories())
 
   const fetchCategories = async (retryCount = 0) => {
     const now = Date.now()

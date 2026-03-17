@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
 import { Book, ChevronLeft, Sparkles, CheckCircle2 } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { clsx } from 'clsx'
@@ -34,6 +35,8 @@ const BookDetails = () => {
     if (authLoading) return
     fetchBook()
   }, [id, authLoading])
+
+  useRefreshOnFocus(() => fetchBook())
 
   const fetchBook = async (retryCount = 0) => {
     const now = Date.now()

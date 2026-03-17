@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
+import { useRefreshOnFocus } from '../../hooks/useRefreshOnFocus'
 import { Plus, Search, Star, Trash2, Edit, ExternalLink, Filter } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Select from '../../components/ui/Select'
@@ -64,6 +65,8 @@ const ManageBooks = () => {
     fetchBooks()
     fetchCategories()
   }, [])
+
+  useRefreshOnFocus(() => fetchBooks())
 
   const toggleFeatured = async (id, currentStatus) => {
     const { error } = await supabase

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
 import { ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import BookCard from '../components/BookCard'
@@ -42,10 +43,14 @@ const Home = () => {
     }
   }, [authLoading, user])
 
+  // Refresh on focus/visibility change
+  useRefreshOnFocus(() => fetchData())
+
   const fetchData = async (catId, retryCount = 0) => {
     const now = Date.now()
     // Throttling: prevent fetches closer than 2 seconds unless it's a manual retry or category change
-    if (authLoading || fetchInProgress.current || (retryCount === 0 && !catId && now - lastFetchTime.current < 2000)) return
+    // Note: useRefreshOnFocus has its own 10s throttle, so this 2s one is for general UI actions.
+    if (authLoading || fetchInProgress.current || (retryCount === 0 && !catId && now - lastRefreshTime.current < 2000)) return
     
     fetchInProgress.current = true
     lastFetchTime.current = now

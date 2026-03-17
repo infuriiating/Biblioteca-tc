@@ -143,9 +143,32 @@ export const AuthProvider = ({ children }) => {
       setLoading(false)
     })
 
+    // Global session refresh on tab switch/focus
+    const handleFocus = async () => {
+      if (document.visibilityState === 'visible') {
+        const now = Date.now()
+        // Throttle session refresh to once every 30s
+        if (!window._lastSessionRefresh || now - window._lastSessionRefresh > 30000) {
+          window._lastSessionRefresh = now
+          console.log('[AuthContext] Tab focused/visible, refreshing session...')
+          try {
+            const { error } = await supabase.auth.getSession()
+            if (error) console.warn('[AuthContext] Session refresh failed:', error.message)
+          } catch (e) {
+            console.error('[AuthContext] Critical error refreshing session:', e)
+          }
+        }
+      }
+    }
+
+    window.addEventListener('visibilitychange', handleFocus)
+    window.addEventListener('focus', handleFocus)
+
     return () => {
       subscription.unsubscribe()
       clearTimeout(timeoutId)
+      window.removeEventListener('visibilitychange', handleFocus)
+      window.removeEventListener('focus', handleFocus)
     }
   }, []) // Empty dependency array to ensure listener only sets up once
 

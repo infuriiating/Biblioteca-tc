@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
-import { RefreshCw, CheckCircle, Clock, User, Book as BookIcon, Filter, Inbox, XCircle, Search } from 'lucide-react'
+import { useRefreshOnFocus } from '../../hooks/useRefreshOnFocus'
+import { Clock, CheckCircle, XCircle, Search, Filter, AlertCircle, ExternalLink, Book as BookIcon, Inbox } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -86,6 +87,8 @@ const ManageLoans = () => {
   useEffect(() => {
     fetchLoans()
   }, [])
+
+  useRefreshOnFocus(() => fetchLoans())
 
   const updateLoanStatus = async (loanId, newStatus, bookId) => {
     const updates = {

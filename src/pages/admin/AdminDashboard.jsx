@@ -2,15 +2,15 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
+import { useRefreshOnFocus } from '../../hooks/useRefreshOnFocus'
 import {
   BookOpen,
   Users,
   Clock,
   AlertCircle,
-  LogOut,
-  Plus,
-  ArrowRight,
-  TrendingUp
+  TrendingUp,
+  ChevronRight,
+  Star
 } from 'lucide-react'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -52,10 +52,12 @@ const AdminDashboard = () => {
   }
 
   useEffect(() => {
-    fetchData()
+    fetchStats()
   }, [])
 
-  const fetchData = async (retryCount = 0) => {
+  useRefreshOnFocus(() => fetchStats())
+
+  const fetchStats = async (retryCount = 0) => {
     const now = Date.now()
     if (fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) return
     

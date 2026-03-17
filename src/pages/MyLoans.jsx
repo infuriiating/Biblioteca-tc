@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
 import { Book as BookIcon, Clock, CheckCircle, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { clsx } from 'clsx'
@@ -56,6 +57,8 @@ const MyLoans = () => {
       fetchInProgress.current = false
     }
   }
+
+  useRefreshOnFocus(() => fetchMyLoans())
 
   useEffect(() => {
     if (!authLoading && user) {

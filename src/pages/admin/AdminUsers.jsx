@@ -24,7 +24,10 @@ const AdminUsers = () => {
 
   const fetchUsers = async (retryCount = 0) => {
     const now = Date.now()
-    if (fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) return
+    if (fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) {
+      setLoading(false)
+      return
+    }
     
     fetchInProgress.current = true
     lastFetchTime.current = now

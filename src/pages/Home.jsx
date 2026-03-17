@@ -50,7 +50,10 @@ const Home = () => {
     const now = Date.now()
     // Throttling: prevent fetches closer than 2 seconds unless it's a manual retry or category change
     // Note: useRefreshOnFocus has its own 10s throttle, so this 2s one is for general UI actions.
-    if (authLoading || fetchInProgress.current || (retryCount === 0 && !catId && now - lastFetchTime.current < 2000)) return
+    if (authLoading || fetchInProgress.current || (retryCount === 0 && !catId && now - lastFetchTime.current < 2000)) {
+      setLoading(false)
+      return
+    }
     
     fetchInProgress.current = true
     lastFetchTime.current = now

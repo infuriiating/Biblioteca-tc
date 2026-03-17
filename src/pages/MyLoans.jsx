@@ -20,8 +20,11 @@ const MyLoans = () => {
   const fetchMyLoans = async (retryCount = 0) => {
     if (!user) return
     const now = Date.now()
-    if (authLoading || fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) return
-
+    if (authLoading || fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) {
+      setLoading(false)
+      return
+    }
+    
     fetchInProgress.current = true
     lastFetchTime.current = now
     if (loans.length === 0) {

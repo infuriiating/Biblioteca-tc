@@ -59,7 +59,10 @@ const AdminDashboard = () => {
 
   const fetchStats = async (retryCount = 0) => {
     const now = Date.now()
-    if (fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) return
+    if (fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) {
+      setLoading(false)
+      return
+    }
     
     fetchInProgress.current = true
     lastFetchTime.current = now
@@ -69,8 +72,7 @@ const AdminDashboard = () => {
     }
 
     try {
-      await supabase.auth.getSession()
-      
+      // 1. Fetch statistics
       const [booksRes, activeRes, pendingRes, overdueRes, recentRes] = await Promise.all([
         supabase.from('books').select('*', { count: 'exact', head: true }),
         supabase.from('loans').select('*', { count: 'exact', head: true }).eq('status', 'active'),
@@ -97,7 +99,7 @@ const AdminDashboard = () => {
       if (retryCount < 1) {
         fetchInProgress.current = false
         await new Promise(r => setTimeout(r, 1500))
-        return fetchData(retryCount + 1)
+        return fetchStats(retryCount + 1)
       }
     } finally {
       setLoading(false)

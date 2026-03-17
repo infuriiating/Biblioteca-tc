@@ -1,35 +1,37 @@
 import { useEffect, useRef } from 'react'
-import { useAuth } from './useAuth'
 
 /**
- * Hook to trigger a callback when the global session is refreshed (e.g., on tab switch).
- * This relies on AuthContext handling the actual window listeners and session locking.
+ * Hook to trigger a callback when the window/tab is focused or becomes visible.
+ * Uses a throttle to prevent excessive fetches.
  * 
  * @param {Function} onRefresh - The callback to execute (e.g., fetchData)
+ * @param {number} throttleMs - Minimum time between refreshes (default 30s)
  */
-export const useRefreshOnFocus = (onRefresh) => {
-  const { sessionVersion } = useAuth()
-  const lastVersion = useRef(sessionVersion)
+export const useRefreshOnFocus = (onRefresh, throttleMs = 30000) => {
+  const lastRefreshTime = useRef(0)
 
   useEffect(() => {
-    // If the session version increased, it means the tab was focused
-    // and the session was successfully validated/refreshed by AuthContext.
-    if (sessionVersion > lastVersion.current) {
-      lastVersion.current = sessionVersion
-      
-      // Add jitter (0-500ms) to prevent thundering herd / lock contention
-      // if multiple components are listening to the same version change.
-      const jitter = Math.floor(Math.random() * 500)
-      
-      const timer = setTimeout(() => {
-        // Double check it's still visible before fetching
-        if (document.visibilityState === 'visible') {
-          console.log(`[useRefreshOnFocus] Triggering refresh with ${jitter}ms jitter...`)
-          onRefresh()
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const now = Date.now()
+        if (now - lastRefreshTime.current >= throttleMs) {
+          lastRefreshTime.current = now
+          
+          // Add jitter (0-500ms) to prevent thundering herd
+          const jitter = Math.floor(Math.random() * 500)
+          const timer = setTimeout(() => {
+            if (document.visibilityState === 'visible') {
+              console.log(`[useRefreshOnFocus] Triggering refresh (jitter: ${jitter}ms)...`)
+              onRefresh()
+            }
+          }, jitter)
+          
+          return () => clearTimeout(timer)
         }
-      }, jitter)
-
-      return () => clearTimeout(timer)
+      }
     }
-  }, [sessionVersion, onRefresh])
+
+    window.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => window.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [onRefresh, throttleMs])
 }

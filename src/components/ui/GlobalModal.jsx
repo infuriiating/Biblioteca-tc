@@ -1,10 +1,17 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, CheckCircle2, ShieldAlert, Info } from 'lucide-react'
 import { useNotification } from '../../context/NotificationContext'
 
 const GlobalModal = () => {
   const { modal } = useNotification()
+  const [inputValue, setInputValue] = useState('')
+
+  useEffect(() => {
+    if (modal?.isPrompt) {
+      setInputValue('')
+    }
+  }, [modal])
 
   const icons = {
     warning: <AlertTriangle className="text-yellow-500" size={24} />,
@@ -38,9 +45,19 @@ const GlobalModal = () => {
               }`}>
                 {icons[modal.type] || icons.warning}
               </div>
-              <div className="pt-1">
+              <div className="pt-1 flex-grow">
                 <h3 className="text-lg font-extrabold text-text-main leading-tight">{modal.title}</h3>
                 <p className="text-sm text-text-muted mt-2 font-medium leading-relaxed">{modal.message}</p>
+                {modal.isPrompt && (
+                  <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder={modal.placeholder}
+                    className="w-full mt-4 bg-bg-main border border-border rounded-xl px-4 py-3 text-sm font-bold text-text-main focus:outline-none focus:border-primary/50 transition-colors"
+                    autoFocus
+                  />
+                )}
               </div>
             </div>
             
@@ -52,7 +69,7 @@ const GlobalModal = () => {
                 {modal.cancelText || 'Cancelar'}
               </button>
               <button 
-                onClick={modal.onConfirm}
+                onClick={() => modal.isPrompt ? modal.onConfirm(inputValue) : modal.onConfirm()}
                 className={`px-5 py-2.5 font-extrabold text-sm text-white rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all ${
                   modal.type === 'danger' ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' :
                   modal.type === 'warning' ? 'bg-yellow-500 hover:bg-yellow-600 shadow-yellow-500/20' :

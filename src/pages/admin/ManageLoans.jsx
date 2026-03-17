@@ -7,6 +7,7 @@ import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import Select from '../../components/ui/Select'
 import { useLanguage } from '../../context/LanguageContext'
+import { useNotification } from '../../context/NotificationContext'
 
 function cn(...inputs) {
   return twMerge(clsx(inputs))
@@ -14,6 +15,7 @@ function cn(...inputs) {
 
 const ManageLoans = () => {
   const { t } = useLanguage()
+  const { prompt, showToast } = useNotification()
   const [loans, setLoans] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -371,13 +373,19 @@ const ManageLoans = () => {
                         )}
                         {loan.status === 'active' && (
                           <button
-                            onClick={() => {
+                            onClick={async () => {
                               const expectedPin = new Date(loan.created_at).getTime().toString().slice(-4)
-                              const inputPin = window.prompt("Insira o PIN de 4 dígitos fornecido pelo aluno no ecrã 'Meus Empréstimos':")
+                              const inputPin = await prompt({
+                                title: "Confirmar Devolução",
+                                message: "Insira o PIN de 4 dígitos fornecido pelo aluno no ecrã 'Meus Empréstimos':",
+                                placeholder: "PIN (ex: 1234)",
+                                type: "info"
+                              })
                               if (inputPin === expectedPin) {
-                                updateLoanStatus(loan.id, 'returned', loan.book_id)
+                                await updateLoanStatus(loan.id, 'returned', loan.book_id)
+                                showToast("Livro devolvido com sucesso!", "success")
                               } else if (inputPin !== null) {
-                                alert("PIN incorreto! A devolução não foi registada.")
+                                showToast("PIN incorreto! A devolução não foi registada.", "danger")
                               }
                             }}
                             className="px-4 py-2 bg-secondary text-primary text-[10px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all shadow-sm"

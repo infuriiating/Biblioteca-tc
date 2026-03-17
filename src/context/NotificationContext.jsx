@@ -38,8 +38,30 @@ export const NotificationProvider = ({ children }) => {
     })
   }, [])
 
+  const promptMessage = useCallback(({ title, message, placeholder = '', confirmText = 'Confirmar', cancelText = 'Cancelar', type = 'info' }) => {
+    return new Promise((resolve) => {
+      setModal({
+        title,
+        message,
+        confirmText,
+        cancelText,
+        type,
+        isPrompt: true,
+        placeholder,
+        onConfirm: (value) => {
+          resolve(value)
+          setModal(null)
+        },
+        onCancel: () => {
+          resolve(null)
+          setModal(null)
+        }
+      })
+    })
+  }, [])
+
   return (
-    <NotificationContext.Provider value={{ showToast, confirm, toast, modal, setModal }}>
+    <NotificationContext.Provider value={{ showToast, confirm, prompt: promptMessage, toast, modal, setModal }}>
       {children}
       <GlobalModal />
       <ToastContainer />

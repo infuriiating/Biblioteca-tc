@@ -30,7 +30,6 @@ const Sidebar = ({ isOpen, onClose }) => {
     { icon: Library, label: t('sidebar.loans'), path: '/console/emprestimos' },
     { icon: Users, label: t('sidebar.users'), path: '/console/utilizadores' },
   ]
-  const inConsole = window.location.pathname.startsWith('/console')
 
   const NavItem = ({ item }) => (
     <NavLink
@@ -80,7 +79,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           )}
 
           {/* Admin Section */}
-          {(isAdmin && inConsole) && (
+          {isAdmin && (
             <div className="pt-6">
               <p className="px-5 text-[10px] font-semibold text-text-muted uppercase tracking-[0.15em] mb-2">{t('sidebar.administration')}</p>
               {adminItems.map((item, idx) => (

@@ -88,6 +88,21 @@ const Navbar = () => {
                     <Book size={18} /> <span className="text-sm">{t('navbar.myLoans')}</span>
                   </Link>
                 )}
+                {isAdmin && (
+                  <>
+                    <div className="h-px bg-border my-2" />
+                    <div className="px-3 py-2 text-xs font-bold text-text-muted uppercase tracking-wider">{t('navbar.adminMenu')}</div>
+                    <Link to="/console/livros" className="flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors">
+                      <List size={18} /> <span className="text-sm">{t('navbar.manageBooks')}</span>
+                    </Link>
+                    <Link to="/console/emprestimos" className="flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors">
+                      <RefreshCw size={18} /> <span className="text-sm">{t('navbar.manageLoans')}</span>
+                    </Link>
+                    <Link to="/console/livros/novo" className="flex items-center gap-2 p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors">
+                      <PlusCircle size={18} /> <span className="text-sm">{t('navbar.newBook')}</span>
+                    </Link>
+                  </>
+                )}
                 <div className="h-px bg-border my-2" />
                 <button
                   onClick={handleSignOut}

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useRef } from 'react'
+import { createContext, useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
 export const AuthContext = createContext()
@@ -10,79 +10,83 @@ export const AuthProvider = ({ children }) => {
   const [profileLoading, setProfileLoading] = useState(false)
 
   const initialized = useRef(false)
-  const isInitializing = useRef(true)
-  const lastFetchedUserId = useRef(null)
+  const abortControllerRef = useRef(null)
 
-  const fetchProfile = async (userId, userObject = null) => {
-    // If we're already fetching for this user, OR we already have this user's profile, skip.
-    if (lastFetchedUserId.current === userId && (profileLoading || profile)) return
-    
+  const fetchProfile = async (currentUser) => {
+    // Skip if we already have this exact user's profile to avoid unnecessary fetches on every tab switch
+    if (profile && profile.id === currentUser.id) {
+      return
+    }
+
     setProfileLoading(true)
-    lastFetchedUserId.current = userId
 
-    const fetchTimeoutId = setTimeout(() => {
-      setProfileLoading(prev => {
-        if (prev) {
-          console.warn('[AuthContext] fetchProfile timed out after 8s')
-          return false
-        }
-        return prev
-      })
+    // Abort any existing ongoing fetch
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    const abortController = new AbortController()
+    abortControllerRef.current = abortController
+
+    // Safety timeout to abort network request after 8 seconds if it hangs
+    const timeoutId = setTimeout(() => {
+      abortController.abort(new Error('Profile fetch timeout'))
     }, 8000)
 
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', currentUser.id)
+        .abortSignal(abortController.signal)
         .single()
 
-      if (error && (error.name === 'AbortError' || error.message?.includes('AbortError'))) {
-        console.log('[AuthContext] fetchProfile aborted, assuming redundant.')
-        return null
+      if (error) {
+        if (error.code === 'PGRST116') { // Not found - create one
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert([{
+              id: currentUser.id,
+              name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'User',
+              email: currentUser.email,
+              role: 'student' // Default role for auto-created profiles
+            }])
+            .select()
+            .single()
+          
+          if (createError) throw createError
+          
+          if (!abortController.signal.aborted) {
+            setProfile(newProfile)
+          }
+          return
+        }
+        throw error
       }
 
-      if (error && error.code === 'PGRST116') {
-        const activeUser = userObject || (await supabase.auth.getUser()).data?.user
-        if (!activeUser) throw new Error('No active user to create profile for')
-
-        const { data: newProfile, error: createError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: userId,
-              name: activeUser.user_metadata?.full_name || activeUser.email?.split('@')[0] || 'User',
-              email: activeUser.email,
-              role: 'student'
-            }
-          ])
-          .select()
-          .single()
-        
-        if (createError) throw createError
-        setProfile(newProfile)
-        return newProfile
+      if (!abortController.signal.aborted) {
+        setProfile(data)
       }
-
-      if (error) throw error
-      setProfile(data)
-      return data
     } catch (error) {
-      console.error('[AuthContext] Error in fetchProfile:', error)
-      setProfile(null)
-      return null
+      if (error.name === 'AbortError' || error.message?.includes('AbortError') || error.message === 'Profile fetch timeout') {
+        console.warn('[AuthContext] Profile fetch aborted or timed out due to network hang:', error.message)
+      } else {
+        console.error('[AuthContext] Error in fetchProfile:', error)
+      }
+      // Don't arbitrarily clear an existing profile if it just failed a background refresh
     } finally {
-      setProfileLoading(false)
-      clearTimeout(fetchTimeoutId)
+      clearTimeout(timeoutId)
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null
+        setProfileLoading(false)
+      }
     }
   }
 
   const refreshSession = async () => {
-    // Manual session check if explicitly requested
     try {
       await supabase.auth.getSession()
     } catch (e) {
-      console.warn('[AuthContext] Manual refresh check failed')
+      console.warn('[AuthContext] Manual session refresh failed:', e)
     }
   }
 
@@ -90,50 +94,64 @@ export const AuthProvider = ({ children }) => {
     if (initialized.current) return
     initialized.current = true
 
-    const timeoutId = setTimeout(() => {
+    // Fallback timer: ensure the app ALWAYS loads after 5s even if Supabase is down
+    const appLoadTimeout = setTimeout(() => {
       setLoading(false)
-    }, 6000)
+    }, 5000)
 
     const initAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
-        if (!session) {
-          setLoading(false)
+        if (session?.user) {
+          setUser(session.user)
+          // We don't await fetchProfile here to avoid blocking UI render
+          fetchProfile(session.user)
         }
       } catch (error) {
-        setLoading(false)
+        console.warn('[AuthContext] Initial getSession failed:', error)
       } finally {
-        isInitializing.current = false
-        clearTimeout(timeoutId)
+        setLoading(false)
+        clearTimeout(appLoadTimeout)
       }
     }
 
     initAuth()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log(`[AuthContext] Auth event: ${event}`)
       const currentUser = session?.user ?? null
       setUser(currentUser)
-      
+
       if (currentUser) {
-        await fetchProfile(currentUser.id, currentUser)
+        // Non-blocking call
+        fetchProfile(currentUser).then(() => {
+          setLoading(false)
+        })
       } else {
+        // Logged out
         setProfile(null)
-        lastFetchedUserId.current = null
+        setLoading(false)
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort()
+        }
       }
-      
-      setLoading(false)
     })
 
     return () => {
       subscription.unsubscribe()
-      clearTimeout(timeoutId)
+      clearTimeout(appLoadTimeout)
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
     }
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty dependency array as this should only run once
 
   const signOut = async () => {
     try {
-      lastFetchedUserId.current = null
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
       await supabase.auth.signOut()
       setUser(null)
       setProfile(null)
@@ -161,7 +179,6 @@ export const AuthProvider = ({ children }) => {
     profileLoading,
     isAdmin: profile?.role === 'admin'
   }
-
 
   return (
     <AuthContext.Provider value={value}>

@@ -1,45 +1,23 @@
 import { useEffect, useRef } from 'react'
+import { useAuth } from './useAuth'
 
 /**
- * Hook to trigger a callback when the window/tab regains focus or visibility.
- * Includes a mandatory throttle to prevent aggressive refetching.
+ * Hook to trigger a callback when the global session is refreshed (e.g., on tab switch).
+ * This relies on AuthContext handling the actual window listeners and session locking.
  * 
  * @param {Function} onRefresh - The callback to execute (e.g., fetchData)
- * @param {number} throttleMs - Minimum time between refreshes in milliseconds (default: 10000)
  */
-export const useRefreshOnFocus = (onRefresh, throttleMs = 10000) => {
-  const lastRefreshTime = useRef(0)
+export const useRefreshOnFocus = (onRefresh) => {
+  const { sessionVersion } = useAuth()
+  const lastVersion = useRef(sessionVersion)
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        const now = Date.now()
-        if (now - lastRefreshTime.current >= throttleMs) {
-          console.log('[useRefreshOnFocus] Tab became visible, triggering refresh...')
-          lastRefreshTime.current = now
-          onRefresh()
-        } else {
-          console.log('[useRefreshOnFocus] Tab visible but throttled (last refresh was < ' + (throttleMs / 1000) + 's ago)')
-        }
-      }
+    // If the session version increased, it means the tab was focused
+    // and the session was successfully validated/refreshed by AuthContext.
+    if (sessionVersion > lastVersion.current) {
+      console.log('[useRefreshOnFocus] Session version updated, triggering component refresh...')
+      lastVersion.current = sessionVersion
+      onRefresh()
     }
-
-    const handleFocus = () => {
-      // Sometimes visibilityState is already 'visible' but focus is just regained
-      const now = Date.now()
-      if (now - lastRefreshTime.current >= throttleMs) {
-        console.log('[useRefreshOnFocus] Window focused, triggering refresh...')
-        lastRefreshTime.current = now
-        onRefresh()
-      }
-    }
-
-    window.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('focus', handleFocus)
-
-    return () => {
-      window.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [onRefresh, throttleMs])
+  }, [sessionVersion, onRefresh])
 }

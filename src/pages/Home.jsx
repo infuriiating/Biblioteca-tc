@@ -63,9 +63,6 @@ const Home = () => {
     }
     
     try {
-      // 1. Check session quickly
-      await supabase.auth.getSession()
-      
       // 2. Fetch data
       const [catRes, bookRes] = await Promise.all([
         supabase.from('categories').select('*').order('display_order', { ascending: true }),

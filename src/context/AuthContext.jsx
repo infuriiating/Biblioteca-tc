@@ -9,15 +9,15 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
 
-  const lastFetchedUserId = useRef(null)
   const initialized = useRef(false)
-  // True while initAuth() is still running — prevents the auth listener
-  // from prematurely clearing the loading gate during page-reload session restore.
   const isInitializing = useRef(true)
+  const lastFetchedUserId = useRef(null)
+  const [sessionVersion, setSessionVersion] = useState(0)
+  const isRefreshing = useRef(false)
 
   const fetchProfile = async (userId, userObject = null) => {
-    // Prevent double-fetching for the same user if already in progress or completed
-    if (lastFetchedUserId.current === userId && profile && !profileLoading) return
+    // If we're already fetching for this user, OR we already have this user's profile, skip.
+    if (lastFetchedUserId.current === userId && (profileLoading || profile)) return
     
     setProfileLoading(true)
     lastFetchedUserId.current = userId
@@ -40,12 +40,7 @@ export const AuthProvider = ({ children }) => {
         .single()
 
       if (error && error.code === 'PGRST116') {
-        // Profile missing - auto create default
-        console.log('[AuthContext] Profile missing, creating default for:', userId)
-        
-        // Use userObject if provided, else fallback to current user
         const activeUser = userObject || (await supabase.auth.getUser()).data?.user
-        
         if (!activeUser) throw new Error('No active user to create profile for')
 
         const { data: newProfile, error: createError } = await supabase
@@ -79,11 +74,42 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const refreshSession = async () => {
+    if (isRefreshing.current) {
+      console.log('[AuthContext] Refresh already in progress, skipping...')
+      return
+    }
+    
+    isRefreshing.current = true
+    console.log('[AuthContext] Refreshing session...')
+    
+    try {
+      // Use getSession() - this is the call that might trigger refreshes
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (error) throw error
+      
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
+      
+      if (currentUser) {
+        await fetchProfile(currentUser.id, currentUser)
+      } else {
+        setProfile(null)
+      }
+      
+      // Signal change to listeners
+      setSessionVersion(v => v + 1)
+    } catch (error) {
+      console.warn('[AuthContext] Session refresh failed:', error.message)
+    } finally {
+      isRefreshing.current = false
+    }
+  }
+
   useEffect(() => {
     if (initialized.current) return
     initialized.current = true
 
-    // Safety timeout: ensure loading state is cleared even if Supabase hangs
     const timeoutId = setTimeout(() => {
       setLoading(false)
     }, 4000)
@@ -93,7 +119,6 @@ export const AuthProvider = ({ children }) => {
         const { data: { session }, error } = await supabase.auth.getSession()
         if (error) {
           if (error.message.includes('refresh_token_not_found') || error.message.includes('Invalid Refresh Token')) {
-             console.warn('[AuthContext] Session invalid, clearing...')
              await supabase.auth.signOut()
           }
           throw error
@@ -104,14 +129,10 @@ export const AuthProvider = ({ children }) => {
         
         if (currentUser) {
           await fetchProfile(currentUser.id, currentUser)
-        } else {
-          setProfile(null)
-          lastFetchedUserId.current = null
         }
+        setSessionVersion(v => v + 1)
       } catch (error) {
         console.error('[AuthContext] Error initializing auth:', error)
-        setUser(null)
-        setProfile(null)
       } finally {
         isInitializing.current = false
         setLoading(false)
@@ -123,10 +144,6 @@ export const AuthProvider = ({ children }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(`[AuthContext] State change: ${event}`)
-
-      // During initial boot, initAuth() owns the loading gate.
-      // If we're still initializing, skip updating state here to avoid
-      // a race condition where the listener fires before getSession() resolves.
       if (isInitializing.current) return
       
       const currentUser = session?.user ?? null
@@ -136,28 +153,16 @@ export const AuthProvider = ({ children }) => {
         await fetchProfile(currentUser.id, currentUser)
       } else {
         setProfile(null)
-        setProfileLoading(false)
         lastFetchedUserId.current = null
       }
       
+      setSessionVersion(v => v + 1)
       setLoading(false)
     })
 
-    // Global session refresh on tab switch/focus
-    const handleFocus = async () => {
+    const handleFocus = () => {
       if (document.visibilityState === 'visible') {
-        const now = Date.now()
-        // Throttle session refresh to once every 30s
-        if (!window._lastSessionRefresh || now - window._lastSessionRefresh > 30000) {
-          window._lastSessionRefresh = now
-          console.log('[AuthContext] Tab focused/visible, refreshing session...')
-          try {
-            const { error } = await supabase.auth.getSession()
-            if (error) console.warn('[AuthContext] Session refresh failed:', error.message)
-          } catch (e) {
-            console.error('[AuthContext] Critical error refreshing session:', e)
-          }
-        }
+        refreshSession()
       }
     }
 
@@ -170,7 +175,7 @@ export const AuthProvider = ({ children }) => {
       window.removeEventListener('visibilitychange', handleFocus)
       window.removeEventListener('focus', handleFocus)
     }
-  }, []) // Empty dependency array to ensure listener only sets up once
+  }, [])
 
   const signOut = async () => {
     try {
@@ -178,7 +183,6 @@ export const AuthProvider = ({ children }) => {
       await supabase.auth.signOut()
       setUser(null)
       setProfile(null)
-      setProfileLoading(false)
       window.location.href = '/'
     } catch (error) {
       console.error('Error signing out:', error)
@@ -192,17 +196,16 @@ export const AuthProvider = ({ children }) => {
       provider: 'google',
       options: {
         redirectTo: window.location.origin,
-        queryParams: {
-          prompt: 'select_account',
-          hd: 'agr-tc.pt'
-        }
+        queryParams: { prompt: 'select_account', hd: 'agr-tc.pt' }
       }
     }),
     signOut,
+    refreshSession,
     user,
     profile,
     loading,
     profileLoading,
+    sessionVersion,
     isAdmin: profile?.role === 'admin'
   }
 

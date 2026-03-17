@@ -50,8 +50,6 @@ const BookDetails = () => {
     }
 
     try {
-      await supabase.auth.getSession()
-      
       const { data, error } = await supabase
         .from('books')
         .select('*, categories(name)')

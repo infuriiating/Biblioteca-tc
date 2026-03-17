@@ -31,8 +31,6 @@ const MyLoans = () => {
     }
 
     try {
-      await supabase.auth.getSession()
-      
       const { data, error } = await supabase
         .from('loans')
         .select('*, books!fk_loans_book(*)')

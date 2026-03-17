@@ -20,6 +20,13 @@ const MyLoans = () => {
   const fetchMyLoans = async (retryCount = 0) => {
     if (!user) return
     const now = Date.now()
+    
+    // Deadlock breaker: if a fetch claims to be in progress for > 15 seconds, assume it hung
+    if (fetchInProgress.current && now - lastFetchTime.current > 15000) {
+      console.warn('[MyLoans] Fetch lock exceeded 15s. Breaking deadlock.')
+      fetchInProgress.current = false
+    }
+
     if (authLoading || fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) {
       setLoading(false)
       return

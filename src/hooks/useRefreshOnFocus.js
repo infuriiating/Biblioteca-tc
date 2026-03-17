@@ -9,6 +9,12 @@ import { useEffect, useRef } from 'react'
  */
 export const useRefreshOnFocus = (onRefresh, throttleMs = 30000) => {
   const lastRefreshTime = useRef(0)
+  const savedCallback = useRef(onRefresh)
+  const timerRef = useRef(null)
+
+  useEffect(() => {
+    savedCallback.current = onRefresh
+  }, [onRefresh])
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -17,21 +23,28 @@ export const useRefreshOnFocus = (onRefresh, throttleMs = 30000) => {
         if (now - lastRefreshTime.current >= throttleMs) {
           lastRefreshTime.current = now
           
-          // Add jitter (0-500ms) to prevent thundering herd
-          const jitter = Math.floor(Math.random() * 500)
-          const timer = setTimeout(() => {
-            if (document.visibilityState === 'visible') {
-              console.log(`[useRefreshOnFocus] Triggering refresh (jitter: ${jitter}ms)...`)
-              onRefresh()
-            }
-          }, jitter)
+          // Add delay to allow network/DB to reconnect (minimum 1000ms + 500ms jitter)
+          const delay = 1000 + Math.floor(Math.random() * 500)
           
-          return () => clearTimeout(timer)
+          if (timerRef.current) clearTimeout(timerRef.current)
+          
+          timerRef.current = setTimeout(() => {
+            if (document.visibilityState === 'visible' && savedCallback.current) {
+              console.log(`[useRefreshOnFocus] Triggering refresh (delay: ${delay}ms)...`)
+              savedCallback.current()
+            }
+          }, delay)
         }
+      } else {
+        // Clear pending refresh if user switches away again quickly
+        if (timerRef.current) clearTimeout(timerRef.current)
       }
     }
 
     window.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => window.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [onRefresh, throttleMs])
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityChange)
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [throttleMs])
 }

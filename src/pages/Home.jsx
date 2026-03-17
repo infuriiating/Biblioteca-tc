@@ -48,6 +48,13 @@ const Home = () => {
 
   const fetchData = async (catId, retryCount = 0) => {
     const now = Date.now()
+    
+    // Deadlock breaker: if a fetch claims to be in progress for > 15 seconds, assume it hung
+    if (fetchInProgress.current && now - lastFetchTime.current > 15000) {
+      console.warn('[Home] Fetch lock exceeded 15s. Breaking deadlock.')
+      fetchInProgress.current = false
+    }
+
     // Throttling: prevent fetches closer than 2 seconds unless it's a manual retry or category change
     // Note: useRefreshOnFocus has its own 10s throttle, so this 2s one is for general UI actions.
     if (authLoading || fetchInProgress.current || (retryCount === 0 && !catId && now - lastFetchTime.current < 2000)) {

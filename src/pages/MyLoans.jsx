@@ -114,7 +114,7 @@ const MyLoans = () => {
                 <p className="text-sm text-text-muted">{loan.books?.author}</p>
               </div>
 
-              <div className="flex flex-col items-center md:items-end gap-2">
+              <div className="flex flex-col items-center gap-2">
                 <span className={cn(
                   "inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest",
                   loan.status === 'active' ? 'bg-orange-500/10 text-orange-500' : 
@@ -129,7 +129,7 @@ const MyLoans = () => {
                 </span>
                 <p className="text-[10px] text-text-muted uppercase font-bold tracking-tighter">Requisição #{loan.id}</p>
                 {loan.status === 'active' && (
-                   <div className="flex flex-col items-center md:items-end gap-1 mt-1">
+                   <div className="flex flex-col items-center gap-1 mt-1">
                      {loan.due_date && <p className="text-[9px] text-orange-500/60 font-medium">Vence: {new Date(loan.due_date).toLocaleDateString()}</p>}
                      <p className="text-[10px] text-primary font-black bg-primary/10 px-2 py-1 rounded-md border border-primary/20 mt-1 uppercase tracking-widest shadow-sm">
                        PIN DEV: {new Date(loan.created_at).getTime().toString().slice(-4)}

@@ -44,7 +44,12 @@ const AdminUsers = () => {
         .order('id', { ascending: false })
 
       if (fetchError) throw fetchError
-      setUsers(data || [])
+      const sortedData = (data || []).sort((a, b) => {
+        if (a.role === 'admin' && b.role !== 'admin') return -1;
+        if (b.role === 'admin' && a.role !== 'admin') return 1;
+        return 0;
+      })
+      setUsers(sortedData)
     } catch (err) {
       console.warn('[AdminUsers] Fetch failed:', err.message || err)
       if (retryCount < 1) {

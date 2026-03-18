@@ -46,7 +46,7 @@ const Signup = () => {
           id: authData.user.id, 
           name: username, 
           email: email, 
-          role: 'student',
+          role: 'aluno',
           created_at: authData.user.created_at
         }
       ])

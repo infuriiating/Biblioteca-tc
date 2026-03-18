@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
               id: currentUser.id,
               name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'User',
               email: currentUser.email,
-              role: 'student' // Default role for auto-created profiles
+              role: 'aluno' // Default role for auto-created profiles
             }])
             .select()
             .single()

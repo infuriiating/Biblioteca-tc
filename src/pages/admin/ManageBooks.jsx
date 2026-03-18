@@ -14,7 +14,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useNotification } from '../../context/NotificationContext'
 
 const ManageBooks = () => {
-  const { t } = useLanguage()
+  const { t, translateCategory } = useLanguage()
   const { confirm, showToast } = useNotification()
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(true)
@@ -146,7 +146,7 @@ const ManageBooks = () => {
           </Link>
           <div className="w-full md:w-64 min-w-0 md:min-w-[250px] flex-shrink-0">
             <Select 
-              options={[{ id: '0', name: t('admin.books.allCategories') }, ...categories]}
+              options={[{ id: '0', name: t('admin.books.allCategories') }, ...categories.map(c => ({...c, name: translateCategory(c.name)}))]}
               value={categoryFilter}
               onChange={setCategoryFilter}
               placeholder={t('admin.books.filterPlaceholder')}

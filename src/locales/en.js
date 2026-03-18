@@ -22,6 +22,9 @@ export default {
     login: 'Login',
     register: 'Register',
     adminMenu: 'Administration',
+    docs: 'Documentation',
+    notifications: 'Notifications',
+    loading: 'Loading...',
     all: 'All'
   },
   settings: {
@@ -211,5 +214,80 @@ export default {
     isbn: 'ISBN',
     publisher: 'Publisher',
     yearEdition: 'Edition Year'
+  },
+  docs: {
+    badge: 'Official Documentation',
+    title: 'Library Guide',
+    subtitle: 'Everything you need to know about the platform, from borrowing and returns to our new AI systems.',
+    roles: {
+      title: 'Accounts and Roles',
+      desc: 'There are two main types of accounts on the platform:',
+      student: 'Student',
+      studentDesc: 'Automatically assigned after registration. Allows exploring the catalog, reading AI summaries, and requesting books.',
+      admin: 'Administrator',
+      adminDesc: 'Associated with library staff and teachers. Allows managing the catalog, approving requests, and processing returns (requires special authentication via /console).'
+    },
+    borrow: {
+      title: 'How to Borrow a Book',
+      desc: 'The borrowing process is designed to be quick and easy:',
+      step1: 'Navigate to the desired book page in the Catalog.',
+      step2: 'Click the Request Book button. The status will change to "Pending".',
+      step3: 'Go to the physical library to pick up the book. The administrator will approve the request in the system and the status will change to "Active".',
+      note: 'Note: You will have a set deadline (e.g. 14 days) to return the book. You can check the due date on the "My Loans" screen.'
+    },
+    pin: {
+      title: 'Return PIN System',
+      desc: 'To ensure maximum security and prevent a book from being marked as returned by mistake, we use a dynamic PIN system.',
+      step1: 'When you borrow a book, a unique 4-digit PIN is generated for that request.',
+      step2: 'You can check this PIN at any time on the My Loans screen, below the active book title.',
+      step3: 'At the time of return: You must hand the book to the administrator and provide the corresponding PIN code. The administrator can only close the request if the correct code is entered.'
+    },
+    ai: {
+      title: 'Artificial Intelligence Features',
+      desc: 'Library TC is a smart platform. We integrate AI to improve your experience:',
+      item1: 'Smart Summaries (Active)',
+      item1Desc: 'When opening a book\'s details, our OpenAI integration reads the book\'s metadata and dynamically writes a catchy short summary (3 or 4 sentences).',
+      item2: 'Semantic "Vibe Check" Search (Coming Soon)',
+      item2Desc: 'Instead of searching only by exact title, you can search for concepts, genres, or descriptions.',
+      item3: 'AI Chat Librarian (Coming Soon)',
+      item3Desc: 'A virtual assistant you can converse with to ask for personalized reading suggestions.'
+    },
+    adminPortal: {
+      title: 'Administrator Portal (Console)',
+      desc: 'The book and user management portal is invisible to regular students.',
+      desc2: 'If you have administrative permissions, follow these steps:',
+      step1: 'Manually type /console at the end of the site URL.',
+      step2: 'If you are logged in and confirmed as an Administrator, the Management Panel will open immediately.',
+      step3: 'Management menus (Books, Categories, Loans) will remain pinned to your Sidebar.'
+    }
+  },
+  home: {
+    recommended: 'Recommended',
+    catalog: 'Catalog',
+    catalogSub: 'Explore all books available in our library',
+    errorLoad: 'Failed to load books.',
+    errorCheckNet: 'Please check your internet connection.',
+    retryBtn: 'Retry'
+  },
+  myLoans: {
+  title: 'My Loans',
+  subtitle: 'Complete history of your requests',
+  emptyTitle: 'No loans',
+  emptyDesc: 'You have not requested any books from our catalog yet.',
+  exploreCatalog: 'Explore Catalog',
+  status: {
+    active: 'Active',
+    pending: 'Pending',
+    rejected: 'Rejected',
+    returned: 'Returned'
+  },
+  requestLabel: 'Request'
+},
+notifications: {
+    title: 'Notifications',
+    subtitle: 'Stay up to date with your library',
+    emptyTitle: 'All caught up!',
+    emptyDesc: 'You have no notifications yet. Any updates about loans or new books will appear here.',
+    exploreCatalog: 'Explore Catalog'
   }
 }

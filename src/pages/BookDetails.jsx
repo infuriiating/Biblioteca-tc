@@ -16,7 +16,7 @@ const BookDetails = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user, loading: authLoading } = useAuth()
-  const { t } = useLanguage()
+  const { t, translateCategory } = useLanguage()
   const [book, setBook] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
@@ -194,7 +194,7 @@ const BookDetails = () => {
           <p className="text-white/50 font-normal">{book.author}</p>
           {book.category_name && (
             <span className="inline-block mt-2 px-3 py-1 bg-white/10 rounded-full text-xs text-white/60 font-medium">
-              {book.category_name}
+              {translateCategory(book.category_name)}
             </span>
           )}
         </div>

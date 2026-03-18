@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useLanguage } from '../context/LanguageContext'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
@@ -11,6 +12,7 @@ function cn(...inputs) {
   return twMerge(clsx(inputs))
 }
 const MyLoans = () => {
+  const { t } = useLanguage();
   const { user, loading: authLoading } = useAuth()
   const [loans, setLoans] = useState([])
   const [loading, setLoading] = useState(true)
@@ -76,8 +78,8 @@ const MyLoans = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-12 pb-20">
       <div className="space-y-1">
-        <h1 className="text-4xl font-black text-text-main tracking-tight">Meus Empréstimos</h1>
-        <p className="text-text-muted text-lg font-medium mt-1">Histórico completo das suas requisições</p>
+        <h1 className="text-4xl font-black text-text-main tracking-tight">{t('myLoans.title')}</h1>
+        <p className="text-text-muted text-lg font-medium mt-1">{t('myLoans.subtitle')}</p>
       </div>
 
       {loading ? (
@@ -123,11 +125,11 @@ const MyLoans = () => {
                   'bg-green-500/10 text-green-500'
                 )}>
                   {loan.status === 'active' ? <Clock size={14} /> : loan.status === 'pending' ? <Clock size={14} className="opacity-50" /> : <CheckCircle size={14} />}
-                  {loan.status === 'active' ? 'Ativo' : 
-                   loan.status === 'pending' ? 'Pendente' : 
-                   loan.status === 'rejected' ? 'Recusado' : 'Devolvido'}
+                  {loan.status === 'active' ? t('myLoans.status.active') : 
+                   loan.status === 'pending' ? t('myLoans.status.pending') : 
+                   loan.status === 'rejected' ? t('myLoans.status.rejected') : t('myLoans.status.returned')}
                 </span>
-                <p className="text-[10px] text-text-muted uppercase font-bold tracking-tighter">Requisição #{loan.id}</p>
+                <p className="text-[10px] text-text-muted uppercase font-bold tracking-tighter">{t('myLoans.requestLabel')} #{loan.id}</p>
                 {loan.status === 'active' && (
                    <div className="flex flex-col items-center gap-1 mt-1">
                      {loan.due_date && <p className="text-[9px] text-orange-500/60 font-medium">Vence: {new Date(loan.due_date).toLocaleDateString()}</p>}
@@ -144,12 +146,10 @@ const MyLoans = () => {
         <div className="py-20 text-center space-y-6 bg-bg-surface/50 rounded-3xl border border-dashed border-border">
           <BookIcon size={64} className="mx-auto text-text-muted opacity-20" />
           <div className="space-y-2">
-            <h3 className="text-xl font-bold">Sem empréstimos</h3>
-            <p className="text-text-muted">Ainda não requisitou nenhum livro do nosso catálogo.</p>
+            <h3 className="text-xl font-bold">{t('myLoans.emptyTitle')}</h3>
+            <p className="text-text-muted">{t('myLoans.emptyDesc')}</p>
+            <Link to="/" className="inline-block bg-primary text-bg-main px-8 py-3 rounded-full font-bold hover:bg-primary-hover transition-all">{t('myLoans.exploreCatalog')}</Link>
           </div>
-          <Link to="/" className="inline-block bg-primary text-bg-main px-8 py-3 rounded-full font-bold hover:bg-primary-hover transition-all">
-            Explorar Catálogo
-          </Link>
         </div>
       )}
     </div>

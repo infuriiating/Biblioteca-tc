@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
 import { ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { useLanguage } from '../context/LanguageContext'
 import BookCard from '../components/BookCard'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -15,6 +16,7 @@ function cn(...inputs) {
 const Home = () => {
   const navigate = useNavigate()
   const { user, loading: authLoading, refreshSession } = useAuth()
+  const { t, translateCategory } = useLanguage()
   const [searchParams] = useSearchParams()
   const query = searchParams.get('q') || ''
   const cat = searchParams.get('c') || '0'
@@ -125,7 +127,7 @@ const Home = () => {
       {/* Recommended */}
       <section>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-3xl font-semibold text-text-main">Recomendados</h2>
+          <h2 className="text-3xl font-semibold text-text-main">{t('home.recommended')}</h2>
         </div>
         <div className="flex gap-5 overflow-x-auto pb-4 custom-scrollbar-h px-1">
           {loading ? (
@@ -148,8 +150,8 @@ const Home = () => {
       {/* Catalog */}
       <section className="space-y-10 pt-10">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black text-text-main tracking-tight">Catálogo</h2>
-          <p className="text-text-muted text-lg font-medium mt-1">Explore todos os livros disponíveis na nossa biblioteca</p>
+          <h2 className="text-3xl font-black text-text-main tracking-tight">{t('home.catalog')}</h2>
+          <p className="text-text-muted text-lg font-medium mt-1">{t('home.catalogSub')}</p>
         </div>
 
         {/* Category Pills */}
@@ -163,7 +165,7 @@ const Home = () => {
                 : "bg-bg-surface border border-border/60 text-text-muted hover:border-primary/30 hover:text-primary"
             )}
           >
-            Todos
+            {t('navbar.all')}
           </button>
           {categories.map(c => (
             <button
@@ -176,7 +178,7 @@ const Home = () => {
                   : "bg-bg-surface border border-border/60 text-text-muted hover:border-primary/30 hover:text-primary"
               )}
             >
-              {c.name}
+              {translateCategory(c.name)}
             </button>
           ))}
         </div>
@@ -198,13 +200,13 @@ const Home = () => {
             ))
           ) : (
             <div className="col-span-full py-16 text-center space-y-4 bg-bg-surface/50 rounded-2xl border border-dashed border-border/50">
-              <p className="text-text-muted text-sm font-medium">Não foi possível carregar os livros.</p>
-              <p className="text-text-muted/60 text-xs">Verifique a sua ligação à internet.</p>
+              <p className="text-text-muted text-sm font-medium">{t('home.errorLoad')}</p>
+              <p className="text-text-muted/60 text-xs">{t('home.errorCheckNet')}</p>
               <button 
                 onClick={() => fetchData()}
                 className="mt-2 px-6 py-2.5 bg-bg-surface border border-border/50 rounded-xl text-xs font-bold text-primary hover:bg-bg-main transition-colors uppercase tracking-wider shadow-sm"
               >
-                Tentar Novamente
+                {t('home.retryBtn')}
               </button>
             </div>
           )}

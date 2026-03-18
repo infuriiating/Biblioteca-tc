@@ -16,7 +16,7 @@ import { useNotification } from '../../context/NotificationContext'
 
 const BookForm = () => {
   const { showToast } = useNotification()
-  const { t } = useLanguage()
+  const { t, translateCategory } = useLanguage()
   const { id } = useParams()
   const navigate = useNavigate()
   const isEdit = !!id
@@ -212,7 +212,7 @@ const BookForm = () => {
               <Select 
                 label={t('admin.editBook.primaryCategory')}
                 placeholder={t('admin.books.filterPlaceholder') || 'Select...'}
-                options={categories}
+                options={categories.map(c => ({...c, name: translateCategory(c.name)}))}
                 value={formData.category_id}
                 onChange={val => setFormData({...formData, category_id: val})}
               />

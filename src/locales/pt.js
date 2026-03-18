@@ -22,6 +22,9 @@ export default {
     login: 'Entrar',
     register: 'Registar',
     adminMenu: 'Administração',
+    docs: 'Documentação',
+    notifications: 'Notificações',
+    loading: 'Carregando...',
     all: 'Tudo'
   },
   settings: {
@@ -211,5 +214,80 @@ export default {
     isbn: 'ISBN',
     publisher: 'Editora',
     yearEdition: 'Ano de Edição'
+  },
+  docs: {
+    badge: 'Documentação Oficial',
+    title: 'Guia da Biblioteca',
+    subtitle: 'Tudo o que precisa de saber sobre o funcionamento da plataforma, desde requisições e devoluções aos nossos novos sistemas de Inteligência Artificial.',
+    roles: {
+      title: 'Contas e Cargos (Roles)',
+      desc: 'Existem dois tipos principais de contas na plataforma:',
+      student: 'Aluno (Estudante)',
+      studentDesc: 'Cargo atribuído automaticamente após o registo. Permite explorar o catálogo, ler resumos gerados por IA, e fazer requisições de livros.',
+      admin: 'Administrador',
+      adminDesc: 'Associado a funcionários da biblioteca e professores. Permite gerir o catálogo, aprovar requisições e processar devoluções (requer autenticação especial via /console).'
+    },
+    borrow: {
+      title: 'Como Requisitar um Livro',
+      desc: 'O processo de requisição foi desenhado para ser rápido e fácil:',
+      step1: 'Navegue até à página do livro desejado no Catálogo.',
+      step2: 'Clique no botão "Requisitar Livro". O estado passará a "Pendente".',
+      step3: 'Dirija-se à biblioteca física para levantar o livro. O administrador irá aprovar o pedido no sistema e o estado da requisição mudará para "Ativo".',
+      note: 'Nota: Terá um prazo definido (Ex: 14 dias) para entregar o livro. Pode verificar a data de vencimento no ecrã "Meus Empréstimos".'
+    },
+    pin: {
+      title: 'Sistema de PIN de Devolução',
+      desc: 'Para garantir a máxima segurança e impedir que um livro seja registado como devolvido por engano, utilizámos um sistema de PIN dinâmico.',
+      step1: 'Quando levanta um livro, um PIN de 4 dígitos é gerado de forma única para essa requisição.',
+      step2: 'Pode consultar este PIN a qualquer momento no ecrã "Meus Empréstimos", abaixo do título do livro ativo.',
+      step3: 'No momento da devolução: Deve entregar o livro em mãos ao administrador e fornecer-lhe o código PIN correspondente. O administrador só conseguirá fechar a requisição se introduzir o código correto.'
+    },
+    ai: {
+      title: 'Funcionalidades de Inteligência Artificial',
+      desc: 'A Biblioteca TC não é apenas uma base de dados, é uma plataforma inteligente. Integramos IA para melhorar a sua experiência:',
+      item1: 'Resumos Inteligentes (Ativo)',
+      item1Desc: 'Ao abrir os detalhes de um livro, a nossa integração com a API da OpenAI lê os metadados da obra e escreve dinamicamente um pequeno resumo cativante (3 ou 4 frases).',
+      item2: 'Search Semântico "Vibe Check" (Em Breve)',
+      item2Desc: 'Em vez de procurar apenas pelo título exato, poderá pesquisar conceitos, géneros ou descrições.',
+      item3: 'AI Chat Librarian (Em Breve)',
+      item3Desc: 'Um assistente virtual com quem poderá conversar para pedir sugestões de leitura personalizadas.'
+    },
+    adminPortal: {
+      title: 'Portal do Administrador (Console)',
+      desc: 'O portal de gestão de livros e utilizadores é invisível para os alunos comuns para manter a interface limpa e focada na leitura.',
+      desc2: 'Se tem permissões administrativas, siga estes passos:',
+      step1: 'Escreva manualmente /console no fim do URL do site.',
+      step2: 'Se a sua sessão já estiver iniciada e confirmada como Administrador, abrirá imediatamente o Painel de Gestão.',
+      step3: 'Os menus de gestão (Livros, Categorias, Empréstimos) ficarão fixos na sua Sidebar lateral enquanto a sessão durar.'
+    }
+  },
+  home: {
+    recommended: 'Recomendados',
+    catalog: 'Catálogo',
+    catalogSub: 'Explore todos os livros disponíveis na nossa biblioteca',
+    errorLoad: 'Não foi possível carregar os livros.',
+    errorCheckNet: 'Verifique a sua ligação à internet.',
+    retryBtn: 'Tentar Novamente'
+  },
+  myLoans: {
+  title: 'Meus Empréstimos',
+  subtitle: 'Histórico completo das suas requisições',
+  emptyTitle: 'Sem empréstimos',
+  emptyDesc: 'Ainda não requisitou nenhum livro do nosso catálogo.',
+  exploreCatalog: 'Explorar Catálogo',
+  status: {
+    active: 'Ativo',
+    pending: 'Pendente',
+    rejected: 'Recusado',
+    returned: 'Devolvido'
+  },
+  requestLabel: 'Requisição'
+},
+notifications: {
+    title: 'Notificações',
+    subtitle: 'Fique a par das atualizações da sua biblioteca',
+    emptyTitle: 'Tudo em dia!',
+    emptyDesc: 'Ainda não tem notificações. Quando houver avisos sobre empréstimos ou novos livros, aparecerão aqui.',
+    exploreCatalog: 'Explorar Catálogo'
   }
 }

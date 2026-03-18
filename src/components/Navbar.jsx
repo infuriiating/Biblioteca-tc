@@ -8,7 +8,7 @@ import { useLanguage } from '../context/LanguageContext'
 
 const Navbar = () => {
   const { user, profile, isAdmin, signOut } = useAuth()
-  const { t } = useLanguage()
+  const { t, translateCategory } = useLanguage()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('0')
   const [categories, setCategories] = useState([])
@@ -51,7 +51,7 @@ const Navbar = () => {
           >
             <option value="0">{t('navbar.all')}</option>
             {categories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+              <option key={c.id} value={c.id}>{translateCategory(c.name)}</option>
             ))}
           </select>
           <div className="w-px h-6 bg-border/50 self-center" />

@@ -11,6 +11,7 @@ import Signup from './pages/Signup'
 import Settings from './pages/Settings'
 import MyLoans from './pages/MyLoans'
 import Notifications from './pages/Notifications'
+import Docs from './pages/Docs'
 
 import ManageBooks from './pages/admin/ManageBooks'
 import ManageLoans from './pages/admin/ManageLoans'
@@ -82,6 +83,7 @@ function AppContent() {
                 />
                 <Route path="/definicoes" element={<Settings />} />
                 <Route path="/notificacoes" element={<Notifications />} />
+                <Route path="/docs" element={<Docs />} />
 
                 {/* Admin routes — local auth guard */}
                 <Route path="/console" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />

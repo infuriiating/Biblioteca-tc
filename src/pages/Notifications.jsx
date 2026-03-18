@@ -1,7 +1,9 @@
 import { Bell, Inbox, ChevronLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useLanguage } from '../context/LanguageContext'
 
 const Notifications = () => {
+  const { t } = useLanguage()
   return (
     <div className="max-w-4xl mx-auto py-10 px-4 space-y-8">
       <div className="flex items-center gap-4">
@@ -12,8 +14,8 @@ const Notifications = () => {
           <ChevronLeft size={22} />
         </Link>
         <div className="space-y-1">
-          <h1 className="text-4xl font-black text-text-main tracking-tight">Notificações</h1>
-          <p className="text-text-muted text-lg font-medium mt-1">Fique a par das atualizações da sua biblioteca</p>
+          <h1 className="text-4xl font-black text-text-main tracking-tight">{t('notifications.title')}</h1>
+          <p className="text-text-muted text-lg font-medium mt-1">{t('notifications.subtitle')}</p>
         </div>
       </div>
 
@@ -21,15 +23,15 @@ const Notifications = () => {
         <div className="w-20 h-20 bg-bg-main rounded-full flex items-center justify-center mb-6 text-text-muted/20">
           <Inbox size={40} />
         </div>
-        <h3 className="text-xl font-bold text-text-main">Tudo em dia!</h3>
+        <h3 className="text-xl font-bold text-text-main">{t('notifications.emptyTitle')}</h3>
         <p className="text-text-muted max-w-xs mt-2 font-medium">
-          Ainda não tem notificações. Quando houver avisos sobre empréstimos ou novos livros, aparecerão aqui.
+          {t('notifications.emptyDesc')}
         </p>
         <Link 
           to="/" 
           className="mt-8 px-8 py-3 bg-primary text-white rounded-2xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-105 transition-all active:scale-95"
         >
-          Explorar Catálogo
+          {t('notifications.exploreCatalog')}
         </Link>
       </div>
     </div>

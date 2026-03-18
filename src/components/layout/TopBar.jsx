@@ -1,9 +1,11 @@
-import { Search, Bell, ChevronDown, Menu } from 'lucide-react'
+import { Search, Bell, ChevronDown, Menu, HelpCircle } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { useLanguage } from '../../context/LanguageContext'
 import { useSearchParams, Link, useLocation } from 'react-router-dom'
 
 const TopBar = ({ onOpenSidebar }) => {
   const { user, profile, profileLoading } = useAuth()
+  const { t } = useLanguage()
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
   const query = searchParams.get('q') || ''
@@ -36,7 +38,7 @@ const TopBar = ({ onOpenSidebar }) => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={17} />
             <input
               type="text"
-              placeholder="Pesquisar livros..."
+              placeholder={t('navbar.searchPlaceholder')}
               value={query}
               onChange={handleSearch}
               className="w-full bg-bg-surface border border-border/50 rounded-xl py-2.5 pl-11 pr-4 text-sm text-text-main placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/8 transition-all"
@@ -47,8 +49,11 @@ const TopBar = ({ onOpenSidebar }) => {
 
       {/* Right — bell + avatar/auth */}
       <div className="flex items-center gap-3 shrink-0">
+        <Link to="/docs" className="p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all group" title={t('navbar.docs')}>
+          <HelpCircle size={18} className="group-hover:scale-110 transition-transform" />
+        </Link>
         {user && (
-          <Link to="/notificacoes" className="relative p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all">
+          <Link to="/notificacoes" className="relative p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('navbar.notifications')}>
             <Bell size={18} />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full border border-bg-surface" />
           </Link>
@@ -71,7 +76,7 @@ const TopBar = ({ onOpenSidebar }) => {
                 {user.user_metadata?.full_name || user.user_metadata?.display_name || user.user_metadata?.username || profile?.name || user.email?.split('@')[0] || 'Utilizador'}
               </p>
               <p className="text-[10px] text-text-muted capitalize font-medium">
-                {profileLoading ? 'Carregando...' : (profile?.role || 'Estudante')}
+                {profileLoading ? t('navbar.loading') : t(`admin.roles.${profile?.role || 'aluno'}`)}
               </p>
             </div>
           </div>
@@ -81,13 +86,13 @@ const TopBar = ({ onOpenSidebar }) => {
               to="/login"
               className="px-4 py-2 text-sm font-medium text-text-muted hover:text-primary transition-colors"
             >
-              Entrar
+              {t('navbar.login')}
             </Link>
             <Link
               to="/signup"
               className="px-4 py-2 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-all active:scale-95"
             >
-              Registe-se
+              {t('navbar.register')}
             </Link>
           </div>
         )}

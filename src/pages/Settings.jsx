@@ -6,6 +6,7 @@ import { User, Sun, Moon, LogOut, Save, Check, Settings as SettingsIcon, Shield,
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { useLanguage } from '../context/LanguageContext'
+import Select from '../components/ui/Select'
 
 function cn(...inputs) {
   return twMerge(clsx(inputs))
@@ -97,7 +98,7 @@ const Settings = () => {
       )}
 
       {/* Appearance Section */}
-      <div className="bg-bg-surface rounded-3xl border border-border/50 shadow-sm overflow-hidden">
+      <div className="bg-bg-surface rounded-3xl border border-border/50 shadow-sm">
         <div className="px-8 py-5 border-b border-border/50">
           <div className="flex items-center gap-3">
             <Sun size={18} className="text-primary" />
@@ -174,36 +175,18 @@ const Settings = () => {
         {/* Language Selection */}
         <div className="px-8 py-6 border-t border-border/50">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted mb-4">{t('settings.languageSection')}</p>
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={() => setLanguage('pt')}
-              className={cn(
-                "relative flex items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all",
-                language === 'pt' ? "border-primary bg-primary/5 text-primary" : "border-border/50 hover:border-primary/30 text-text-muted"
-              )}
-            >
-              <span className="text-sm font-bold">Português (PT)</span>
-              {language === 'pt' && (
-                <div className="absolute right-4 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                  <Check size={11} className="text-white" strokeWidth={3} />
-                </div>
-              )}
-            </button>
-            <button
-              onClick={() => setLanguage('en')}
-              className={cn(
-                "relative flex items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all",
-                language === 'en' ? "border-primary bg-primary/5 text-primary" : "border-border/50 hover:border-primary/30 text-text-muted"
-              )}
-            >
-              <span className="text-sm font-bold">English (EN)</span>
-              {language === 'en' && (
-                <div className="absolute right-4 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                  <Check size={11} className="text-white" strokeWidth={3} />
-                </div>
-              )}
-            </button>
-          </div>
+          <Select 
+            options={[
+              { id: 'pt', name: 'Português (PT)' },
+              { id: 'en', name: 'English (EN)' },
+              { id: 'es', name: 'Español (ES)' },
+              { id: 'fr', name: 'Français (FR)' },
+              { id: 'de', name: 'Deutsch (DE)' },
+              { id: 'nl', name: 'Nederlands (NL)' }
+            ]}
+            value={language}
+            onChange={(val) => setLanguage(val)}
+          />
         </div>
       </div>
 

@@ -87,7 +87,7 @@ const AdminLogin = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/40 ml-4">
-                Email
+                {t('auth.emailLabel')}
               </label>
               <div className="relative group">
                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
@@ -96,7 +96,7 @@ const AdminLogin = () => {
                   required
                   autoComplete="email"
                   className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 outline-none focus:bg-white/10 focus:border-primary/50 text-white transition-all font-bold placeholder:text-white/10 text-sm"
-                  placeholder="admin@exemplo.pt"
+                  placeholder={t('auth.emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -105,7 +105,7 @@ const AdminLogin = () => {
 
             <div className="space-y-2">
               <label className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/40 ml-4">
-                Password
+                {t('auth.passwordLabel')}
               </label>
               <div className="relative group">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
@@ -114,7 +114,7 @@ const AdminLogin = () => {
                   required
                   autoComplete="current-password"
                   className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 outline-none focus:bg-white/10 focus:border-primary/50 text-white transition-all font-bold placeholder:text-white/10 text-sm"
-                  placeholder="••••••••••••"
+                  placeholder={t('auth.passwordPlaceholder')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />

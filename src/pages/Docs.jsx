@@ -1,6 +1,5 @@
 import { ShieldAlert, BookOpen, Bot, Key, ShieldCheck, ExternalLink, GraduationCap, Globe } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
-import Select from '../components/ui/Select'
 
 const DocSection = ({ icon: Icon, title, children }) => (
   <div className="bg-bg-surface border border-border/50 rounded-[2rem] p-8 shadow-sm hover:shadow-md transition-shadow">
@@ -36,13 +35,7 @@ const Docs = () => {
     <div className="max-w-4xl mx-auto space-y-12 pb-20 px-4">
       {/* Header */}
       <div className="space-y-4 mt-4 relative">
-        <div className="absolute right-0 top-0 flex items-center gap-3 z-10 w-48">
-           <Select 
-             options={languages.map(l => ({ id: l.code, name: l.name }))}
-             value={language}
-             onChange={(val) => setLanguage(val)}
-           />
-        </div>
+
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-widest">
           <BookOpen size={16} /> {t('docs.badge')}
         </div>

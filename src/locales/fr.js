@@ -45,7 +45,27 @@ export default {
   },
   requestLabel: 'Demande'
 },
-notifications: {
+auth: {
+    loginTitle: 'Content de vous revoir',
+    loginSubtitle: 'Connectez-vous pour accéder à la bibliothèque',
+    emailLabel: 'Adresse e-mail',
+    emailPlaceholder: 'votre@email.com',
+    passwordLabel: 'Mot de passe',
+    passwordPlaceholder: '••••••••',
+    signInBtn: 'Se connecter',
+    or: 'ou',
+    googleBtn: 'Continuer avec Google',
+    noAccount: 'Pas de compte ?',
+    registerLink: 'S\'inscrire',
+    signupTitle: 'Créer un Compte',
+    signupSubtitle: 'Rejoignez notre bibliothèque',
+    nameLabel: 'Nom complet',
+    namePlaceholder: 'Jean Dupont',
+    signUpBtn: 'Créer le compte',
+    hasAccount: 'Vous avez déjà un compte ?',
+    loginLink: 'Se connecter'
+  },
+  notifications: {
     title: 'Notifications',
     subtitle: 'Restez informé des mises à jour de votre bibliothèque',
     emptyTitle: 'Tout est à jour !',

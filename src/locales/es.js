@@ -45,7 +45,27 @@ export default {
   },
   requestLabel: 'Solicitud'
 },
-notifications: {
+auth: {
+    loginTitle: 'Bienvenido de nuevo',
+    loginSubtitle: 'Inicia sesión para acceder a la biblioteca',
+    emailLabel: 'Correo electrónico',
+    emailPlaceholder: 'tu@email.com',
+    passwordLabel: 'Contraseña',
+    passwordPlaceholder: '••••••••',
+    signInBtn: 'Entrar',
+    or: 'o',
+    googleBtn: 'Continuar con Google',
+    noAccount: '¿No tienes cuenta?',
+    registerLink: 'Regístrate',
+    signupTitle: 'Crear Cuenta',
+    signupSubtitle: 'Únete a nuestra biblioteca',
+    nameLabel: 'Nombre completo',
+    namePlaceholder: 'Juan Pérez',
+    signUpBtn: 'Crear cuenta',
+    hasAccount: '¿Ya tienes cuenta?',
+    loginLink: 'Entrar'
+  },
+  notifications: {
     title: 'Notificaciones',
     subtitle: 'Mantente al día con tu biblioteca',
     emptyTitle: '¡Todo al día!',

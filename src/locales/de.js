@@ -45,7 +45,27 @@ export default {
   },
   requestLabel: 'Anfrage'
 },
-notifications: {
+auth: {
+    loginTitle: 'Willkommen zurück',
+    loginSubtitle: 'Melden Sie sich an, um auf die Bibliothek zuzugreifen',
+    emailLabel: 'E-Mail',
+    emailPlaceholder: 'deine@email.com',
+    passwordLabel: 'Passwort',
+    passwordPlaceholder: '••••••••',
+    signInBtn: 'Anmelden',
+    or: 'oder',
+    googleBtn: 'Weiter mit Google',
+    noAccount: 'Kein Konto?',
+    registerLink: 'Registrieren',
+    signupTitle: 'Konto erstellen',
+    signupSubtitle: 'Treten Sie unserer Bibliothek bei',
+    nameLabel: 'Vollständiger Name',
+    namePlaceholder: 'Max Mustermann',
+    signUpBtn: 'Konto erstellen',
+    hasAccount: 'Bereits ein Konto?',
+    loginLink: 'Anmelden'
+  },
+  notifications: {
     title: 'Benachrichtigungen',
     subtitle: 'Bleiben Sie über Ihre Bibliothek auf dem Laufenden',
     emptyTitle: 'Alles auf dem neuesten Stand!',

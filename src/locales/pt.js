@@ -283,7 +283,27 @@ export default {
   },
   requestLabel: 'Requisição'
 },
-notifications: {
+auth: {
+    loginTitle: 'Bem-vindo de volta',
+    loginSubtitle: 'Inicie sessão para aceder à biblioteca',
+    emailLabel: 'E-mail',
+    emailPlaceholder: 'o-seu@email.com',
+    passwordLabel: 'Palavra-passe',
+    passwordPlaceholder: '••••••••',
+    signInBtn: 'Entrar',
+    or: 'ou',
+    googleBtn: 'Continuar com Google',
+    noAccount: 'Sem conta?',
+    registerLink: 'Registe-se',
+    signupTitle: 'Criar Conta',
+    signupSubtitle: 'Junte-se à nossa biblioteca',
+    nameLabel: 'Nome completo',
+    namePlaceholder: 'Criança Prodígio',
+    signUpBtn: 'Criar conta',
+    hasAccount: 'Já tem conta?',
+    loginLink: 'Entrar'
+  },
+  notifications: {
     title: 'Notificações',
     subtitle: 'Fique a par das atualizações da sua biblioteca',
     emptyTitle: 'Tudo em dia!',

@@ -2,10 +2,11 @@ import { Search, Bell, ChevronDown, Menu, HelpCircle } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useLanguage } from '../../context/LanguageContext'
 import { useSearchParams, Link, useLocation } from 'react-router-dom'
+import Select from '../ui/Select'
 
 const TopBar = ({ onOpenSidebar }) => {
   const { user, profile, profileLoading } = useAuth()
-  const { t } = useLanguage()
+  const { t, language, setLanguage } = useLanguage()
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
   const query = searchParams.get('q') || ''
@@ -49,6 +50,20 @@ const TopBar = ({ onOpenSidebar }) => {
 
       {/* Right — bell + avatar/auth */}
       <div className="flex items-center gap-3 shrink-0">
+        <div className="w-24 sm:w-32 hidden sm:block">
+          <Select 
+            options={[
+              { id: 'pt', name: 'PT' },
+              { id: 'en', name: 'EN' },
+              { id: 'es', name: 'ES' },
+              { id: 'fr', name: 'FR' },
+              { id: 'de', name: 'DE' },
+              { id: 'nl', name: 'NL' }
+            ]}
+            value={language}
+            onChange={setLanguage}
+          />
+        </div>
         <Link to="/docs" className="p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all group" title={t('navbar.docs')}>
           <HelpCircle size={18} className="group-hover:scale-110 transition-transform" />
         </Link>

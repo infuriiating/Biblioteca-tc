@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useLanguage } from '../context/LanguageContext'
 import { Mail, Lock, User, UserPlus, AlertCircle, BookOpen } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import logo from '../assets/logo.png'
@@ -12,6 +13,7 @@ const Signup = () => {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const { signUp, signInWithGoogle } = useAuth()
+  const { t } = useLanguage()
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
@@ -79,8 +81,8 @@ const Signup = () => {
 
         <div className="bg-bg-surface border border-border/60 rounded-3xl shadow-sm p-7 space-y-5">
           <div className="space-y-1">
-            <h1 className="text-2xl font-semibold text-text-main">Criar conta</h1>
-            <p className="text-sm text-text-muted font-normal">Junte-se à biblioteca escolar</p>
+            <h1 className="text-2xl font-semibold text-text-main">{t('auth.signupTitle')}</h1>
+            <p className="text-sm text-text-muted font-normal">{t('auth.signupSubtitle')}</p>
           </div>
 
           {error && (
@@ -92,14 +94,14 @@ const Signup = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-text-muted ml-1">Nome</label>
+              <label className="text-xs font-medium text-text-muted ml-1">{t('auth.nameLabel')}</label>
               <div className="relative">
                 <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
                 <input
                   type="text"
                   required
                   className="w-full bg-bg-main border border-border rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/40 transition-all text-text-main placeholder:text-text-muted/60"
-                  placeholder="O seu nome"
+                  placeholder={t('auth.namePlaceholder')}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
@@ -107,7 +109,7 @@ const Signup = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-text-muted ml-1">E-mail</label>
+              <label className="text-xs font-medium text-text-muted ml-1">{t('auth.emailLabel')}</label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
                 <input
@@ -123,7 +125,7 @@ const Signup = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-text-muted ml-1">Palavra-passe</label>
+              <label className="text-xs font-medium text-text-muted ml-1">{t('auth.passwordLabel')}</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
                 <input
@@ -132,7 +134,7 @@ const Signup = () => {
                   minLength={6}
                   autoComplete="new-password"
                   className="w-full bg-bg-main border border-border rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/40 transition-all text-text-main placeholder:text-text-muted/60"
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder={t('auth.passwordPlaceholder')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -147,14 +149,14 @@ const Signup = () => {
               {loading ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <><UserPlus size={16} /> Criar Conta</>
+                <><UserPlus size={16} /> {t('auth.signUpBtn')}</>
               )}
             </button>
           </form>
 
           <div className="relative flex items-center">
             <div className="flex-grow border-t border-border/60" />
-            <span className="mx-3 text-text-muted text-xs font-normal">ou</span>
+            <span className="mx-3 text-text-muted text-xs font-normal">{t('auth.or')}</span>
             <div className="flex-grow border-t border-border/60" />
           </div>
 
@@ -169,12 +171,12 @@ const Signup = () => {
               <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z" />
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
             </svg>
-            Continuar com Google
+            {t('auth.googleBtn')}
           </button>
 
           <p className="text-center text-sm text-text-muted font-normal">
-            Já tem conta?{' '}
-            <Link to="/entrar" className="text-primary hover:underline font-medium">Entrar</Link>
+            {t('auth.hasAccount')}{' '}
+            <Link to="/entrar" className="text-primary hover:underline font-medium">{t('auth.loginLink')}</Link>
           </p>
         </div>
       </div>

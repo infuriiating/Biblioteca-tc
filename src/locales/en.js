@@ -283,7 +283,27 @@ export default {
   },
   requestLabel: 'Request'
 },
-notifications: {
+auth: {
+    loginTitle: 'Welcome back',
+    loginSubtitle: 'Log in to access the library',
+    emailLabel: 'Email',
+    emailPlaceholder: 'your@email.com',
+    passwordLabel: 'Password',
+    passwordPlaceholder: '••••••••',
+    signInBtn: 'Sign In',
+    or: 'or',
+    googleBtn: 'Continue with Google',
+    noAccount: 'No account?',
+    registerLink: 'Sign Up',
+    signupTitle: 'Create Account',
+    signupSubtitle: 'Join our library',
+    nameLabel: 'Full name',
+    namePlaceholder: 'John Doe',
+    signUpBtn: 'Create account',
+    hasAccount: 'Already have an account?',
+    loginLink: 'Sign In'
+  },
+  notifications: {
     title: 'Notifications',
     subtitle: 'Stay up to date with your library',
     emptyTitle: 'All caught up!',

@@ -45,7 +45,27 @@ export default {
   },
   requestLabel: 'Aanvraag'
 },
-notifications: {
+auth: {
+    loginTitle: 'Welkom terug',
+    loginSubtitle: 'Log in om toegang te krijgen tot de bibliotheek',
+    emailLabel: 'E-mail',
+    emailPlaceholder: 'jouw@email.com',
+    passwordLabel: 'Wachtwoord',
+    passwordPlaceholder: '••••••••',
+    signInBtn: 'Inloggen',
+    or: 'of',
+    googleBtn: 'Doorgaan met Google',
+    noAccount: 'Geen account?',
+    registerLink: 'Registreren',
+    signupTitle: 'Account Aanmaken',
+    signupSubtitle: 'Word lid van onze bibliotheek',
+    nameLabel: 'Volledige naam',
+    namePlaceholder: 'Jan Jansen',
+    signUpBtn: 'Account aanmaken',
+    hasAccount: 'Heb je al een account?',
+    loginLink: 'Inloggen'
+  },
+  notifications: {
     title: 'Meldingen',
     subtitle: 'Blijf op de hoogte van uw bibliotheek',
     emptyTitle: 'Helemaal bij!',

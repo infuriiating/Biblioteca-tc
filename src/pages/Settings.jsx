@@ -59,7 +59,7 @@ const Settings = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 py-4 pb-20">
+    <div className="max-w-4xl mx-auto space-y-6 pb-20">
       {/* Header */}
       <div className="space-y-1 mb-10">
         <h1 className="text-4xl font-black text-text-main tracking-tight">{t('settings.title')}</h1>
@@ -105,6 +105,23 @@ const Settings = () => {
             <h2 className="font-bold text-text-main">{t('settings.appearance')}</h2>
           </div>
         </div>
+        {/* Language Selection */}
+        <div className="px-8 py-6 border-b border-border/50">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted mb-4">{t('settings.languageSection')}</p>
+          <Select 
+            options={[
+              { id: 'pt', name: 'Português (PT)' },
+              { id: 'en', name: 'English (EN)' },
+              { id: 'es', name: 'Español (ES)' },
+              { id: 'fr', name: 'Français (FR)' },
+              { id: 'de', name: 'Deutsch (DE)' },
+              { id: 'nl', name: 'Nederlands (NL)' }
+            ]}
+            value={language}
+            onChange={(val) => setLanguage(val)}
+          />
+        </div>
+
         <div className="px-8 py-6">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted mb-4">{t('settings.theme')}</p>
           <div className="grid grid-cols-2 gap-4">
@@ -170,23 +187,6 @@ const Settings = () => {
               )}
             </button>
           </div>
-        </div>
-
-        {/* Language Selection */}
-        <div className="px-8 py-6 border-t border-border/50">
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted mb-4">{t('settings.languageSection')}</p>
-          <Select 
-            options={[
-              { id: 'pt', name: 'Português (PT)' },
-              { id: 'en', name: 'English (EN)' },
-              { id: 'es', name: 'Español (ES)' },
-              { id: 'fr', name: 'Français (FR)' },
-              { id: 'de', name: 'Deutsch (DE)' },
-              { id: 'nl', name: 'Nederlands (NL)' }
-            ]}
-            value={language}
-            onChange={(val) => setLanguage(val)}
-          />
         </div>
       </div>
 

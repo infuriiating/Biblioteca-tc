@@ -25,7 +25,25 @@ export default {
     docs: 'Documentação',
     notifications: 'Notificações',
     loading: 'Carregando...',
-    all: 'Tudo'
+    all: 'Tudo',
+    home: 'Início',
+    settings: 'Definições'
+  },
+  landing: {
+    badge: 'Biblioteca Digital',
+    title: 'Escola Secundária Tomás Cabreira',
+    subtitle: 'Bem-vindo ao portal digital da nossa biblioteca. Explore o nosso vasto catálogo de livros, teses e recursos educativos.',
+    exploreBtn: 'Explorar Catálogo',
+    aboutTitle: 'Sobre a nossa Biblioteca',
+    aboutDesc: 'A Biblioteca da Escola Secundária Tomás Cabreira é um espaço de aprendizagem, descoberta e partilha. Agora, com a nossa versão digital, pode consultar a disponibilidade de livros e gerir as suas requisições de qualquer lugar.',
+    features: {
+      search: 'Pesquisa Inteligente',
+      searchDesc: 'Encontre facilmente o que procura por título, autor ou categoria.',
+      manage: 'Gestão Online',
+      manageDesc: 'Acompanhe os seus empréstimos e receba notificações de devolução.',
+      access: 'Acesso Facilitado',
+      accessDesc: 'Disponível em qualquer dispositivo para toda a comunidade escolar.'
+    }
   },
   settings: {
     title: 'Definições',
@@ -213,7 +231,19 @@ export default {
     bookMetadata: 'Detalhes da Obra',
     isbn: 'ISBN',
     publisher: 'Editora',
-    yearEdition: 'Ano de Edição'
+    yearEdition: 'Ano de Edição',
+    reviewsTitle: 'Avaliações e Comentários',
+    writeReview: 'Escrever uma Avaliação',
+    editReview: 'Editar a sua Avaliação',
+    submitReview: 'Submeter Avaliação',
+    cancelReview: 'Cancelar',
+    noReviews: 'Ainda sem avaliações. Seja o primeiro a avaliar este livro!',
+    ratingLabel: 'Classificação',
+    commentLabel: 'Comentário (opcional)',
+    averageRating: 'Média de Avaliações',
+    reviewSuccess: 'Avaliação submetida com sucesso!',
+    reviewError: 'Erro ao submeter a avaliação. Tente novamente.',
+    youReviewed: 'Você avaliou este livro'
   },
   docs: {
     badge: 'Documentação Oficial',
@@ -267,7 +297,9 @@ export default {
     catalogSub: 'Explore todos os livros disponíveis na nossa biblioteca',
     errorLoad: 'Não foi possível carregar os livros.',
     errorCheckNet: 'Verifique a sua ligação à internet.',
-    retryBtn: 'Tentar Novamente'
+    retryBtn: 'Tentar Novamente',
+    noBooksFound: 'Não encontrámos nenhum livro que corresponda à sua pesquisa.',
+    searchNoResults: 'Tente utilizar palavras-chave diferentes ou limpar os filtros.'
   },
   myLoans: {
   title: 'Meus Empréstimos',

@@ -25,7 +25,25 @@ export default {
     docs: 'Documentation',
     notifications: 'Notifications',
     loading: 'Loading...',
-    all: 'All'
+    all: 'All',
+    home: 'Home',
+    settings: 'Settings'
+  },
+  landing: {
+    badge: 'Digital Library',
+    title: 'Tomás Cabreira Secondary School',
+    subtitle: 'Welcome to our library\'s digital portal. Explore our vast catalog of books, theses, and educational resources.',
+    exploreBtn: 'Explore Catalog',
+    aboutTitle: 'About our Library',
+    aboutDesc: 'The Tomás Cabreira Secondary School Library is a space for learning, discovery, and sharing. Now, with our digital version, you can check book availability and manage your requests from anywhere.',
+    features: {
+      search: 'Smart Search',
+      searchDesc: 'Easily find what you are looking for by title, author, or category.',
+      manage: 'Online Management',
+      manageDesc: 'Track your loans and receive return notifications.',
+      access: 'Easy Access',
+      accessDesc: 'Available on any device for the entire school community.'
+    }
   },
   settings: {
     title: 'Settings',
@@ -213,7 +231,19 @@ export default {
     bookMetadata: 'Book Details',
     isbn: 'ISBN',
     publisher: 'Publisher',
-    yearEdition: 'Edition Year'
+    yearEdition: 'Publish Year',
+    reviewsTitle: 'Reviews & Comments',
+    writeReview: 'Write a Review',
+    editReview: 'Edit your Review',
+    submitReview: 'Submit Review',
+    cancelReview: 'Cancel',
+    noReviews: 'No reviews yet. Be the first to review this book!',
+    ratingLabel: 'Rating',
+    commentLabel: 'Comment (optional)',
+    averageRating: 'Average Rating',
+    reviewSuccess: 'Review submitted successfully!',
+    reviewError: 'Failed to submit review. Please try again.',
+    youReviewed: 'You reviewed this book'
   },
   docs: {
     badge: 'Official Documentation',
@@ -265,9 +295,11 @@ export default {
     recommended: 'Recommended',
     catalog: 'Catalog',
     catalogSub: 'Explore all books available in our library',
-    errorLoad: 'Failed to load books.',
+    errorLoad: 'Could not load books.',
     errorCheckNet: 'Please check your internet connection.',
-    retryBtn: 'Retry'
+    retryBtn: 'Try Again',
+    noBooksFound: 'No books matched your search.',
+    searchNoResults: 'Try using different keywords or clearing your filters.'
   },
   myLoans: {
   title: 'My Loans',

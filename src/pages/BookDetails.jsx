@@ -3,8 +3,10 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
-import { Book, ChevronLeft, Sparkles, CheckCircle2 } from 'lucide-react'
+import { Book, ChevronLeft, Sparkles, CheckCircle2, MessageSquare } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
+import { useNotification } from '../context/NotificationContext'
+import StarRating from '../components/StarRating'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -17,12 +19,18 @@ const BookDetails = () => {
   const navigate = useNavigate()
   const { user, loading: authLoading } = useAuth()
   const { t, translateCategory } = useLanguage()
+  const { showToast } = useNotification()
   const [book, setBook] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
   const [summaryError, setSummaryError] = useState(null)
   const [isRequesting, setIsRequesting] = useState(false)
   const [requestStatus, setRequestStatus] = useState(null)
+  const [reviews, setReviews] = useState([])
+  const [userReview, setUserReview] = useState(null)
+  const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' })
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false)
+  const [showReviewForm, setShowReviewForm] = useState(false)
   const fetchInProgress = useRef(false)
   const lastFetchTime = useRef(0)
 
@@ -35,6 +43,16 @@ const BookDetails = () => {
     if (authLoading) return
     fetchBook()
   }, [id, authLoading])
+
+  useEffect(() => {
+    if (user && reviews.length > 0) {
+      const myReview = reviews.find(r => r.user_id === user.id)
+      if (myReview) {
+        setUserReview(myReview)
+        setReviewForm({ rating: myReview.rating, comment: myReview.comment || '' })
+      }
+    }
+  }, [user, reviews])
 
   useRefreshOnFocus(() => fetchBook())
 
@@ -67,6 +85,14 @@ const BookDetails = () => {
         .single()
       
       if (error) throw error
+
+      const { data: reviewsData } = await supabase
+        .from('reviews')
+        .select('*, profiles(name)')
+        .eq('book_id', id)
+        .order('created_at', { ascending: false })
+
+      setReviews(reviewsData || [])
       
       setBook({ ...data, category_name: data.categories?.name, cover_url: getCoverUrl(data.cover_image) })
     } catch (error) {
@@ -100,6 +126,44 @@ const BookDetails = () => {
       setRequestStatus('error')
     } finally {
       setIsRequesting(false)
+    }
+  }
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault()
+    if (!user || reviewForm.rating === 0) return
+    setIsSubmittingReview(true)
+    
+    try {
+      if (userReview) {
+        // Update existing review
+        const { error } = await supabase
+          .from('reviews')
+          .update({ rating: reviewForm.rating, comment: reviewForm.comment })
+          .eq('id', userReview.id)
+        if (error) throw error
+      } else {
+        // Insert new review
+        const { error } = await supabase
+          .from('reviews')
+          .insert([{ 
+            book_id: id, 
+            user_id: user.id, 
+            rating: reviewForm.rating, 
+            comment: reviewForm.comment 
+          }])
+        if (error) throw error
+      }
+      
+      // Refresh the page data
+      await fetchBook()
+      setShowReviewForm(false)
+      showToast(t('bookDetails.reviewSuccess'), 'success')
+    } catch (err) {
+      console.error(err)
+      showToast(t('bookDetails.reviewError'), 'danger')
+    } finally {
+      setIsSubmittingReview(false)
     }
   }
 
@@ -173,6 +237,10 @@ const BookDetails = () => {
     </div>
   )
 
+  const averageRating = reviews.length > 0 
+    ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length 
+    : 0
+
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 space-y-6">
       <Link to="/" className="inline-flex items-center gap-1.5 text-text-muted hover:text-primary text-sm font-medium transition-colors">
@@ -189,9 +257,20 @@ const BookDetails = () => {
         </div>
 
         {/* Title & Author */}
-        <div className="space-y-2 mb-10 max-w-2xl">
-          <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight leading-tight">{book.title}</h1>
-          <p className="text-white/50 font-normal">{book.author}</p>
+        <div className="space-y-4 mb-10 max-w-2xl">
+          <div>
+            <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight leading-tight">{book.title}</h1>
+            <p className="text-white/50 font-normal mt-2">{book.author}</p>
+          </div>
+          
+          <div className="flex items-center justify-center gap-3">
+             <StarRating rating={averageRating} size={18} />
+             <span className="text-white/70 text-sm font-medium">
+               {averageRating > 0 ? averageRating.toFixed(1) : t('bookDetails.noReviews')} 
+               {reviews.length > 0 && ` (${reviews.length})`}
+             </span>
+          </div>
+
           {book.category_name && (
             <span className="inline-block mt-2 px-3 py-1 bg-white/10 rounded-full text-xs text-white/60 font-medium">
               {translateCategory(book.category_name)}
@@ -284,6 +363,92 @@ const BookDetails = () => {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="bg-bg-surface rounded-[2rem] p-8 shadow-sm border border-border/30 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5 text-text-main">
+            <MessageSquare size={18} className="text-primary" />
+            <h3 className="text-lg font-semibold">{t('bookDetails.reviewsTitle')}</h3>
+          </div>
+          {user && !showReviewForm && (
+            <button 
+              onClick={() => setShowReviewForm(true)}
+              className="text-sm font-medium bg-primary/10 text-primary px-4 py-2 rounded-xl hover:bg-primary/20 transition-colors"
+            >
+              {userReview ? t('bookDetails.editReview') : t('bookDetails.writeReview')}
+            </button>
+          )}
+        </div>
+
+        {showReviewForm && (
+          <form onSubmit={handleSubmitReview} className="bg-bg-main/50 p-6 rounded-2xl border border-border/50 space-y-5">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-text-main block">{t('bookDetails.ratingLabel')} <span className="text-red-500">*</span></label>
+              <StarRating 
+                rating={reviewForm.rating} 
+                interactive={true} 
+                onChange={(rating) => setReviewForm(prev => ({ ...prev, rating }))} 
+                size={24}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-text-main block">{t('bookDetails.commentLabel')}</label>
+              <textarea 
+                value={reviewForm.comment}
+                onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
+                placeholder="..."
+                className="w-full bg-bg-surface border border-border/50 rounded-xl p-4 text-sm focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 min-h-[100px] resize-y"
+              />
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <button 
+                type="submit" 
+                disabled={isSubmittingReview || reviewForm.rating === 0}
+                className="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-sm shadow-primary/20 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100"
+              >
+                {isSubmittingReview ? '...' : t('bookDetails.submitReview')}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setShowReviewForm(false)}
+                className="px-6 py-2.5 rounded-xl text-sm font-bold text-text-muted hover:bg-border/50 transition-colors"
+              >
+                {t('bookDetails.cancelReview')}
+              </button>
+            </div>
+          </form>
+        )}
+
+        <div className="space-y-4">
+          {reviews.length === 0 ? (
+            <p className="text-sm text-text-muted italic">{t('bookDetails.noReviews')}</p>
+          ) : (
+            reviews.map(review => (
+              <div key={review.id} className="border-b border-border/20 last:border-0 pb-5 last:pb-0">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase">
+                      {review.profiles?.name?.charAt(0) || 'U'}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-text-main">
+                        {review.profiles?.name || 'Utilizador'}
+                        {user?.id === review.user_id && <span className="ml-2 text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider">{t('bookDetails.youReviewed')}</span>}
+                      </p>
+                      <p className="text-[10px] text-text-muted">{new Date(review.created_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <StarRating rating={review.rating} size={14} />
+                </div>
+                {review.comment && (
+                  <p className="text-sm text-text-muted ml-10 mt-1 leading-relaxed">{review.comment}</p>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

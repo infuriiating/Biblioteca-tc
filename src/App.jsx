@@ -12,6 +12,7 @@ import Settings from './pages/Settings'
 import MyLoans from './pages/MyLoans'
 import Notifications from './pages/Notifications'
 import Docs from './pages/Docs'
+import Landing from './pages/Landing'
 
 import ManageBooks from './pages/admin/ManageBooks'
 import ManageLoans from './pages/admin/ManageLoans'
@@ -42,7 +43,7 @@ function ScrollToTop() {
 }
 // Main Content Wrapper to handle global states like Auth Loading
 function AppContent() {
-  const { loading } = useAuth()
+  const { user, loading } = useAuth()
 
   if (loading) {
     return (
@@ -66,12 +67,14 @@ function AppContent() {
         <Route path="/console/login" element={<AdminLogin />} />
 
         {/* Main app with sidebar layout */}
+        <Route path="/" element={user ? <DashboardLayout><Home /></DashboardLayout> : <Landing />} />
+        
         <Route 
           path="/*" 
           element={
             <DashboardLayout>
               <Routes>
-                <Route path="/" element={<Home />} />
+                <Route path="/catalogo" element={<Home />} />
                 <Route path="/livro/:id" element={<BookDetails />} />
                 <Route 
                   path="/emprestimos" 

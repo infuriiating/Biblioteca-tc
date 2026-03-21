@@ -1,16 +1,17 @@
-import { Search, Bell, ChevronDown, Menu, HelpCircle } from 'lucide-react'
+import { Search, Bell, ChevronDown, Menu, HelpCircle, Home, Settings, Library } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useLanguage } from '../../context/LanguageContext'
 import { useSearchParams, Link, useLocation } from 'react-router-dom'
 import Select from '../ui/Select'
+import logo from '../../assets/logo.png'
 
 const TopBar = ({ onOpenSidebar }) => {
-  const { user, profile, profileLoading } = useAuth()
+  const { user, profile, profileLoading, isAdmin } = useAuth()
   const { t, language, setLanguage } = useLanguage()
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
   const query = searchParams.get('q') || ''
-  const isDiscoverPage = location.pathname === '/'
+  const isDiscoverPage = location.pathname === '/' || location.pathname === '/catalogo'
 
   const handleSearch = (e) => {
     const val = e.target.value
@@ -25,12 +26,27 @@ const TopBar = ({ onOpenSidebar }) => {
   return (
     <header className="sticky top-0 z-40 h-20 bg-bg-main/90 backdrop-blur-lg flex items-center justify-between px-4 lg:px-8 gap-4 py-4">
       {/* Mobile Menu */}
-      <button
-        onClick={onOpenSidebar}
-        className="lg:hidden p-2 text-text-muted hover:text-primary transition-colors shrink-0"
-      >
-        <Menu size={22} />
-      </button>
+      {/* Mobile Menu / Logo Wrapper */}
+      <div className="flex items-center gap-3 shrink-0">
+        {user && isAdmin && (
+          <button
+            onClick={onOpenSidebar}
+            className="lg:hidden p-2 text-text-muted hover:text-primary transition-colors"
+          >
+            <Menu size={22} />
+          </button>
+        )}
+        {(!user || !isAdmin) && (
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 overflow-hidden">
+              <img src={logo} alt="Logo" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+            </div>
+            <span className="hidden sm:block text-sm font-black text-text-main tracking-tight leading-none">
+              Biblioteca<span className="text-primary italic">TC</span>
+            </span>
+          </Link>
+        )}
+      </div>
 
       {/* Search Bar - Only on Discover Page */}
       <div className="flex-1 min-w-[200px] max-w-xl relative group">
@@ -62,11 +78,35 @@ const TopBar = ({ onOpenSidebar }) => {
             ]}
             value={language}
             onChange={setLanguage}
+            triggerClassName="!h-[38px] !px-3 !rounded-xl"
           />
         </div>
+
+        {/* Home Icon for Guests and Regular Users */}
+        {(!user || !isAdmin) && (
+          <Link to="/catalogo" className="p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all group" title={t('navbar.home')}>
+            <Home size={18} className="transition-transform" />
+          </Link>
+        )}
+
+        {/* My Library Button for Regular Users */}
+        {user && !isAdmin && (
+          <Link to="/emprestimos" className="flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-xl font-bold text-sm transition-all shadow-sm">
+            <Library size={18} />
+            <span className="hidden xl:inline">{t('sidebar.myLibrary')}</span>
+          </Link>
+        )}
+
         <Link to="/docs" className="p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all group" title={t('navbar.docs')}>
-          <HelpCircle size={18} className="group-hover:scale-110 transition-transform" />
+          <HelpCircle size={18} className="transition-transform" />
         </Link>
+
+        {/* Settings Icon for Guests and Regular Users */}
+        {(!user || !isAdmin) && (
+          <Link to="/definicoes" className="p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all group" title={t('navbar.settings')}>
+            <Settings size={18} className="transition-transform" />
+          </Link>
+        )}
         {user && (
           <Link to="/notificacoes" className="relative p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('navbar.notifications')}>
             <Bell size={18} />

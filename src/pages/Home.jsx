@@ -28,6 +28,16 @@ const Home = () => {
   const [categoryFilter, setCategoryFilter] = useState(cat)
   const fetchInProgress = useRef(false)
   const lastFetchTime = useRef(0)
+  const catalogRef = useRef(null)
+  const prevQueryLength = useRef(query.length)
+
+  // Auto-scroll to catalog when starting a search
+  useEffect(() => {
+    if (query.length > 0 && prevQueryLength.current === 0 && catalogRef.current) {
+      catalogRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+    prevQueryLength.current = query.length
+  }, [query])
 
   useEffect(() => {
     setCategoryFilter(cat)
@@ -125,30 +135,32 @@ const Home = () => {
   return (
     <div className="space-y-10 pb-12">
       {/* Recommended */}
-      <section>
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-3xl font-semibold text-text-main">{t('home.recommended')}</h2>
-        </div>
-        <div className="flex gap-5 overflow-x-auto pb-4 custom-scrollbar-h px-1">
-          {loading ? (
-            [...Array(4)].map((_, i) => (
-              <div key={i} className="min-w-[200px] aspect-[3/4] bg-bg-surface rounded-[1.75rem] animate-pulse shrink-0" />
-            ))
-          ) : (
-            featuredBooks.map(book => (
-              <BookCard
-                key={book.id}
-                book={book}
-                variant="recommended"
-                onClick={(id) => navigate(`/livro/${id}`)}
-              />
-            ))
-          )}
-        </div>
-      </section>
+      {query.length === 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-3xl font-semibold text-text-main">{t('home.recommended')}</h2>
+          </div>
+          <div className="flex gap-5 overflow-x-auto pb-4 custom-scrollbar-h px-1">
+            {loading ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="min-w-[200px] aspect-[3/4] bg-bg-surface rounded-[1.75rem] animate-pulse shrink-0" />
+              ))
+            ) : (
+              featuredBooks.map(book => (
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  variant="recommended"
+                  onClick={(id) => navigate(`/livro/${id}`)}
+                />
+              ))
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Catalog */}
-      <section className="space-y-10 pt-10">
+      <section ref={catalogRef} className="space-y-10 pt-10 scroll-mt-24">
         <div className="space-y-1">
           <h2 className="text-3xl font-black text-text-main tracking-tight">{t('home.catalog')}</h2>
           <p className="text-text-muted text-lg font-medium mt-1">{t('home.catalogSub')}</p>
@@ -198,6 +210,11 @@ const Home = () => {
                 onClick={(id) => navigate(`/livro/${id}`)}
               />
             ))
+          ) : books.length > 0 ? (
+            <div className="col-span-full py-16 text-center space-y-4 bg-bg-surface/50 rounded-2xl border border-dashed border-border/50">
+              <p className="text-text-muted text-sm font-medium">{t('home.noBooksFound')}</p>
+              <p className="text-text-muted/60 text-xs">{t('home.searchNoResults')}</p>
+            </div>
           ) : (
             <div className="col-span-full py-16 text-center space-y-4 bg-bg-surface/50 rounded-2xl border border-dashed border-border/50">
               <p className="text-text-muted text-sm font-medium">{t('home.errorLoad')}</p>

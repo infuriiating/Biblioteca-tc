@@ -5,18 +5,10 @@ import { useLanguage } from '../context/LanguageContext'
 const Notifications = () => {
   const { t } = useLanguage()
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4 space-y-8">
-      <div className="flex items-center gap-4">
-        <Link 
-          to="/" 
-          className="p-3 bg-bg-surface hover:bg-white rounded-2xl shadow-sm border border-border/50 transition-all text-text-muted hover:text-primary"
-        >
-          <ChevronLeft size={22} />
-        </Link>
-        <div className="space-y-1">
-          <h1 className="text-4xl font-black text-text-main tracking-tight">{t('notifications.title')}</h1>
-          <p className="text-text-muted text-lg font-medium mt-1">{t('notifications.subtitle')}</p>
-        </div>
+    <div className="max-w-4xl mx-auto space-y-8 pb-20">
+      <div className="space-y-1">
+        <h1 className="text-4xl font-black text-text-main tracking-tight">{t('notifications.title')}</h1>
+        <p className="text-text-muted text-lg font-medium mt-1">{t('notifications.subtitle')}</p>
       </div>
 
       <div className="bg-bg-surface rounded-[2.5rem] border border-border/40 shadow-sm overflow-hidden min-h-[400px] flex flex-col items-center justify-center text-center p-10">

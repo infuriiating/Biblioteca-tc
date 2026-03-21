@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Default-allow: /
+
+# Protect administration sections from being indexed directly
+Disallow: /console/
+Disallow: /definicoes
+Disallow: /emprestimos
+Disallow: /notificacoes
+
+# Sitemap location linking
+Sitemap: https://bibliotecatc.vercel.app/sitemap.xml

@@ -28,7 +28,7 @@ const TopBar = () => {
       {/* Mobile Menu */}
       <div className="flex items-center gap-3 shrink-0">
         {/* Logo Wrapper */}
-        <Link to="/" className="flex items-center gap-2.5 group">
+        <Link to="/landing" className="flex items-center gap-2.5 group">
           <div className="w-9 h-9 overflow-hidden">
             <img src={logo} alt="Logo" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
           </div>

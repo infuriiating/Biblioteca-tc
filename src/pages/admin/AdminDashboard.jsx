@@ -206,10 +206,10 @@ const AdminDashboard = () => {
             <TrendingUp size={140} />
           </div>
           <div className="relative z-10 flex-grow flex flex-col">
-            <div className="grid grid-cols-2 gap-4 flex-grow">
+            <div className="grid grid-cols-2 grid-rows-2 gap-4 flex-grow">
               <Link
                 to="/console/livros"
-                className="bg-white/5 hover:bg-white/10 p-4 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
+                className="bg-white/5 hover:bg-white/10 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
               >
                 <div className="p-3 rounded-2xl bg-primary/20 text-primary group-hover:scale-110 transition-transform">
                   <BookOpen size={24} />
@@ -218,7 +218,7 @@ const AdminDashboard = () => {
               </Link>
               <Link
                 to="/console/categorias"
-                className="bg-white/5 hover:bg-white/10 p-4 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
+                className="bg-white/5 hover:bg-white/10 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
               >
                 <div className="p-3 rounded-2xl bg-orange-500/20 text-orange-400 group-hover:scale-110 transition-transform">
                   <Tags size={24} />
@@ -227,7 +227,7 @@ const AdminDashboard = () => {
               </Link>
               <Link
                 to="/console/emprestimos"
-                className="bg-white/5 hover:bg-white/10 p-4 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
+                className="bg-white/5 hover:bg-white/10 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
               >
                 <div className="p-3 rounded-2xl bg-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform">
                   <Library size={24} />
@@ -236,7 +236,7 @@ const AdminDashboard = () => {
               </Link>
               <Link
                 to="/console/utilizadores"
-                className="bg-white/5 hover:bg-white/10 p-4 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
+                className="bg-white/5 hover:bg-white/10 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
               >
                 <div className="p-3 rounded-2xl bg-green-500/20 text-green-400 group-hover:scale-110 transition-transform">
                   <ShieldCheck size={24} />

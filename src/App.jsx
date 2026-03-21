@@ -68,6 +68,7 @@ function AppContent() {
 
         {/* Main app with sidebar layout */}
         <Route path="/" element={user ? <DashboardLayout><Home /></DashboardLayout> : <Landing />} />
+        <Route path="/landing" element={<Landing />} />
         
         <Route 
           path="/*" 

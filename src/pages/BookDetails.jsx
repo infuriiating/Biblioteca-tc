@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
-import { Book, ChevronLeft, Sparkles, CheckCircle2, MessageSquare } from 'lucide-react'
+import { Book, ChevronLeft, Sparkles, CheckCircle2, MessageSquare, Star, Edit } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useNotification } from '../context/NotificationContext'
 import StarRating from '../components/StarRating'
@@ -17,7 +17,7 @@ function cn(...inputs) {
 const BookDetails = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { user, loading: authLoading } = useAuth()
+  const { user, isAdmin, loading: authLoading } = useAuth()
   const { t, translateCategory } = useLanguage()
   const { showToast } = useNotification()
   const [book, setBook] = useState(null)
@@ -126,6 +126,17 @@ const BookDetails = () => {
       setRequestStatus('error')
     } finally {
       setIsRequesting(false)
+    }
+  }
+
+  const handleToggleFeatured = async () => {
+    const newVal = !book.is_featured
+    const { error } = await supabase.from('books').update({ is_featured: newVal }).eq('id', id)
+    if (error) {
+      showToast('Erro ao actualizar destaque', 'danger')
+    } else {
+      setBook(prev => ({ ...prev, is_featured: newVal }))
+      showToast(newVal ? 'Livro marcado como destaque ⭐' : 'Destaque removido', 'success')
     }
   }
 
@@ -301,6 +312,31 @@ const BookDetails = () => {
             {t('bookDetails.availableOf').replace('{available}', book.available_qty).replace('{total}', book.quantity)}
           </p>
         </div>
+
+        {/* Admin Action Bar */}
+        {isAdmin && (
+          <div className="flex items-center justify-center gap-3 w-full max-w-xs mb-10">
+            <button
+              onClick={handleToggleFeatured}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-bold border transition-all",
+                book.is_featured
+                  ? "bg-yellow-500/20 border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/30"
+                  : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white"
+              )}
+            >
+              <Star size={15} fill={book.is_featured ? 'currentColor' : 'none'} />
+              {book.is_featured ? 'Destacado' : 'Destacar'}
+            </button>
+            <Link
+              to={`/console/livros?q=${encodeURIComponent(book.title)}`}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-bold border bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white transition-all"
+            >
+              <Edit size={15} />
+              Editar
+            </Link>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="w-full max-w-md space-y-6">

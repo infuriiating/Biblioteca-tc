@@ -12,7 +12,10 @@ import {
   ChevronRight,
   Star,
   ArrowRight,
-  Plus
+  Plus,
+  Tags,
+  ShieldCheck,
+  Library
 } from 'lucide-react'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -198,51 +201,47 @@ const AdminDashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-[#0a1629] rounded-[2.5rem] p-8 text-white space-y-6 shadow-xl relative overflow-hidden h-full flex flex-col">
+        <div className="bg-[#0a1629] rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden h-full flex flex-col">
           <div className="absolute top-0 right-0 p-8 opacity-5">
             <TrendingUp size={140} />
           </div>
-          <div className="relative z-10">
-            <h2 className="text-lg font-bold mb-6">{t('admin.dashboard.quickActions')}</h2>
-            <div className="space-y-3">
-              <Link
-                to="/console/livros/novo"
-                className="w-full bg-white/10 hover:bg-white/20 p-4 rounded-2xl flex items-center gap-3 transition-all border border-white/5 group"
-              >
-                <div className="p-2 rounded-xl bg-primary/20 text-primary">
-                  <Plus size={18} />
-                </div>
-                <div>
-                  <p className="font-bold text-sm">{t('admin.dashboard.addNewBook')}</p>
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest">{t('admin.dashboard.updateCatalog')}</p>
-                </div>
-                <ArrowRight size={14} className="ml-auto text-white/20 group-hover:text-white/60 transition-colors" />
-              </Link>
+          <div className="relative z-10 flex-grow flex flex-col">
+            <div className="grid grid-cols-2 gap-4 flex-grow">
               <Link
                 to="/console/livros"
-                className="w-full bg-white/10 hover:bg-white/20 p-4 rounded-2xl flex items-center gap-3 transition-all border border-white/5 group"
+                className="bg-white/5 hover:bg-white/10 p-4 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
               >
-                <div className="p-2 rounded-xl bg-orange-500/20 text-orange-400">
-                  <BookOpen size={18} />
+                <div className="p-3 rounded-2xl bg-primary/20 text-primary group-hover:scale-110 transition-transform">
+                  <BookOpen size={24} />
                 </div>
-                <div>
-                  <p className="font-bold text-sm">{t('admin.dashboard.manageBooks')}</p>
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest">{t('admin.dashboard.editOrRemove')}</p>
+                <p className="font-bold text-sm text-center">{t('sidebar.books')}</p>
+              </Link>
+              <Link
+                to="/console/categorias"
+                className="bg-white/5 hover:bg-white/10 p-4 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
+              >
+                <div className="p-3 rounded-2xl bg-orange-500/20 text-orange-400 group-hover:scale-110 transition-transform">
+                  <Tags size={24} />
                 </div>
-                <ArrowRight size={14} className="ml-auto text-white/20 group-hover:text-white/60 transition-colors" />
+                <p className="font-bold text-sm text-center">{t('sidebar.categories')}</p>
               </Link>
               <Link
                 to="/console/emprestimos"
-                className="w-full bg-white/10 hover:bg-white/20 p-4 rounded-2xl flex items-center gap-3 transition-all border border-white/5 group"
+                className="bg-white/5 hover:bg-white/10 p-4 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
               >
-                <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400">
-                  <Users size={18} />
+                <div className="p-3 rounded-2xl bg-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform">
+                  <Library size={24} />
                 </div>
-                <div>
-                  <p className="font-bold text-sm">{t('admin.dashboard.manageLoans')}</p>
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest">{t('admin.dashboard.approveReject')}</p>
+                <p className="font-bold text-sm text-center">{t('sidebar.loans')}</p>
+              </Link>
+              <Link
+                to="/console/utilizadores"
+                className="bg-white/5 hover:bg-white/10 p-4 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
+              >
+                <div className="p-3 rounded-2xl bg-green-500/20 text-green-400 group-hover:scale-110 transition-transform">
+                  <ShieldCheck size={24} />
                 </div>
-                <ArrowRight size={14} className="ml-auto text-white/20 group-hover:text-white/60 transition-colors" />
+                <p className="font-bold text-sm text-center">{t('sidebar.users')}</p>
               </Link>
             </div>
           </div>

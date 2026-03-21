@@ -160,7 +160,7 @@ const BookForm = () => {
               <div className="p-4 rounded-2xl bg-white/20 text-white">
                 <Upload size={32} />
               </div>
-              <span className="text-white text-xs font-extrabold uppercase tracking-[0.2em]">{t('admin.editBook.uploadImage')}</span>
+              <span className="text-white text-xs font-extrabold uppercase tracking-[0.2em] text-center px-4">{t('admin.editBook.uploadImage')}</span>
               <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
             </label>
           </div>

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRefreshOnFocus } from '../../hooks/useRefreshOnFocus'
 import { Plus, Search, Star, Trash2, Edit, ExternalLink, Filter } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import Select from '../../components/ui/Select'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -18,7 +18,8 @@ const ManageBooks = () => {
   const { confirm, showToast } = useNotification()
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [searchParams] = useSearchParams()
+  const [search, setSearch] = useState(searchParams.get('q') || '')
   const [categoryFilter, setCategoryFilter] = useState('0')
   const [categories, setCategories] = useState([])
   const fetchInProgress = useRef(false)
@@ -215,7 +216,7 @@ const ManageBooks = () => {
                           )}
                         </div>
                         <div className="space-y-1">
-                          <p className="font-extrabold text-text-main group-hover:text-primary transition-colors line-clamp-1">{book.title}</p>
+                          <Link to={`/livro/${book.id}`} className="font-extrabold text-text-main hover:text-primary transition-colors line-clamp-1 block">{book.title}</Link>
                           <p className="text-xs text-text-muted font-bold opacity-60">{book.author}</p>
                         </div>
                       </div>

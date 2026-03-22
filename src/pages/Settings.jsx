@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
-import { User, Sun, Moon, LogOut, Save, Check, Settings as SettingsIcon, Shield, Globe } from 'lucide-react'
+import { User, Sun, Moon, LogOut, Save, Check, Settings as SettingsIcon, Shield, Globe, MessageSquare, Send, X } from 'lucide-react'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { useLanguage } from '../context/LanguageContext'
+import { useNotification } from '../context/NotificationContext'
 import Select from '../components/ui/Select'
 
 function cn(...inputs) {
@@ -24,6 +25,12 @@ const Settings = () => {
   const [displayName, setDisplayName] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  
+  // Notification & Feedback
+  const { showToast } = useNotification()
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [feedbackText, setFeedbackText] = useState('')
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false)
 
   useEffect(() => {
     if (profile?.full_name) setDisplayName(profile.full_name)
@@ -56,6 +63,25 @@ const Settings = () => {
 
   const handleLogout = async () => {
     await signOut()
+  }
+
+  const handleSendFeedback = async () => {
+    if (!feedbackText.trim() || !user) return
+    setIsSubmittingFeedback(true)
+    const { error } = await supabase.from('feedback').insert({
+      user_id: user.id,
+      message: feedbackText.trim()
+    })
+    setIsSubmittingFeedback(false)
+    
+    if (error) {
+       console.error(error)
+       showToast('Erro ao enviar feedback', 'danger')
+    } else {
+       showToast('Obrigado pelo seu feedback!', 'success')
+       setFeedbackText('')
+       setShowFeedback(false)
+    }
   }
 
   return (
@@ -191,6 +217,64 @@ const Settings = () => {
       </div>
 
 
+      {/* Feedback Section */}
+      {user && (
+        <div className="bg-bg-surface rounded-3xl border border-border/50 shadow-sm overflow-hidden mb-6">
+          <div className="px-8 py-5 border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <MessageSquare size={18} className="text-primary" />
+              <h2 className="font-bold text-text-main">Enviar Feedback</h2>
+            </div>
+          </div>
+          <div className="px-8 py-6">
+            {!showFeedback ? (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-text-main text-sm">Problemas ou Sugestões?</p>
+                  <p className="text-text-muted text-xs mt-0.5">Ajude-nos a melhorar a plataforma descrevendo a sua experiência.</p>
+                </div>
+                <button
+                  onClick={() => setShowFeedback(true)}
+                  className="flex items-center gap-2 px-5 py-3 bg-primary/10 text-primary hover:bg-primary/20 rounded-2xl font-bold text-sm transition-all active:scale-95"
+                >
+                  <MessageSquare size={15} />
+                  Escrever
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                <textarea
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  placeholder="Descreva o problema que encontrou ou a sua sugestão de melhoria..."
+                  className="w-full bg-bg-main/50 border border-border/50 rounded-2xl p-4 text-sm text-text-main resize-none focus:outline-none focus:border-primary/50 transition-colors min-h-[120px]"
+                />
+                <div className="flex items-center justify-end gap-3">
+                  <button
+                    onClick={() => { setShowFeedback(false); setFeedbackText(''); }}
+                    className="flex items-center gap-2 px-5 py-2.5 text-text-muted hover:text-text-main font-bold text-sm transition-colors"
+                  >
+                    <X size={15} />
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleSendFeedback}
+                    disabled={isSubmittingFeedback || !feedbackText.trim()}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white hover:bg-primary-hover rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50 disabled:grayscale"
+                  >
+                    {isSubmittingFeedback ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Send size={14} />
+                    )}
+                    Enviar Feedback
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Account Section */}
       {user && (

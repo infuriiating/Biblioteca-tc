@@ -23,6 +23,7 @@ import BookForm from './pages/admin/BookForm'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminUsers from './pages/admin/AdminUsers'
+import ManageFeedback from './pages/admin/ManageFeedback'
 
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminProtectedRoute from './components/AdminProtectedRoute'
@@ -99,6 +100,7 @@ function AppContent() {
                 <Route path="/console/categorias" element={<AdminProtectedRoute><ManageCategories /></AdminProtectedRoute>} />
                 <Route path="/console/emprestimos" element={<AdminProtectedRoute><ManageLoans /></AdminProtectedRoute>} />
                 <Route path="/console/utilizadores" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
+                <Route path="/console/feedback" element={<AdminProtectedRoute><ManageFeedback /></AdminProtectedRoute>} />
                 <Route path="/console/livros/novo" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
                 <Route path="/console/livros/editar/:id" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
               </Routes>

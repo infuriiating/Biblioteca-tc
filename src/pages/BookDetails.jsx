@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
-import { Book, ChevronLeft, Sparkles, CheckCircle2, MessageSquare, Star, Edit } from 'lucide-react'
+import { Book, ChevronLeft, Sparkles, CheckCircle2, MessageSquare, Star, Edit, Trash2 } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useNotification } from '../context/NotificationContext'
 import { notifyUser } from '../lib/sendEmail'
@@ -20,13 +20,14 @@ const BookDetails = () => {
   const navigate = useNavigate()
   const { user, isAdmin, loading: authLoading } = useAuth()
   const { t, translateCategory } = useLanguage()
-  const { showToast } = useNotification()
+  const { showToast, confirm } = useNotification()
   const [book, setBook] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
   const [summaryError, setSummaryError] = useState(null)
   const [isRequesting, setIsRequesting] = useState(false)
   const [requestStatus, setRequestStatus] = useState(null)
+  const [userHasLoan, setUserHasLoan] = useState(false)
   const [reviews, setReviews] = useState([])
   const [userReview, setUserReview] = useState(null)
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' })
@@ -44,6 +45,22 @@ const BookDetails = () => {
     if (authLoading) return
     fetchBook()
   }, [id, authLoading])
+
+  useEffect(() => {
+    const checkUserLoan = async () => {
+      if (!user) return
+      const { data } = await supabase
+        .from('loans')
+        .select('id')
+        .eq('book_id', id)
+        .eq('user_id', user.id)
+        .in('status', ['pending', 'active'])
+        .limit(1)
+      
+      setUserHasLoan(data && data.length > 0)
+    }
+    checkUserLoan()
+  }, [user, id])
 
   useEffect(() => {
     if (user && reviews.length > 0) {
@@ -113,13 +130,27 @@ const BookDetails = () => {
 
   const handleLoan = async () => {
     if (!user) { navigate('/entrar'); return }
-    if (book.available_qty <= 0) return
+    if (book.available_qty <= 0 || userHasLoan) return
     setIsRequesting(true)
+    setRequestStatus(null)
+
     try {
-      const { error: loanError } = await supabase.from('loans').insert([
-        { book_id: id, user_id: user.id, status: 'pending' }
-      ])
-      if (loanError) throw loanError
+      const { data, error: rpcError } = await supabase.rpc('request_book', {
+        p_book_id: id,
+        p_user_id: user.id
+      })
+      
+      if (rpcError) throw rpcError
+      
+      if (!data.success) {
+        showToast(data.message || 'Erro ao requisitar livro', 'error')
+        setRequestStatus('error')
+        return
+      }
+      
+      // Update local state smoothly
+      setUserHasLoan(true)
+      setBook(prev => ({ ...prev, available_qty: prev.available_qty - 1 }))
       
       // Notify the user about their reservation
       await notifyUser({
@@ -127,7 +158,7 @@ const BookDetails = () => {
         userEmail: user.email,
         type: 'info',
         subject: 'Reserva Registada',
-        message: `O seu pedido de reserva para o livro "${book.title}" foi recebido e aguarda aprovação. Será notificado assim que o processo estiver concluído.`,
+        message: `O seu pedido de reserva para o livro "${book.title}" foi recebido e aguarda aprovação. Terá 12 horas para levantar o livro na biblioteca antes que a reserva expire automaticamente.`,
         buttonText: 'Ver os meus empréstimos',
         buttonLink: `${window.location.origin}/emprestimos`
       })
@@ -135,6 +166,7 @@ const BookDetails = () => {
       setRequestStatus('success')
     } catch (error) {
       console.error('Error requesting loan:', error)
+      showToast('Erro ao processar o seu pedido.', 'danger')
       setRequestStatus('error')
     } finally {
       setIsRequesting(false)
@@ -303,24 +335,27 @@ const BookDetails = () => {
 
         {/* Action Button */}
         <div className="flex flex-col items-center gap-3 w-full max-w-xs mb-10">
-          {requestStatus === 'success' ? (
-            <div className="bg-green-500/20 border border-green-500/30 py-3.5 px-8 rounded-2xl w-full text-green-400 font-medium flex items-center justify-center gap-2 text-sm">
-              <CheckCircle2 size={18} /> {t('bookDetails.requestedSuccess')}
+          {requestStatus === 'success' || userHasLoan ? (
+            <div className="bg-primary/20 border border-primary/30 py-3.5 px-8 rounded-2xl w-full text-primary font-bold shadow-inner flex flex-col items-center justify-center gap-1 text-sm">
+               <div className="flex items-center gap-2">
+                 <CheckCircle2 size={18} /> {userHasLoan && requestStatus !== 'success' ? 'Já Requisitado' : t('bookDetails.requestedSuccess')}
+               </div>
+               <span className="text-[10px] text-primary/70 font-medium">Aguardando aprovação do administrador</span>
             </div>
           ) : (
             <button 
               onClick={handleLoan}
               disabled={isRequesting || book.available_qty <= 0}
-              className="w-full bg-primary text-white py-3.5 rounded-2xl font-medium shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95 flex items-center justify-center gap-2.5 disabled:opacity-30 disabled:grayscale text-sm"
+              className="w-full bg-primary text-white py-3.5 rounded-2xl font-bold tracking-wide shadow-xl shadow-primary/20 hover:bg-primary/90 hover:-translate-y-0.5 transition-all active:translate-y-0 active:scale-95 flex items-center justify-center gap-2.5 disabled:opacity-40 disabled:grayscale disabled:hover:translate-y-0 disabled:active:scale-100 text-sm"
             >
               {isRequesting ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <><Book size={16} /> {book.available_qty <= 0 ? t('bookDetails.outOfStock') : t('bookDetails.requestBook')}</>
+                <><Book size={18} /> {book.available_qty <= 0 ? t('bookDetails.outOfStock') : t('bookDetails.requestBook')}</>
               )}
             </button>
           )}
-          <p className="text-[11px] text-white/30 font-normal">
+          <p className="text-[11px] text-white/30 font-semibold tracking-wider uppercase">
             {t('bookDetails.availableOf').replace('{available}', book.available_qty).replace('{total}', book.quantity)}
           </p>
         </div>
@@ -489,7 +524,38 @@ const BookDetails = () => {
                       <p className="text-[10px] text-text-muted">{new Date(review.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  <StarRating rating={review.rating} size={14} />
+                  <div className="flex items-center gap-3">
+                    <StarRating rating={review.rating} size={14} />
+                    {(isAdmin || user?.id === review.user_id) && (
+                      <button 
+                        onClick={async () => {
+                          const confirmed = await confirm({
+                            title: "Apagar Avaliação",
+                            message: "Tem a certeza que deseja apagar esta avaliação?",
+                            type: "danger"
+                          })
+                          if (confirmed) {
+                             const { error } = await supabase.from('reviews').delete().eq('id', review.id)
+                             if (!error) {
+                               showToast("Avaliação apagada com sucesso.", "success")
+                               if (user?.id === review.user_id) {
+                                 setUserReview(null)
+                                 setShowReviewForm(false)
+                                 setReviewForm({ rating: 0, comment: '' })
+                               }
+                               setReviews(prev => prev.filter(r => r.id !== review.id))
+                             } else {
+                               showToast("Erro ao apagar avaliação.", "danger")
+                             }
+                          }
+                        }}
+                        className="text-red-500 hover:text-red-600 transition-colors bg-red-500/10 p-1.5 rounded-lg"
+                        title="Apagar avaliação"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 {review.comment && (
                   <p className="text-sm text-text-muted ml-10 mt-1 leading-relaxed">{review.comment}</p>

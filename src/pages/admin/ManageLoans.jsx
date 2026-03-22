@@ -16,7 +16,7 @@ function cn(...inputs) {
 
 const ManageLoans = () => {
   const { t } = useLanguage()
-  const { prompt, showToast } = useNotification()
+  const { prompt, showToast, confirm } = useNotification()
   const [loans, setLoans] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -59,17 +59,25 @@ const ManageLoans = () => {
 
       if (fetchError) throw fetchError
       
-      // Auto-reject pending loans older than 24h
+      // Auto-reject pending loans older than 12h (Frontend fallback for pg_cron)
       const nowTime = new Date()
-      const expiryLimit = 24 * 60 * 60 * 1000
-      const expiredIds = (data || [])
-        .filter(l => l.status === 'pending' && (nowTime - new Date(l.created_at)) > expiryLimit)
-        .map(l => l.id)
+      const expiryLimit = 12 * 60 * 60 * 1000
+      const expiredLoans = (data || []).filter(l => l.status === 'pending' && (nowTime - new Date(l.created_at)) > expiryLimit)
 
-      if (expiredIds.length > 0) {
+      if (expiredLoans.length > 0) {
+        const expiredIds = expiredLoans.map(l => l.id)
         await supabase.from('loans').update({ status: 'rejected' }).in('id', expiredIds)
+        
+        // Restore stock for auto-rejected requests
+        for (const l of expiredLoans) {
+          if (l.book_id) {
+             const { data: b } = await supabase.from('books').select('available_qty').eq('id', l.book_id).single()
+             if (b) await supabase.from('books').update({ available_qty: b.available_qty + 1 }).eq('id', l.book_id)
+          }
+        }
+
         // Refresh data after auto-rejection
-        const { data: refreshedData, error: refreshError } = await supabase
+        const { data: refreshedData } = await supabase
           .from('loans')
           .select(`
             *,
@@ -78,7 +86,6 @@ const ManageLoans = () => {
           `)
           .order('id', { ascending: false })
         
-        if (refreshError) throw refreshError
         setLoans(refreshedData || [])
       } else {
         setLoans(data || [])
@@ -104,12 +111,24 @@ const ManageLoans = () => {
   useRefreshOnFocus(() => fetchLoans())
 
   const updateLoanStatus = async (loanId, newStatus, bookId) => {
+    const loan = loans.find(l => l.id === loanId)
+    
+    let appliedFine = 0
+    if (newStatus === 'returned' && loan?.due_date) {
+      if (new Date() > new Date(loan.due_date)) {
+        appliedFine = 5
+      }
+    }
+
     const updates = {
       status: newStatus,
       ...(newStatus === 'active' && {
         due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
       }),
-      ...(newStatus === 'returned' && { returned_at: new Date().toISOString() })
+      ...(newStatus === 'returned' && { 
+        returned_at: new Date().toISOString(),
+        fine_amount: appliedFine
+      })
     }
 
     const { error } = await supabase
@@ -122,20 +141,15 @@ const ManageLoans = () => {
       return
     }
 
-    // Stock management
-    if (newStatus === 'active' && bookId) {
-      const { data: book } = await supabase.from('books').select('available_qty').eq('id', bookId).single()
-      if (book) {
-        await supabase.from('books').update({ available_qty: book.available_qty - 1 }).eq('id', bookId)
-      }
-    } else if (newStatus === 'returned' && bookId) {
+    // Stock management (Stock is securely deducted via request_book RPC upon User Click)
+    // We only need to RESTORE it if the Admins rejects or marks it returned.
+    if ((newStatus === 'rejected' || newStatus === 'returned') && bookId) {
       const { data: book } = await supabase.from('books').select('available_qty').eq('id', bookId).single()
       if (book) {
         await supabase.from('books').update({ available_qty: book.available_qty + 1 }).eq('id', bookId)
       }
     }
 
-    const loan = loans.find(l => l.id === loanId)
     const bookTitle = loan?.books?.title || ''
     const userEmail = loan?.profiles?.email || ''
     const userId = loan?.user_id
@@ -411,6 +425,13 @@ const ManageLoans = () => {
                             </span>
                           )
                         })()}
+
+                        {loan.status === 'returned' && loan.fine_amount > 0 && (
+                          <div className="flex items-center gap-1.5 text-red-500 bg-red-500/10 px-3 py-1.5 rounded-full border border-red-500/20 shadow-sm mt-2">
+                            <AlertCircle size={12} strokeWidth={2.5} />
+                            <span className="text-[10px] font-bold tracking-wider uppercase">Multa: {loan.fine_amount}€</span>
+                          </div>
+                        )}
                         
                         {(loan.due_date && loan.status === 'active') && (
                           <div className="flex items-center gap-2 text-[10px] font-bold">
@@ -449,7 +470,22 @@ const ManageLoans = () => {
                             >
                               {t('admin.common.approve')}
                             </button>
-                            {/* Rejeitar button removed from pending view as per request */}
+                            <button
+                              onClick={async () => {
+                                const confirmed = await confirm({
+                                  title: "Rejeitar Pedido",
+                                  message: "Tem a certeza que deseja rejeitar este pedido? Esta ação irá devolver a unidade de stock para que outros alunos a possam requisitar.",
+                                  type: "danger"
+                                })
+                                if (confirmed) {
+                                  await updateLoanStatus(loan.id, 'rejected', loan.book_id)
+                                  showToast("Pedido rejeitado com sucesso.", "success")
+                                }
+                              }}
+                              className="px-4 py-2 bg-red-500/10 text-red-500 text-[10px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                            >
+                              {t('admin.common.rejectBtn') || 'Rejeitar'}
+                            </button>
                           </>
                         )}
                         {loan.status === 'active' && (
@@ -537,9 +573,17 @@ const ManageLoans = () => {
                 </div>
                 <div className="flex gap-2">
                   {loan.status === 'pending' && (
-                    <button onClick={() => updateLoanStatus(loan.id, 'active', loan.book_id)} className="px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all">
-                      {t('admin.common.approve')}
-                    </button>
+                    <>
+                      <button onClick={() => updateLoanStatus(loan.id, 'active', loan.book_id)} className="px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all">
+                        {t('admin.common.approve')}
+                      </button>
+                      <button onClick={async () => {
+                        const confirmed = await confirm({ title: "Rejeitar", message: "Tem a certeza?", type: "danger" })
+                        if (confirmed) { await updateLoanStatus(loan.id, 'rejected', loan.book_id); showToast("Rejeitado!", "success") }
+                      }} className="px-3 py-1.5 bg-red-500/10 text-red-500 text-[10px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                        {t('admin.common.rejectBtn') || 'Rejeitar'}
+                      </button>
+                    </>
                   )}
                   {loan.status === 'active' && (
                     <button onClick={async () => {

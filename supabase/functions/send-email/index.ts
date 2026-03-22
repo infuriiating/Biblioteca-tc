@@ -24,17 +24,17 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'BibliotecaTC <onboarding@resend.dev>', // Replace with your verified domain in production
+        from: 'BibliotecaTC <noreply@contact.bibliotecatc.pt>', // Replace with your verified domain in production
         to,
         subject,
         html,
       }),
     })
-    
+
     const data = await res.json()
-    
+
     if (!res.ok) {
-        return new Response(JSON.stringify({ error: data }), {
+      return new Response(JSON.stringify({ error: data }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: res.status,
       })

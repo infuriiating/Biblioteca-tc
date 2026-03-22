@@ -132,9 +132,25 @@ const MyLoans = () => {
                 <p className="text-[10px] text-text-muted uppercase font-bold tracking-tighter">{t('myLoans.requestLabel')} #{loan.id}</p>
                 {loan.status === 'active' && (
                    <div className="flex flex-col items-center gap-1 mt-1">
-                     {loan.due_date && <p className="text-[9px] text-orange-500/60 font-medium">Vence: {new Date(loan.due_date).toLocaleDateString()}</p>}
+                     {loan.due_date && (
+                       <p className={cn(
+                         "text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase",
+                         new Date() > new Date(loan.due_date) 
+                           ? "text-red-500 bg-red-500/10 border-red-500/20" 
+                           : "text-orange-500/60 border-transparent bg-transparent"
+                       )}>
+                         {new Date() > new Date(loan.due_date) ? 'Em Atraso - Sujeito a Multa' : `Vence: ${new Date(loan.due_date).toLocaleDateString()}`}
+                       </p>
+                     )}
                      <p className="text-[10px] text-primary font-black bg-primary/10 px-2 py-1 rounded-md border border-primary/20 mt-1 uppercase tracking-widest shadow-sm">
                        PIN DEV: {new Date(loan.created_at).getTime().toString().slice(-4)}
+                     </p>
+                   </div>
+                )}
+                {loan.status === 'returned' && loan.fine_amount > 0 && (
+                   <div className="flex flex-col items-center gap-1 mt-1">
+                     <p className="text-[10px] text-red-500 font-black bg-red-500/10 px-3 py-1.5 rounded-md border border-red-500/20 uppercase tracking-widest shadow-sm">
+                       Multa a pagar: {loan.fine_amount}€
                      </p>
                    </div>
                 )}

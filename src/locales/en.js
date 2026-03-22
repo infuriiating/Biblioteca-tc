@@ -9,7 +9,8 @@ export default {
     users: 'Users',
     administration: 'Administration',
     settings: 'Settings',
-    admin: 'Admin'
+    admin: 'Admin',
+    feedback: 'Feedback'
   },
   navbar: {
     searchPlaceholder: 'Search books, authors...',
@@ -107,6 +108,7 @@ export default {
     common: {
       approve: 'Approve',
       reject: 'Reject',
+      rejectBtn: 'Reject',
       returnBtn: 'Return',
       loadingRequests: 'Loading requests...',
       fetchingCollection: 'Fetching your collection...',
@@ -171,6 +173,14 @@ export default {
       returnedDate: 'RETURNED ON',
       dueDate: 'DUE DATE',
       approvedDate: 'APPROVED ON'
+    },
+    feedback: {
+      title: 'User Feedback',
+      subtitle: 'Suggestions and issues reported by the community',
+      user: 'USER',
+      message: 'MESSAGE',
+      date: 'DATE',
+      noFeedback: 'No feedback received yet.'
     },
     users: {
       title: 'Users',
@@ -248,47 +258,30 @@ export default {
   docs: {
     badge: 'Official Documentation',
     title: 'Library Guide',
-    subtitle: 'Everything you need to know about the platform, from borrowing and returns to our new AI systems.',
-    roles: {
-      title: 'Accounts and Roles',
-      desc: 'There are two main types of accounts on the platform:',
-      student: 'Student',
-      studentDesc: 'Automatically assigned after registration. Allows exploring the catalog, reading AI summaries, and requesting books.',
-      admin: 'Administrator',
-      adminDesc: 'Associated with library staff and teachers. Allows managing the catalog, approving requests, and processing returns (requires special authentication via /console).'
-    },
+    subtitle: 'Everything you need to know to use the Digital Library efficiently.',
     borrow: {
-      title: 'How to Borrow a Book',
-      desc: 'The borrowing process is designed to be quick and easy:',
-      step1: 'Navigate to the desired book page in the Catalog.',
-      step2: 'Click the Request Book button. The status will change to "Pending".',
-      step3: 'Go to the physical library to pick up the book. The administrator will approve the request in the system and the status will change to "Active".',
-      note: 'Note: You will have a set deadline (e.g. 14 days) to return the book. You can check the due date on the "My Loans" screen.'
+      title: '1. How to Borrow a Book',
+      desc: 'Browse the catalog, choose a book, and click "Request Book". After the request, you have a 12-hour window to pick up the book at the physical library before the reservation is automatically cancelled.',
     },
     pin: {
-      title: 'Return PIN System',
-      desc: 'To ensure maximum security and prevent a book from being marked as returned by mistake, we use a dynamic PIN system.',
-      step1: 'When you borrow a book, a unique 4-digit PIN is generated for that request.',
-      step2: 'You can check this PIN at any time on the My Loans screen, below the active book title.',
-      step3: 'At the time of return: You must hand the book to the administrator and provide the corresponding PIN code. The administrator can only close the request if the correct code is entered.'
+      title: '2. Return PIN (4 Digits)',
+      desc: 'Upon pickup, a unique 4-digit code is associated with your request. You can find this PIN in the "My Loans" menu. You must provide it to the administrator to complete the return.',
+    },
+    duration: {
+      title: '3. Borrow Duration',
+      desc: 'The standard loan period for any book in our catalog is 14 days.',
     },
     ai: {
-      title: 'Artificial Intelligence Features',
-      desc: 'Library TC is a smart platform. We integrate AI to improve your experience:',
-      item1: 'Smart Summaries (Active)',
-      item1Desc: 'When opening a book\'s details, our OpenAI integration reads the book\'s metadata and dynamically writes a catchy short summary (3 or 4 sentences).',
-      item2: 'Semantic "Vibe Check" Search (Coming Soon)',
-      item2Desc: 'Instead of searching only by exact title, you can search for concepts, genres, or descriptions.',
-      item3: 'AI Chat Librarian (Coming Soon)',
-      item3Desc: 'A virtual assistant you can converse with to ask for personalized reading suggestions.'
+      title: '4. AI Descriptions',
+      desc: 'Our platform uses Artificial Intelligence to read book metadata and generate automatic descriptions and engaging summaries, helping you decide if the book is what you are looking for.',
     },
-    adminPortal: {
-      title: 'Administrator Portal (Console)',
-      desc: 'The book and user management portal is invisible to regular students.',
-      desc2: 'If you have administrative permissions, follow these steps:',
-      step1: 'Manually type /console at the end of the site URL.',
-      step2: 'If you are logged in and confirmed as an Administrator, the Management Panel will open immediately.',
-      step3: 'Management menus (Books, Categories, Loans) will remain pinned to your Sidebar.'
+    fine: {
+      title: '5. Overdue Fine',
+      desc: 'To ensure catalog rotation, returns made after the deadline are subject to a single fine of 5.00€.',
+    },
+    feedback: {
+      title: '6. Feedback and Support',
+      desc: 'If you encounter any error on the site, have doubts about how it works, or want to suggest improvements, use the "Send Feedback" button in your Settings.',
     }
   },
   home: {

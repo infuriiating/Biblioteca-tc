@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useLanguage } from '../context/LanguageContext'
 import { supabase } from '../lib/supabase'
-import { Mail, Lock, LogIn, AlertCircle, BookOpen } from 'lucide-react'
+import { Mail, Lock, LogIn, AlertCircle, BookOpen, Zap, KeyRound } from 'lucide-react'
 import logo from '../assets/logo.png'
 
 const Login = () => {
@@ -93,6 +93,11 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
+              <div className="flex justify-end">
+                <Link to="/recuperar-password" className="text-xs text-text-muted hover:text-primary transition-colors font-medium">
+                  Esqueceu a password?
+                </Link>
+              </div>
             </div>
 
             <button
@@ -132,6 +137,19 @@ const Login = () => {
             {t('auth.noAccount')}{' '}
             <Link to="/registar" className="text-primary hover:underline font-medium">{t('auth.registerLink')}</Link>
           </p>
+
+          <div className="relative flex items-center">
+            <div className="flex-grow border-t border-border/60" />
+            <span className="mx-3 text-text-muted text-xs font-normal">ou</span>
+            <div className="flex-grow border-t border-border/60" />
+          </div>
+
+          <Link
+            to="/acesso-link"
+            className="w-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 py-3 rounded-xl text-sm font-medium hover:bg-yellow-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <Zap size={16} /> Entrar com link mágico
+          </Link>
         </div>
       </div>
     </div>

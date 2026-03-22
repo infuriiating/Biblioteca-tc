@@ -13,6 +13,8 @@ import MyLoans from './pages/MyLoans'
 import Notifications from './pages/Notifications'
 import Docs from './pages/Docs'
 import Landing from './pages/Landing'
+import ForgotPassword from './pages/ForgotPassword'
+import MagicLink from './pages/MagicLink'
 
 import ManageBooks from './pages/admin/ManageBooks'
 import ManageLoans from './pages/admin/ManageLoans'
@@ -65,6 +67,8 @@ function AppContent() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/console/entrar" element={<AdminLogin />} />
         <Route path="/console/login" element={<AdminLogin />} />
+        <Route path="/recuperar-password" element={<ForgotPassword />} />
+        <Route path="/acesso-link" element={<MagicLink />} />
 
         {/* Main app with sidebar layout */}
         <Route path="/" element={user ? <DashboardLayout><Home /></DashboardLayout> : <Landing />} />

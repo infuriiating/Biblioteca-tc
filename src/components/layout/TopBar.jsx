@@ -1,4 +1,4 @@
-import { Search, Bell, ChevronDown, Menu, HelpCircle, Home, Settings, Library, Grid } from 'lucide-react'
+import { Search, Bell, HelpCircle, Home, Settings, Library, Grid } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useLanguage } from '../../context/LanguageContext'
 import { useSearchParams, Link, useLocation } from 'react-router-dom'
@@ -24,12 +24,11 @@ const TopBar = () => {
   }
 
   return (
-    <header className="sticky top-0 z-40 h-20 bg-bg-main/90 backdrop-blur-lg flex items-center justify-between px-4 lg:px-8 gap-4 py-4">
-      {/* Mobile Menu */}
-      <div className="flex items-center gap-3 shrink-0">
-        {/* Logo Wrapper */}
-        <Link to="/landing" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 overflow-hidden">
+    <header className="sticky top-0 z-40 h-16 md:h-20 bg-bg-main/90 backdrop-blur-lg flex items-center justify-between px-3 md:px-8 gap-2 md:gap-4 py-3 md:py-4 border-b border-border/20 md:border-none">
+      {/* Logo */}
+      <div className="flex items-center gap-2 shrink-0">
+        <Link to="/landing" className="flex items-center gap-2 group">
+          <div className="w-8 h-8 md:w-9 md:h-9 overflow-hidden shrink-0">
             <img src={logo} alt="Logo" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
           </div>
           <span className="hidden sm:block text-sm font-black text-text-main tracking-tight leading-none">
@@ -39,25 +38,26 @@ const TopBar = () => {
       </div>
 
       {/* Search Bar - Only on Discover Page */}
-      <div className="flex-1 min-w-[200px] max-w-xl relative group">
+      <div className="flex-1 min-w-0 max-w-xl relative group">
         {isDiscoverPage && (
           <>
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={17} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={15} />
             <input
               type="text"
               placeholder={t('navbar.searchPlaceholder')}
               value={query}
               onChange={handleSearch}
-              className="w-full bg-bg-surface border border-border/50 rounded-xl py-2.5 pl-11 pr-4 text-sm text-text-main placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/8 transition-all"
+              className="w-full bg-bg-surface border border-border/50 rounded-xl py-2 pl-9 pr-3 text-sm text-text-main placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/8 transition-all"
             />
           </>
         )}
       </div>
 
-      {/* Right — bell + avatar/auth */}
-      <div className="flex items-center gap-3 shrink-0">
+      {/* Right section */}
+      <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+        {/* Language — hidden on mobile */}
         <div className="w-24 sm:w-32 hidden sm:block">
-          <Select 
+          <Select
             options={[
               { id: 'pt', name: 'PT' },
               { id: 'en', name: 'EN' },
@@ -72,44 +72,44 @@ const TopBar = () => {
           />
         </div>
 
-        {/* Admin Overview Hub */}
+        {/* Desktop-only nav icons — hidden on mobile (handled by MobileNav) */}
         {user && isAdmin && (
-          <Link to="/console" className="p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all group" title={t('sidebar.overview')}>
-            <Grid size={18} className="transition-transform" />
+          <Link to="/console" className="hidden md:flex p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('sidebar.overview')}>
+            <Grid size={18} />
           </Link>
         )}
 
-        {/* Home Icon for Everyone */}
-        <Link to="/catalogo" className="p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all group" title={t('navbar.home')}>
-          <Home size={18} className="transition-transform" />
+        <Link to="/catalogo" className="hidden md:flex p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('navbar.home')}>
+          <Home size={18} />
         </Link>
 
-        {/* My Library Button for Regular Users */}
         {user && !isAdmin && (
-          <Link to="/emprestimos" className="flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-xl font-bold text-sm transition-all shadow-sm">
+          <Link to="/emprestimos" className="hidden md:flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-xl font-bold text-sm transition-all shadow-sm">
             <Library size={18} />
             <span className="hidden xl:inline">{t('sidebar.myLibrary')}</span>
           </Link>
         )}
 
-        <Link to="/docs" className="p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all group" title={t('navbar.docs')}>
-          <HelpCircle size={18} className="transition-transform" />
+        <Link to="/docs" className="hidden md:flex p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('navbar.docs')}>
+          <HelpCircle size={18} />
         </Link>
 
-        {/* Settings Icon for Everyone */}
-        <Link to="/definicoes" className="p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all group" title={t('navbar.settings')}>
-          <Settings size={18} className="transition-transform" />
+        <Link to="/definicoes" className="hidden md:flex p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('navbar.settings')}>
+          <Settings size={18} />
         </Link>
+
+        {/* Bell — visible on desktop; on mobile it's in MobileNav */}
         {user && (
-          <Link to="/notificacoes" className="relative p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('navbar.notifications')}>
+          <Link to="/notificacoes" className="hidden md:flex relative p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('navbar.notifications')}>
             <Bell size={18} />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full border border-bg-surface" />
           </Link>
         )}
 
+        {/* Avatar — always visible */}
         {user ? (
-          <div className="flex items-center gap-2.5 bg-bg-surface border border-border/40 px-2.5 py-1.5 rounded-xl transition-all">
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-primary/10 flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-2 bg-bg-surface border border-border/40 px-2 py-1.5 rounded-xl">
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg overflow-hidden bg-primary/10 flex items-center justify-center shrink-0">
               <span className="text-[10px] font-bold text-primary uppercase">
                 {(() => {
                   const name = user.user_metadata?.full_name || user.user_metadata?.display_name || user.user_metadata?.username || profile?.name || user.email?.split('@')[0] || 'U'
@@ -129,16 +129,16 @@ const TopBar = () => {
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2">
             <Link
               to="/login"
-              className="px-4 py-2 text-sm font-medium text-text-muted hover:text-primary transition-colors"
+              className="px-3 md:px-4 py-2 text-xs md:text-sm font-medium text-text-muted hover:text-primary transition-colors"
             >
               {t('navbar.login')}
             </Link>
             <Link
               to="/signup"
-              className="px-4 py-2 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-all active:scale-95"
+              className="px-3 md:px-4 py-2 bg-primary text-white text-xs md:text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-all active:scale-95"
             >
               {t('navbar.register')}
             </Link>

@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import TopBar from './TopBar'
+import MobileNav from './MobileNav'
 
 const DashboardLayout = ({ children }) => {
   const { user, isAdmin } = useAuth()
@@ -13,12 +13,15 @@ const DashboardLayout = ({ children }) => {
         <TopBar />
 
         {/* Main Content */}
-        <main className="flex-grow px-4 md:px-8 pt-6 pb-12">
+        <main className="flex-grow px-4 md:px-8 pt-4 md:pt-6 pb-24 md:pb-12">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
         </main>
       </div>
+
+      {/* Mobile Bottom Nav */}
+      <MobileNav />
     </div>
   )
 }

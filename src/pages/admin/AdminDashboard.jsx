@@ -120,7 +120,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-theme(spacing.20)-theme(spacing.6)-theme(spacing.12))] overflow-hidden space-y-8">
+    <div className="space-y-4 md:space-y-8">
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 shrink-0">
         {loading ? (
@@ -144,9 +144,9 @@ const AdminDashboard = () => {
       </div>
 
       {/* Quick Actions + Recent Loans */}
-      <div className="grid lg:grid-cols-3 gap-8 flex-grow min-h-0">
+      <div className="grid lg:grid-cols-3 gap-4 md:gap-8">
         {/* Recent Loans */}
-        <div className="lg:col-span-2 bg-bg-surface rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden flex flex-col h-full">
+        <div className="lg:col-span-2 bg-bg-surface rounded-[1.5rem] md:rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden flex flex-col">
           <div className="px-8 py-6 border-b border-border/50 flex items-center justify-between shrink-0">
             <h2 className="font-bold text-text-main">{t('admin.dashboard.recentActivity')}</h2>
             <Link to="/console/emprestimos" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">

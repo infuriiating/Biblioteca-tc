@@ -115,7 +115,7 @@ const AdminUsers = () => {
     <div className="space-y-10 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
-          <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.users.title') || 'Users'}</h1>
+          <h1 className="text-2xl md:text-4xl font-black text-text-main tracking-tight">{t('admin.users.title') || 'Users'}</h1>
           <p className="text-text-muted text-lg font-medium mt-1">{t('admin.users.subtitle') || 'Manage system access and roles'}</p>
         </div>
       </div>
@@ -134,7 +134,7 @@ const AdminUsers = () => {
         </div>
       </div>
 
-      <div className="bg-bg-surface rounded-[2rem] shadow-sm border border-border/50 overflow-hidden">
+      <div className="hidden md:block bg-bg-surface rounded-[2rem] shadow-sm border border-border/50 overflow-hidden">
         <div className="overflow-x-auto min-h-[400px]">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -236,6 +236,47 @@ const AdminUsers = () => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile Card List */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          [...Array(4)].map((_, i) => (
+            <div key={i} className="bg-bg-surface rounded-2xl border border-border/50 p-4 flex items-center gap-3 animate-pulse">
+              <div className="w-10 h-10 rounded-xl bg-bg-main shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-1/2 bg-bg-main rounded" />
+                <div className="h-3 w-3/4 bg-bg-main rounded opacity-50" />
+              </div>
+            </div>
+          ))
+        ) : filteredUsers.map((user) => {
+          const displayName = getDisplayName(user)
+          const displayEmail = getDisplayEmail(user)
+          const initial = displayName.charAt(0).toUpperCase()
+          return (
+            <div key={user.id} className="bg-bg-surface rounded-2xl border border-border/50 p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary text-primary flex items-center justify-center font-bold text-base shrink-0">
+                  {initial}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-text-main text-sm truncate">{displayName}</p>
+                  <p className="text-xs text-text-muted truncate">{displayEmail}</p>
+                </div>
+                <p className="text-[10px] text-text-muted opacity-60 shrink-0">{user.created_at ? new Date(user.created_at).toLocaleDateString() : ''}</p>
+              </div>
+              <div className={cn("transition-opacity", updating === user.id ? "opacity-50 pointer-events-none" : "", user.role === 'admin' ? "opacity-60 pointer-events-none" : "")}>
+                <Select
+                  options={user.role === 'admin' ? [{ id: 'admin', name: t('admin.roles.admin') || 'Administrator' }] : roleOptions}
+                  value={user.role || 'aluno'}
+                  onChange={(newRole) => handleRoleChange(user.id, newRole)}
+                  placeholder={t('admin.common.select.placeholder')}
+                />
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

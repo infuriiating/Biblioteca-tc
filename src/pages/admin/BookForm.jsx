@@ -134,12 +134,12 @@ const BookForm = () => {
           <ChevronLeft size={24} />
         </button>
         <div className="space-y-1">
-          <h1 className="text-4xl font-black text-text-main tracking-tight">{isEdit ? t('admin.editBook.editBookTitle') : t('admin.editBook.newBookTitle')}</h1>
+          <h1 className="text-2xl md:text-4xl font-black text-text-main tracking-tight">{isEdit ? t('admin.editBook.editBookTitle') : t('admin.editBook.newBookTitle')}</h1>
           <p className="text-text-muted text-lg">{isEdit ? t('admin.editBook.editBookSubtitle') : t('admin.editBook.newBookSubtitle')}</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid lg:grid-cols-3 gap-10">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
         {/* Cover Upload */}
         <div className="space-y-6">
           <div className="aspect-[3/4.5] bg-white border-2 border-dashed border-border/50 rounded-[2.5rem] overflow-hidden relative group shadow-sm">

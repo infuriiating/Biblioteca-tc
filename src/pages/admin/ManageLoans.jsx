@@ -201,7 +201,7 @@ const ManageLoans = () => {
         </div>
       </div>
 
-      <div className="bg-bg-surface rounded-[2rem] shadow-sm border border-border/50 overflow-hidden">
+      <div className="hidden md:block bg-bg-surface rounded-[2rem] shadow-sm border border-border/50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -411,6 +411,75 @@ const ManageLoans = () => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile Card List */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          [...Array(4)].map((_, i) => (
+            <div key={i} className="bg-bg-surface rounded-2xl border border-border/50 p-4 animate-pulse space-y-3">
+              <div className="h-4 w-3/4 bg-bg-main rounded" />
+              <div className="h-3 w-1/2 bg-bg-main rounded opacity-50" />
+            </div>
+          ))
+        ) : filteredLoans.length > 0 ? filteredLoans.map((loan) => {
+          const isOverdue = loan.status === 'active' && loan.due_date && new Date(loan.due_date) < new Date()
+          return (
+            <div key={loan.id} className="bg-bg-surface rounded-2xl border border-border/50 p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <Link to={`/livro/${loan.book_id}`} className="w-10 h-14 bg-bg-main rounded-xl overflow-hidden shrink-0 border border-border/10">
+                  {loan.books?.cover_image ? (
+                    <img src={supabase.storage.from('capalivro').getPublicUrl(loan.books.cover_image).data.publicUrl} className="w-full h-full object-cover" alt="" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-text-muted/30"><BookIcon size={16} /></div>
+                  )}
+                </Link>
+                <div className="flex-1 min-w-0">
+                  <p className="font-extrabold text-text-main text-sm line-clamp-1">{loan.books?.title}</p>
+                  <p className="text-[10px] text-text-muted font-bold opacity-60 uppercase">{loan.books?.author}</p>
+                </div>
+                <span className={cn(
+                  "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-wider shrink-0",
+                  loan.status === 'pending' ? "bg-orange-500/10 text-orange-600" :
+                    isOverdue ? "bg-red-500/10 text-red-600" :
+                      loan.status === 'active' ? "bg-green-500/10 text-green-600" :
+                        loan.status === 'rejected' ? "bg-red-500/10 text-red-600" :
+                          "bg-bg-main text-text-muted"
+                )}>
+                  {isOverdue ? t('admin.loans.overdue') : t(`admin.loans.${loan.status}`)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <div>
+                  <p className="font-bold text-text-main">{loan.profiles?.name || 'User'}</p>
+                  <p className="text-[10px] text-text-muted opacity-60">{new Date(loan.created_at).toLocaleDateString()}</p>
+                </div>
+                <div className="flex gap-2">
+                  {loan.status === 'pending' && (
+                    <button onClick={() => updateLoanStatus(loan.id, 'active', loan.book_id)} className="px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all">
+                      {t('admin.common.approve')}
+                    </button>
+                  )}
+                  {loan.status === 'active' && (
+                    <button onClick={async () => {
+                      const expectedPin = new Date(loan.created_at).getTime().toString().slice(-4)
+                      const inputPin = await prompt({ title: "Confirmar Devolução", message: "Insira o PIN de 4 dígitos:", placeholder: "PIN", type: "info" })
+                      if (inputPin === expectedPin) { await updateLoanStatus(loan.id, 'returned', loan.book_id); showToast("Livro devolvido!", "success") }
+                      else if (inputPin !== null) showToast("PIN incorreto!", "danger")
+                    }} className="px-3 py-1.5 bg-secondary text-primary text-[10px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all">
+                      {t('admin.common.returnBtn')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        }) : (
+          <div className="py-16 text-center text-text-muted opacity-30">
+            <Inbox size={40} className="mx-auto mb-3" />
+            <p className="font-bold uppercase tracking-widest text-sm">{t('admin.common.noRequests')}</p>
+          </div>
+        )}
       </div>
     </div>
   )

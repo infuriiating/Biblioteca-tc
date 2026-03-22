@@ -121,7 +121,7 @@ const ManageBooks = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
-          <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.dashboard.manageBooks')}</h1>
+          <h1 className="text-2xl md:text-4xl font-black text-text-main tracking-tight">{t('admin.dashboard.manageBooks')}</h1>
           <p className="text-text-muted text-lg font-medium mt-1">{t('admin.dashboard.updateCatalog')}</p>
         </div>
       </div>
@@ -156,8 +156,8 @@ const ManageBooks = () => {
         </div>
       </div>
 
-      {/* Table Section */}
-      <div className="bg-bg-surface rounded-[2rem] shadow-sm border border-border/50 overflow-hidden">
+      {/* Table Section - desktop */}
+      <div className="hidden md:block bg-bg-surface rounded-[2rem] shadow-sm border border-border/50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -281,6 +281,65 @@ const ManageBooks = () => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile Card List */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          [...Array(4)].map((_, i) => (
+            <div key={i} className="bg-bg-surface rounded-2xl border border-border/50 p-4 flex items-center gap-4 animate-pulse">
+              <div className="w-12 h-16 bg-bg-main rounded-xl shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-3/4 bg-bg-main rounded" />
+                <div className="h-3 w-1/2 bg-bg-main rounded opacity-50" />
+              </div>
+            </div>
+          ))
+        ) : filteredBooks.map((book) => (
+          <div key={book.id} className="bg-bg-surface rounded-2xl border border-border/50 p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-16 bg-bg-main rounded-xl overflow-hidden shrink-0 border border-border/10">
+                {book.cover_image && (
+                  <img
+                    src={supabase.storage.from('capalivro').getPublicUrl(book.cover_image).data.publicUrl}
+                    className="w-full h-full object-cover"
+                    alt=""
+                  />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <Link to={`/livro/${book.id}`} className="font-extrabold text-text-main hover:text-primary transition-colors text-sm line-clamp-2 block">{book.title}</Link>
+                <p className="text-xs text-text-muted font-bold opacity-60 mt-0.5">{book.author}</p>
+                <span className="text-[10px] font-mono text-text-muted opacity-40">#{book.id}</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold text-text-muted uppercase">{t('admin.books.available')}: {book.available_qty}/{book.quantity}</p>
+                <div className="w-24 h-1.5 bg-bg-main rounded-full overflow-hidden">
+                  <div
+                    className={cn("h-full", book.available_qty === 0 ? "bg-red-500" : (book.available_qty / book.quantity) < 0.3 ? "bg-orange-500" : "bg-primary")}
+                    style={{ width: `${(book.available_qty / book.quantity) * 100}%` }}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => toggleFeatured(book.id, book.is_featured)}
+                  className={cn("w-9 h-9 rounded-full flex items-center justify-center transition-all", book.is_featured ? "bg-yellow-50 text-yellow-500" : "bg-bg-main text-text-muted")}
+                >
+                  <Star size={16} fill={book.is_featured ? 'currentColor' : 'none'} />
+                </button>
+                <Link to={`/console/livros/editar/${book.id}`} className="p-2.5 bg-bg-main text-text-muted hover:bg-primary/10 hover:text-primary rounded-xl transition-all">
+                  <Edit size={16} />
+                </Link>
+                <button onClick={() => deleteBook(book.id)} className="p-2.5 bg-bg-main text-text-muted hover:bg-red-50 hover:text-red-500 rounded-xl transition-all">
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

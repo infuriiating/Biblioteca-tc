@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, GraduationCap, Search, ShieldCheck, Globe, ArrowRight, Book, Library, HelpCircle } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
+import { useAuth } from '../hooks/useAuth'
 import { Link } from 'react-router-dom'
 import Select from '../components/ui/Select'
 import logo from '../assets/logo.png'
@@ -8,6 +9,7 @@ import logo from '../assets/logo.png'
 const Landing = () => {
   const navigate = useNavigate()
   const { t, language, setLanguage } = useLanguage()
+  const { user } = useAuth()
 
   const features = [
     {
@@ -83,12 +85,14 @@ const Landing = () => {
               {t('landing.exploreBtn')}
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </button>
-            <button
-              onClick={() => navigate('/login')}
-              className="px-8 py-4 bg-bg-surface border border-border/50 text-text-main rounded-2xl font-bold transition-all hover:bg-white hover:border-primary/30"
-            >
-              {t('navbar.login')}
-            </button>
+            {!user && (
+              <button
+                onClick={() => navigate('/login')}
+                className="px-8 py-4 bg-bg-surface border border-border/50 text-text-main rounded-2xl font-bold transition-all hover:bg-white hover:border-primary/30"
+              >
+                {t('navbar.login')}
+              </button>
+            )}
           </div>
         </div>
       </section>

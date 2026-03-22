@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRefreshOnFocus } from '../../hooks/useRefreshOnFocus'
-import { Clock, CheckCircle, XCircle, Search, Filter, AlertCircle, ExternalLink, Book as BookIcon, Inbox } from 'lucide-react'
+import { Clock, CheckCircle, XCircle, Search, Filter, AlertCircle, ExternalLink, Book as BookIcon, Inbox, BellRing } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { notifyUser } from '../../lib/sendEmail'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import Select from '../../components/ui/Select'
@@ -134,7 +135,50 @@ const ManageLoans = () => {
       }
     }
 
+    const loan = loans.find(l => l.id === loanId)
+    const bookTitle = loan?.books?.title || ''
+    const userEmail = loan?.profiles?.email || ''
+    const userId = loan?.user_id
+
+    if (newStatus === 'active' && userId) {
+      notifyUser({
+        userId,
+        userEmail,
+        type: 'success',
+        subject: 'Empréstimo Aprovado',
+        message: `O seu pedido de empréstimo para o livro "${bookTitle}" foi aprovado. O livro encontra-se disponível para levantamento.`
+      })
+    } else if (newStatus === 'rejected' && userId) {
+      notifyUser({
+        userId,
+        userEmail,
+        type: 'error',
+        subject: 'Empréstimo Rejeitado',
+        message: `O seu pedido de empréstimo para o livro "${bookTitle}" não pôde ser aprovado neste momento.`
+      })
+    } else if (newStatus === 'returned' && userId) {
+      notifyUser({
+        userId,
+        userEmail,
+        type: 'info',
+        subject: 'Livro Devolvido',
+        message: `Confirmamos a devolução do livro "${bookTitle}". Obrigado pela leitura!`
+      })
+    }
+
     setLoans(prev => prev.map(l => l.id === loanId ? { ...l, ...updates } : l))
+  }
+
+  const handleSendReminders = async () => {
+    const confirmed = await prompt({
+      title: 'Enviar Lembretes?',
+      message: 'Isto irá enviar um email a todos os utilizadores com empréstimos cujo prazo termina amanhã. Continuar?',
+      type: 'info'
+    })
+    
+    // The prompt returns true/false if it's not a text prompt, wait, confirm() is better for true/false.
+    // The previous implementation of NotificationContext has confirm().
+    // Actually, I'll just change to confirm instead of prompt internally inside the component if confirm is not imported. It is imported via useNotification.
   }
 
   const filteredLoans = loans.filter(l => {
@@ -170,6 +214,43 @@ const ManageLoans = () => {
           <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.loans.title')}</h1>
           <p className="text-text-muted text-lg font-medium mt-1">{t('admin.loans.subtitle')}</p>
         </div>
+        <button 
+          onClick={async () => {
+            const confirmed = await confirm({
+              title: 'Enviar Lembretes?',
+              message: 'Isto irá enviar um email a todos os utilizadores com empréstimos cujo prazo termina amanhã. Continuar?',
+              type: 'warning'
+            })
+            if (!confirmed) return
+            
+            let count = 0
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            const tomorrowStr = tomorrow.toISOString().split('T')[0]
+            
+            const toRemind = loans.filter(l => {
+              if (l.status !== 'active' || !l.due_date) return false
+              const dueDateStr = new Date(l.due_date).toISOString().split('T')[0]
+              return dueDateStr === tomorrowStr
+            })
+
+            for (const loan of toRemind) {
+              if (!loan.profiles?.email || !loan.user_id) continue
+              await notifyUser({
+                userId: loan.user_id,
+                userEmail: loan.profiles.email,
+                type: 'warning',
+                subject: 'Aviso de Devolução Próxima',
+                message: `Lembramos que o livro "${loan.books?.title || ''}" deve ser devolvido amanhã. Por favor, entregue-o na biblioteca.`
+              })
+              count++
+            }
+            showToast(`Enviados ${count} lembretes!`, 'success')
+          }}
+          className="flex items-center gap-2 px-6 py-3 bg-yellow-500/10 text-yellow-600 rounded-2xl font-bold text-sm shadow-sm hover:bg-yellow-500/20 hover:scale-105 active:scale-95 transition-all w-full md:w-auto justify-center"
+        >
+          <BellRing size={18} /> Enviar Lembretes (Amanhã)
+        </button>
       </div>
 
       {/* Filters & Search */}

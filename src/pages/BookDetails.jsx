@@ -6,6 +6,7 @@ import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
 import { Book, ChevronLeft, Sparkles, CheckCircle2, MessageSquare, Star, Edit } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useNotification } from '../context/NotificationContext'
+import { notifyUser } from '../lib/sendEmail'
 import StarRating from '../components/StarRating'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -120,6 +121,17 @@ const BookDetails = () => {
       ])
       if (loanError) throw loanError
       
+      // Notify the user about their reservation
+      await notifyUser({
+        userId: user.id,
+        userEmail: user.email,
+        type: 'info',
+        subject: 'Reserva Registada',
+        message: `O seu pedido de reserva para o livro "${book.title}" foi recebido e aguarda aprovação. Será notificado assim que o processo estiver concluído.`,
+        buttonText: 'Ver os meus empréstimos',
+        buttonLink: `${window.location.origin}/emprestimos`
+      })
+
       setRequestStatus('success')
     } catch (error) {
       console.error('Error requesting loan:', error)

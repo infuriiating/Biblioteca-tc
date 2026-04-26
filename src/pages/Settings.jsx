@@ -39,12 +39,26 @@ const Settings = () => {
   // Apply theme
   useEffect(() => {
     const root = document.documentElement
-    if (theme === 'dark') {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
+    const currentTheme = root.classList.contains('dark') ? 'dark' : 'light'
+    
+    if (currentTheme === theme) return
+
+    const applyTheme = () => {
+      if (theme === 'dark') {
+        root.classList.add('dark')
+      } else {
+        root.classList.remove('dark')
+      }
+      localStorage.setItem('theme', theme)
     }
-    localStorage.setItem('theme', theme)
+
+    if (!document.startViewTransition) {
+      applyTheme()
+    } else {
+      document.startViewTransition(() => {
+        applyTheme()
+      })
+    }
   }, [theme])
 
   const handleSaveName = async () => {

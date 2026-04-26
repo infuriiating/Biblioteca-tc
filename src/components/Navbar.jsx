@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import logo from '../assets/logo.png'
 import { useLanguage } from '../context/LanguageContext'
+import SlideIn from './ui/motion/SlideIn'
 
 const Navbar = () => {
   const { user, profile, isAdmin, signOut } = useAuth()
@@ -37,7 +38,8 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-bg-surface border-b border-border z-50 h-16 shadow-sm">
-      <div className="container mx-auto h-full flex items-center justify-between px-4">
+      <SlideIn direction="down" duration={0.5} className="h-full">
+        <div className="container mx-auto h-full flex items-center justify-between px-4">
         <Link to="/" className="flex-shrink-0">
           <img src={logo} alt="Logo" className="h-12 transition-opacity hover:opacity-90" />
         </Link>
@@ -120,6 +122,7 @@ const Navbar = () => {
           )}
         </div>
       </div>
+      </SlideIn>
     </nav>
   )
 }

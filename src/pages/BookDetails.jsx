@@ -56,7 +56,7 @@ const BookDetails = () => {
         .eq('user_id', user.id)
         .in('status', ['pending', 'active'])
         .limit(1)
-      
+
       setUserHasLoan(data && data.length > 0)
     }
     checkUserLoan()
@@ -76,7 +76,7 @@ const BookDetails = () => {
 
   const fetchBook = async (retryCount = 0) => {
     const now = Date.now()
-    
+
     // Deadlock breaker: if a fetch claims to be in progress for > 15 seconds, assume it hung
     if (fetchInProgress.current && now - lastFetchTime.current > 15000) {
       console.warn('[BookDetails] Fetch lock exceeded 15s. Breaking deadlock.')
@@ -87,7 +87,7 @@ const BookDetails = () => {
       setLoading(false)
       return
     }
-    
+
     fetchInProgress.current = true
     lastFetchTime.current = now
 
@@ -101,7 +101,7 @@ const BookDetails = () => {
         .select('*, categories(name)')
         .eq('id', id)
         .single()
-      
+
       if (error) throw error
 
       const { data: reviewsData } = await supabase
@@ -111,11 +111,11 @@ const BookDetails = () => {
         .order('created_at', { ascending: false })
 
       setReviews(reviewsData || [])
-      
+
       setBook({ ...data, category_name: data.categories?.name, cover_url: getCoverUrl(data.cover_image) })
     } catch (error) {
       console.warn('[BookDetails] Fetch failed:', error.message || error)
-      
+
       if (retryCount < 1) {
         console.log('[BookDetails] Retrying in 1.5s...')
         fetchInProgress.current = false
@@ -139,19 +139,19 @@ const BookDetails = () => {
         p_book_id: id,
         p_user_id: user.id
       })
-      
+
       if (rpcError) throw rpcError
-      
+
       if (!data.success) {
         showToast(data.message || 'Erro ao requisitar livro', 'error')
         setRequestStatus('error')
         return
       }
-      
+
       // Update local state smoothly
       setUserHasLoan(true)
       setBook(prev => ({ ...prev, available_qty: prev.available_qty - 1 }))
-      
+
       // Notify the user about their reservation
       await notifyUser({
         userId: user.id,
@@ -188,7 +188,7 @@ const BookDetails = () => {
     e.preventDefault()
     if (!user || reviewForm.rating === 0) return
     setIsSubmittingReview(true)
-    
+
     try {
       if (userReview) {
         // Update existing review
@@ -201,15 +201,15 @@ const BookDetails = () => {
         // Insert new review
         const { error } = await supabase
           .from('reviews')
-          .insert([{ 
-            book_id: id, 
-            user_id: user.id, 
-            rating: reviewForm.rating, 
-            comment: reviewForm.comment 
+          .insert([{
+            book_id: id,
+            user_id: user.id,
+            rating: reviewForm.rating,
+            comment: reviewForm.comment
           }])
         if (error) throw error
       }
-      
+
       // Refresh the page data
       await fetchBook()
       setShowReviewForm(false)
@@ -292,8 +292,8 @@ const BookDetails = () => {
     </div>
   )
 
-  const averageRating = reviews.length > 0 
-    ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length 
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
     : 0
 
   return (
@@ -305,7 +305,7 @@ const BookDetails = () => {
       {/* Main Detail Card */}
       <div className="bg-[#0a1629] rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col items-center py-12 px-8 text-center text-white relative">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-        
+
         {/* Book Cover */}
         <div className="w-44 aspect-[3/4] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-8 transform hover:scale-105 transition-transform duration-500">
           <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
@@ -317,13 +317,13 @@ const BookDetails = () => {
             <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight leading-tight">{book.title}</h1>
             <p className="text-white/50 font-normal mt-2">{book.author}</p>
           </div>
-          
+
           <div className="flex items-center justify-center gap-3">
-             <StarRating rating={averageRating} size={18} />
-             <span className="text-white/70 text-sm font-medium">
-               {averageRating > 0 ? averageRating.toFixed(1) : t('bookDetails.noReviews')} 
-               {reviews.length > 0 && ` (${reviews.length})`}
-             </span>
+            <StarRating rating={averageRating} size={18} />
+            <span className="text-white/70 text-sm font-medium">
+              {averageRating > 0 ? averageRating.toFixed(1) : t('bookDetails.noReviews')}
+              {reviews.length > 0 && ` (${reviews.length})`}
+            </span>
           </div>
 
           {book.category_name && (
@@ -337,13 +337,13 @@ const BookDetails = () => {
         <div className="flex flex-col items-center gap-3 w-full max-w-xs mb-10">
           {requestStatus === 'success' || userHasLoan ? (
             <div className="bg-primary/20 border border-primary/30 py-3.5 px-8 rounded-2xl w-full text-primary font-bold shadow-inner flex flex-col items-center justify-center gap-1 text-sm">
-               <div className="flex items-center gap-2">
-                 <CheckCircle2 size={18} /> {userHasLoan && requestStatus !== 'success' ? 'Já Requisitado' : t('bookDetails.requestedSuccess')}
-               </div>
-               <span className="text-[10px] text-primary/70 font-medium">Aguardando aprovação do administrador</span>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 size={18} /> {userHasLoan && requestStatus !== 'success' ? 'Já Requisitado' : t('bookDetails.requestedSuccess')}
+              </div>
+              <span className="text-[10px] text-primary/70 font-medium">Aguardando aprovação do administrador</span>
             </div>
           ) : (
-            <button 
+            <button
               onClick={handleLoan}
               disabled={isRequesting || book.available_qty <= 0}
               className="w-full bg-primary text-white py-3.5 rounded-2xl font-bold tracking-wide shadow-xl shadow-primary/20 hover:bg-primary/90 hover:-translate-y-0.5 transition-all active:translate-y-0 active:scale-95 flex items-center justify-center gap-2.5 disabled:opacity-40 disabled:grayscale disabled:hover:translate-y-0 disabled:active:scale-100 text-sm"
@@ -409,13 +409,13 @@ const BookDetails = () => {
         <p className="text-text-muted leading-relaxed text-sm font-normal">
           {book.ai_summary || book.description || t('bookDetails.noDescription')}
         </p>
-        
+
         {summaryError && (
           <p className="text-red-400 text-xs font-normal bg-red-500/8 border border-red-400/20 rounded-xl px-4 py-3">{summaryError}</p>
         )}
 
         {!book.ai_summary && (
-          <button 
+          <button
             onClick={handleGenerateSummary}
             disabled={isGeneratingSummary}
             className="flex items-center gap-1.5 text-primary font-medium text-sm hover:underline disabled:opacity-50"
@@ -457,7 +457,7 @@ const BookDetails = () => {
             <h3 className="text-lg font-semibold">{t('bookDetails.reviewsTitle')}</h3>
           </div>
           {user && !showReviewForm && (
-            <button 
+            <button
               onClick={() => setShowReviewForm(true)}
               className="text-sm font-medium bg-primary/10 text-primary px-4 py-2 rounded-xl hover:bg-primary/20 transition-colors"
             >
@@ -470,16 +470,16 @@ const BookDetails = () => {
           <form onSubmit={handleSubmitReview} className="bg-bg-main/50 p-6 rounded-2xl border border-border/50 space-y-5">
             <div className="space-y-1">
               <label className="text-sm font-medium text-text-main block">{t('bookDetails.ratingLabel')} <span className="text-red-500">*</span></label>
-              <StarRating 
-                rating={reviewForm.rating} 
-                interactive={true} 
-                onChange={(rating) => setReviewForm(prev => ({ ...prev, rating }))} 
+              <StarRating
+                rating={reviewForm.rating}
+                interactive={true}
+                onChange={(rating) => setReviewForm(prev => ({ ...prev, rating }))}
                 size={24}
               />
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-text-main block">{t('bookDetails.commentLabel')}</label>
-              <textarea 
+              <textarea
                 value={reviewForm.comment}
                 onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
                 placeholder="..."
@@ -487,15 +487,15 @@ const BookDetails = () => {
               />
             </div>
             <div className="flex items-center gap-3 pt-2">
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={isSubmittingReview || reviewForm.rating === 0}
                 className="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-sm shadow-primary/20 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100"
               >
                 {isSubmittingReview ? '...' : t('bookDetails.submitReview')}
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setShowReviewForm(false)}
                 className="px-6 py-2.5 rounded-xl text-sm font-bold text-text-muted hover:bg-border/50 transition-colors"
               >
@@ -527,7 +527,7 @@ const BookDetails = () => {
                   <div className="flex items-center gap-3">
                     <StarRating rating={review.rating} size={14} />
                     {(isAdmin || user?.id === review.user_id) && (
-                      <button 
+                      <button
                         onClick={async () => {
                           const confirmed = await confirm({
                             title: "Apagar Avaliação",
@@ -535,18 +535,18 @@ const BookDetails = () => {
                             type: "danger"
                           })
                           if (confirmed) {
-                             const { error } = await supabase.from('reviews').delete().eq('id', review.id)
-                             if (!error) {
-                               showToast("Avaliação apagada com sucesso.", "success")
-                               if (user?.id === review.user_id) {
-                                 setUserReview(null)
-                                 setShowReviewForm(false)
-                                 setReviewForm({ rating: 0, comment: '' })
-                               }
-                               setReviews(prev => prev.filter(r => r.id !== review.id))
-                             } else {
-                               showToast("Erro ao apagar avaliação.", "danger")
-                             }
+                            const { error } = await supabase.from('reviews').delete().eq('id', review.id)
+                            if (!error) {
+                              showToast("Avaliação apagada com sucesso.", "success")
+                              if (user?.id === review.user_id) {
+                                setUserReview(null)
+                                setShowReviewForm(false)
+                                setReviewForm({ rating: 0, comment: '' })
+                              }
+                              setReviews(prev => prev.filter(r => r.id !== review.id))
+                            } else {
+                              showToast("Erro ao apagar avaliação.", "danger")
+                            }
                           }
                         }}
                         className="text-red-500 hover:text-red-600 transition-colors bg-red-500/10 p-1.5 rounded-lg"

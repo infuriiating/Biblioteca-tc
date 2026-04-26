@@ -2,6 +2,7 @@ import { useRef, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import ImageSkeleton from './ui/motion/ImageSkeleton'
 
 function cn(...inputs) {
   return twMerge(clsx(inputs))
@@ -68,19 +69,16 @@ const BookCard = ({ book, variant = 'catalog', onClick }) => {
         <div
           className="rounded-[1.75rem] overflow-hidden shadow-sm border border-border/40 transition-all duration-300 group-hover:shadow-xl bg-bg-surface"
         >
-          <div
-            className="aspect-[3/4] overflow-hidden"
-          >
-            <img 
-              ref={imgRef}
-              src={book.cover_url} 
-              alt={book.title}
-              crossOrigin="anonymous"
-              onLoad={handleImageLoad}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
+          <ImageSkeleton
+            ref={imgRef}
+            src={book.cover_url} 
+            alt={book.title}
+            crossOrigin="anonymous"
+            onLoad={handleImageLoad}
+            containerClassName="aspect-[3/4]"
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
           <div className="space-y-0.5 px-4 py-3.5">
             <h3 className="font-semibold text-text-main text-sm line-clamp-1">{book.title}</h3>
             <p className="text-text-muted text-[12px] line-clamp-1 font-normal">{book.author}</p>
@@ -89,14 +87,13 @@ const BookCard = ({ book, variant = 'catalog', onClick }) => {
       ) : (
         /* Catalog Variant */
         <div className="space-y-3">
-          <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-bg-surface shadow-sm border-[5px] border-bg-surface ring-1 ring-border/20 group-hover:shadow-md group-hover:ring-primary/20 transition-all duration-300">
-            <img 
-              src={book.cover_url} 
-              alt={book.title}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
+          <ImageSkeleton
+            src={book.cover_url} 
+            alt={book.title}
+            containerClassName="relative aspect-[3/4] rounded-2xl bg-bg-surface shadow-sm border-[5px] border-bg-surface ring-1 ring-border/20 group-hover:shadow-md group-hover:ring-primary/20 transition-all duration-300"
+            className="w-full h-full object-cover rounded-xl"
+            loading="lazy"
+          />
           <div className="space-y-0.5 px-1">
             <h3 className="font-medium text-text-main text-sm line-clamp-1 group-hover:text-primary transition-colors">{book.title}</h3>
             <p className="text-text-muted text-[11px] line-clamp-1 font-normal">{book.author}</p>

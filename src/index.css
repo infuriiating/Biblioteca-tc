@@ -86,18 +86,10 @@ body {
   color: var(--color-text-main);
   font-feature-settings: 'cv11', 'ss01';
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Apply transitions to all interactive/surface elements */
-body * {
-  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* Remove global CSS transitions to prevent lag and font-color glitches during View Transitions */
+/* Modern browsers will use the View Transition API from Settings.jsx instead */
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Outfit', sans-serif;

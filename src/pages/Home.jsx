@@ -8,6 +8,8 @@ import { useLanguage } from '../context/LanguageContext'
 import BookCard from '../components/BookCard'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import FadeIn from '../components/ui/motion/FadeIn'
+import SlideIn from '../components/ui/motion/SlideIn'
 
 function cn(...inputs) {
   return twMerge(clsx(inputs))
@@ -137,10 +139,11 @@ const Home = () => {
       {/* Recommended */}
       {query.length === 0 && (
         <section>
-          <div className="flex items-center justify-between mb-5">
+          <FadeIn className="flex items-center justify-between mb-5">
             <h2 className="text-3xl font-semibold text-text-main">{t('home.recommended')}</h2>
-          </div>
-          <div className="flex gap-5 overflow-x-auto pb-4 custom-scrollbar-h px-1">
+          </FadeIn>
+          <SlideIn direction="up" delay={0.1}>
+            <div className="flex gap-5 overflow-x-auto pb-4 custom-scrollbar-h px-1">
             {loading ? (
               [...Array(4)].map((_, i) => (
                 <div key={i} className="min-w-[200px] aspect-[3/4] bg-bg-surface rounded-[1.75rem] animate-pulse shrink-0" />
@@ -155,20 +158,22 @@ const Home = () => {
                 />
               ))
             )}
-          </div>
+            </div>
+          </SlideIn>
         </section>
       )}
 
       {/* Catalog */}
       <section ref={catalogRef} className="space-y-10 pt-10 scroll-mt-24">
-        <div className="space-y-1">
+        <FadeIn className="space-y-1">
           <h2 className="text-3xl font-black text-text-main tracking-tight">{t('home.catalog')}</h2>
           <p className="text-text-muted text-lg font-medium mt-1">{t('home.catalogSub')}</p>
-        </div>
+        </FadeIn>
 
         {/* Category Pills */}
-        <div className="flex gap-2.5 overflow-x-auto pb-4 scrollbar-hide">
-          <button
+        <SlideIn direction="up" delay={0.1}>
+          <div className="flex gap-2.5 overflow-x-auto pb-4 scrollbar-hide">
+            <button
             onClick={() => setCategoryFilter('0')}
             className={cn(
               "px-4 py-2 rounded-xl text-xs font-medium transition-all shrink-0",
@@ -193,7 +198,8 @@ const Home = () => {
               {translateCategory(c.name)}
             </button>
           ))}
-        </div>
+          </div>
+        </SlideIn>
 
         {/* Book Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 mt-3">

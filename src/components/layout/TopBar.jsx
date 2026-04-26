@@ -31,7 +31,7 @@ const TopBar = () => {
           <div className="w-8 h-8 md:w-9 md:h-9 overflow-hidden shrink-0">
             <img src={logo} alt="Logo" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
           </div>
-          <span className="hidden sm:block text-sm font-black text-text-main tracking-tight leading-none">
+          <span className="hidden lg:block text-sm font-black text-text-main tracking-tight leading-none">
             Biblioteca<span className="text-primary italic">TC</span>
           </span>
         </Link>
@@ -55,8 +55,8 @@ const TopBar = () => {
 
       {/* Right section */}
       <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
-        {/* Language — hidden on mobile */}
-        <div className="w-24 sm:w-32 hidden sm:block">
+        {/* Language — hidden on tablet/mobile */}
+        <div className="w-24 lg:w-32 hidden lg:block">
           <Select
             options={[
               { id: 'pt', name: 'PT' },
@@ -119,7 +119,7 @@ const TopBar = () => {
                 })()}
               </span>
             </div>
-            <div className="text-left hidden sm:block">
+            <div className="text-left hidden lg:block">
               <p className="text-xs font-semibold text-text-main leading-tight">
                 {user.user_metadata?.full_name || user.user_metadata?.display_name || user.user_metadata?.username || profile?.name || user.email?.split('@')[0] || 'Utilizador'}
               </p>

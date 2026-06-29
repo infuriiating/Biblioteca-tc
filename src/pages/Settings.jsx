@@ -36,6 +36,7 @@ const Settings = () => {
   const [newsletterEnabled, setNewsletterEnabled] = useState(true)
   const [newsletterCats, setNewsletterCats] = useState(['books', 'history', 'philosophy', 'world'])
   const [savingNewsletter, setSavingNewsletter] = useState(false)
+  const [weeklyPicksEnabled, setWeeklyPicksEnabled] = useState(true)
   const NEWSLETTER_OPTIONS = [
     { id: 'books', labelKey: 'settings.newsletter.catBooks' },
     { id: 'history', labelKey: 'settings.newsletter.catHistory' },
@@ -47,13 +48,14 @@ const Settings = () => {
     if (!user) return
     supabase
       .from('newsletter_preferences')
-      .select('enabled, categories')
+      .select('enabled, categories, weekly_picks_enabled')
       .eq('user_id', user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
           setNewsletterEnabled(data.enabled)
           setNewsletterCats(data.categories || newsletterCats)
+          if (data.weekly_picks_enabled !== null) setWeeklyPicksEnabled(data.weekly_picks_enabled)
         }
       })
   }, [user])
@@ -65,6 +67,7 @@ const Settings = () => {
       user_id: user.id,
       enabled: newsletterEnabled,
       categories: newsletterCats,
+      weekly_picks_enabled: weeklyPicksEnabled,
       updated_at: new Date().toISOString(),
     })
     setSavingNewsletter(false)
@@ -267,6 +270,15 @@ const Settings = () => {
               className="w-4 h-4 accent-primary"
             />
             <span className="text-sm font-medium">{t('settings.newsletter.enabled')}</span>
+          </label>
+          <label className="flex items-center gap-3 mb-4 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={weeklyPicksEnabled}
+              onChange={(e) => setWeeklyPicksEnabled(e.target.checked)}
+              className="w-4 h-4 accent-primary"
+            />
+            <span className="text-sm font-medium">{t('settings.newsletter.weeklyPicks')}</span>
           </label>
           <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2">
             {t('settings.newsletter.categories')}

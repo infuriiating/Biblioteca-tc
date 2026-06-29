@@ -108,6 +108,7 @@ export default {
       title: 'Newsletter — curiosidades',
       desc: 'Receba factos sobre livros, história, filosofia e mundo às 8:20 (dias úteis).',
       enabled: 'Receber newsletter',
+      weeklyPicks: 'Receber recomendações semanais de livros',
       categories: 'Categorias',
       catBooks: 'Livros',
       catHistory: 'História',

@@ -108,6 +108,7 @@ export default {
       title: 'Newsletter — fun facts',
       desc: 'Get book, history, philosophy and world facts at 8:20 on weekdays.',
       enabled: 'Receive newsletter',
+      weeklyPicks: 'Receive weekly book picks',
       categories: 'Categories',
       catBooks: 'Books',
       catHistory: 'History',

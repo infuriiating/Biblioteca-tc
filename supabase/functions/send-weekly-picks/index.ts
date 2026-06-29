@@ -21,6 +21,14 @@ Deno.serve(async (req) => {
   const testEmail = await getTestEmail(req);
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+  const { data: prefs } = await supabase
+    .from("newsletter_preferences")
+    .select("user_id, enabled, weekly_picks_enabled");
+
+  const prefMap = new Map(
+    (prefs || []).map((p: { user_id: string; enabled: boolean; weekly_picks_enabled: boolean }) => [p.user_id, p])
+  );
+
   const { data: featured } = await supabase
     .from("books")
     .select("id, title, author, description")
@@ -72,6 +80,9 @@ Deno.serve(async (req) => {
   }
 
   for (const u of recipients) {
+    const pref = prefMap.get(u.id) as { enabled?: boolean; weekly_picks_enabled?: boolean } | undefined;
+    if (pref?.enabled === false || pref?.weekly_picks_enabled === false) continue;
+
     if (!u.email) continue;
 
     const rendered = renderNamedTemplate("weekly_pick", {
